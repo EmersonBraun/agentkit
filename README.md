@@ -6,6 +6,8 @@
 [![bundle size](https://img.shields.io/bundlephobia/minzip/@agentkit-react/core)](https://bundlephobia.com/package/@agentkit-react/core)
 [![license](https://img.shields.io/npm/l/@agentkit-react/core)](https://github.com/EmersonBraun/agentkit/blob/main/LICENSE)
 
+[Documentation](https://emersonbraun.github.io/agentkit/) | [npm](https://www.npmjs.com/package/@agentkit-react/core) | [GitHub](https://github.com/EmersonBraun/agentkit)
+
 Drop-in hooks and components for streaming AI interfaces. Works with **Claude**, **GPT**, **Vercel AI SDK**, or any LLM. So simple an AI agent can write it for you.
 
 ## Install
