@@ -35,6 +35,25 @@ const sidebars: SidebarsConfig = {
       label: 'Theming',
       items: ['theming/overview'],
     },
+    {
+      type: 'category',
+      label: 'Examples',
+      items: [
+        'examples/index',
+        'examples/todo-list',
+        'examples/pomodoro-timer',
+        'examples/color-palette',
+        'examples/password-generator',
+        'examples/accordion',
+        'examples/live-feed',
+        'examples/data-table',
+        'examples/tabs',
+        'examples/photo-gallery',
+        'examples/flappy-arrow',
+        'examples/mui-chat',
+        'examples/shadcn-chat',
+      ],
+    },
   ],
 }
 
