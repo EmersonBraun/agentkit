@@ -392,7 +392,8 @@ export function RAGChat() {
         margin: '0 auto',
         display: 'flex',
         flexDirection: 'column',
-        height: 560,
+        height: 'min(560px, 80vh)',
+        width: '100%',
       }}
     >
       {/* Titlebar */}
@@ -456,12 +457,13 @@ export function RAGChat() {
       </div>
 
       {/* Body: sidebar + chat */}
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+      <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', overflow: 'hidden' }}>
         {/* Sidebar */}
         <div
           style={{
-            width: 200,
-            flexShrink: 0,
+            flex: '1 1 200px',
+            minWidth: 200,
+            maxWidth: '100%',
             background: '#0d1b2e',
             borderRight: '1px solid rgba(255,255,255,0.06)',
             display: 'flex',
@@ -505,7 +507,7 @@ export function RAGChat() {
         </div>
 
         {/* Chat pane */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {/* Messages */}
           <div
             ref={containerRef}

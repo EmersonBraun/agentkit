@@ -339,7 +339,8 @@ export function SupportBot() {
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
-        height: 540,
+        height: 'min(540px, 80vh)',
+        width: '100%',
         background: '#f8fafc',
       }}
     >

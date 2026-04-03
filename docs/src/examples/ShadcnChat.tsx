@@ -62,7 +62,8 @@ export function ShadcnChat() {
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
-        height: 480,
+        height: 'min(480px, 80vh)',
+        width: '100%',
         background: '#ffffff',
       }}
     >

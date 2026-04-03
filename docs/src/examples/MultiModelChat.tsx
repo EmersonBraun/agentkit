@@ -163,12 +163,14 @@ function ChatPanel({
   bubbleColor,
   state,
   scrollRef,
+  panelStyle,
 }: {
   label: string
   dotColor: string
   bubbleColor: string
   state: PanelState
   scrollRef: React.RefObject<HTMLDivElement>
+  panelStyle?: React.CSSProperties
 }) {
   return (
     <div
@@ -181,6 +183,7 @@ function ChatPanel({
         overflow: 'hidden',
         flex: 1,
         minWidth: 0,
+        ...panelStyle,
       }}
     >
       <TitleBar label={label} dotColor={dotColor} streaming={state.streaming} />
@@ -378,7 +381,7 @@ export function MultiModelChat() {
         style={{
           display: 'flex',
           gap: 12,
-          height: 360,
+          flexWrap: 'wrap',
         }}
       >
         <ChatPanel
@@ -387,6 +390,7 @@ export function MultiModelChat() {
           bubbleColor={COLORS.claudeBubble}
           state={claudeState}
           scrollRef={claudeScrollRef}
+          panelStyle={{ flex: '1 1 280px', height: 'min(360px, 40vh)' }}
         />
         <ChatPanel
           label="GPT"
@@ -394,6 +398,7 @@ export function MultiModelChat() {
           bubbleColor={COLORS.gptBubble}
           state={gptState}
           scrollRef={gptScrollRef}
+          panelStyle={{ flex: '1 1 280px', height: 'min(360px, 40vh)' }}
         />
       </div>
 

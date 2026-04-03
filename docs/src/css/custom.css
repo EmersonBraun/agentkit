@@ -354,3 +354,94 @@
   color: var(--ak-accent);
   user-select: none;
 }
+
+/* ═══════════ MOBILE RESPONSIVE ═══════════ */
+@media (max-width: 768px) {
+  /* Hero */
+  .hero-glow {
+    width: 80vw;
+    height: 40vw;
+  }
+
+  .hero-grid {
+    background-size: 32px 32px;
+  }
+
+  /* Typography */
+  .section-title {
+    font-size: clamp(1.4rem, 5vw, 2rem);
+  }
+
+  .section-subtitle {
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Demo window */
+  .demo-window {
+    max-width: 100% !important;
+  }
+
+  .demo-messages {
+    min-height: 200px;
+    max-height: 50vh !important;
+  }
+
+  .demo-msg {
+    max-width: 90%;
+    font-size: 12px;
+  }
+
+  /* Install command */
+  .install-cmd {
+    max-width: 100%;
+    font-size: 12px;
+    padding: 8px 12px;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Feature cards */
+  .feature-card {
+    padding: 1.25rem;
+  }
+
+  /* Code panels */
+  .code-panel pre {
+    font-size: 11px;
+    padding: 12px;
+  }
+
+  /* Example cards */
+  .example-card {
+    padding: 12px 16px;
+  }
+
+  .example-emoji {
+    font-size: 20px;
+    width: 32px;
+  }
+
+  /* Provider pills */
+  .provider-pill {
+    font-size: 12px;
+    padding: 4px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .install-cmd {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  .demo-msg {
+    max-width: 95%;
+    font-size: 11px;
+  }
+
+  .code-panel pre {
+    font-size: 10px;
+  }
+}

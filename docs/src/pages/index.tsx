@@ -347,18 +347,18 @@ export default function Home(): React.JSX.Element {
   return (
     <Layout title="AgentKit" description="Ship AI chat in 10 lines of React">
       {/* ══════════ HERO ══════════ */}
-      <section style={{ position: 'relative', overflow: 'hidden', minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
+      <section style={{ position: 'relative', overflow: 'hidden', minHeight: '100svh', display: 'flex', alignItems: 'center' }}>
         <div className="hero-grid" />
         <div className="hero-glow" />
         <FloatingKeywords />
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 1200, margin: '0 auto', padding: '4rem 2rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', alignItems: 'center', width: '100%' }}>
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 1200, margin: '0 auto', padding: '3rem 1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem', alignItems: 'center', width: '100%' }}>
           {/* Left: Copy */}
           <div>
             <div style={{ display: 'inline-block', padding: '4px 14px', borderRadius: 100, background: 'var(--ak-accent-glow)', border: '1px solid var(--ak-accent)', color: 'var(--ak-accent)', fontSize: 13, fontWeight: 600, marginBottom: '1.5rem' }}>
               3 hooks &middot; Any provider &middot; Zero opinions
             </div>
-            <h1 style={{ fontSize: '3.2rem', fontWeight: 800, lineHeight: 1.08, margin: '0 0 1.5rem 0', color: 'var(--ak-text)' }}>
+            <h1 style={{ fontSize: 'clamp(2rem, 6vw, 3.2rem)', fontWeight: 800, lineHeight: 1.08, margin: '0 0 1.5rem 0', color: 'var(--ak-text)' }}>
               Ship AI chat in<br />
               <span style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6, #3b82f6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundSize: '200% auto' }}>
                 10 lines of React
@@ -383,13 +383,13 @@ export default function Home(): React.JSX.Element {
           </div>
 
           {/* Right: Live Demo */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
             <LiveChatDemo />
           </div>
         </div>
       </section>
 
-      <main style={{ maxWidth: 1100, margin: '0 auto', padding: '0 2rem' }}>
+      <main style={{ maxWidth: 1100, margin: '0 auto', padding: '0 1rem' }}>
 
         {/* ══════════ PROVIDERS ══════════ */}
         <section style={{ textAlign: 'center', padding: '3rem 0' }}>
@@ -408,7 +408,7 @@ export default function Home(): React.JSX.Element {
           <h2 className="section-title">Stop writing boilerplate</h2>
           <p className="section-subtitle">50 lines of stream parsing &rarr; 10 lines with AgentKit</p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
             <div className="code-panel" style={{ opacity: 0.7 }}>
               <div className="code-panel-header" style={{ color: '#ef4444' }}>Before &mdash; ~50 lines</div>
               <pre style={{ maxHeight: 320 }}><code>{BEFORE_CODE}</code></pre>
@@ -425,7 +425,7 @@ export default function Home(): React.JSX.Element {
           <h2 className="section-title">Why AgentKit?</h2>
           <p className="section-subtitle">Everything you need, nothing you don't</p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
             {[
               { icon: '🪝', title: '3 Hooks', desc: 'useStream, useReactive, useChat — that\'s the entire API. Learn it in 5 minutes.' },
               { icon: '⚡', title: '<5KB Bundle', desc: 'Tiny footprint. No virtual DOM overhead. Just reactive streams wired to the DOM.' },
@@ -448,7 +448,7 @@ export default function Home(): React.JSX.Element {
           <h2 className="section-title">10 Interactive Examples</h2>
           <p className="section-subtitle">Every example is a chat &mdash; because that's what AgentKit does</p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
             {EXAMPLES.map(ex => (
               <Link key={ex.name} to={ex.href} className="example-card">
                 <span className="example-emoji">{ex.emoji}</span>
@@ -489,7 +489,7 @@ import '@agentkit-react/core/theme'`}</code></pre>
 
         {/* ══════════ CTA ══════════ */}
         <section style={{ padding: '4rem 0 6rem', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--ak-text)', marginBottom: '1rem' }}>
+          <h2 style={{ fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', fontWeight: 800, color: 'var(--ak-text)', marginBottom: '1rem' }}>
             Ready to ship?
           </h2>
           <p style={{ fontSize: '1.1rem', color: 'var(--ak-text-muted)', marginBottom: '2rem' }}>

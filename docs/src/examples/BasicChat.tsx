@@ -125,10 +125,11 @@ export function BasicChat() {
         overflow: 'hidden',
         boxShadow: '0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06)',
         maxWidth: 680,
+        width: '100%',
         margin: '0 auto',
         display: 'flex',
         flexDirection: 'column',
-        height: 520,
+        height: 'min(520px, 80vh)',
       }}
     >
       {/* macOS-style titlebar */}

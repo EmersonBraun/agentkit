@@ -98,7 +98,7 @@ function ToolCallCard({ toolCall }: ToolCallCardProps) {
         marginBottom: 4,
         background: '#1a1f35',
         overflow: 'hidden',
-        maxWidth: 420,
+        maxWidth: 'min(420px, 100%)',
         fontFamily: 'monospace',
         fontSize: 13,
         transition: 'border-color 0.3s',
@@ -239,7 +239,7 @@ function MessageBubble({ message }: MessageBubbleProps) {
       {message.text && (
         <div
           style={{
-            maxWidth: 480,
+            maxWidth: 'min(480px, 100%)',
             padding: '10px 14px',
             borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
             background: isUser ? '#3b82f6' : '#1e293b',
@@ -527,7 +527,8 @@ export function ToolUseChat() {
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
-        height: 540,
+        height: 'min(540px, 80vh)',
+        width: '100%',
         maxWidth: 640,
         margin: '0 auto',
         boxShadow: '0 20px 60px rgba(0,0,0,0.5)',

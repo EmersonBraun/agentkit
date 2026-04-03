@@ -771,9 +771,10 @@ export function CodeAssistant() {
           flexDirection: 'column',
           fontFamily:
             '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-          height: 600,
+          height: 'min(600px, 80vh)',
           margin: '0 auto',
           maxWidth: 760,
+          width: '100%',
           overflow: 'hidden',
           border: '1px solid #1e293b',
         }}
