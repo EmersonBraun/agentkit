@@ -31,61 +31,210 @@ function FloatingKeywords() {
   )
 }
 
-// ─── Live Chat Demo ───
-const DEMO_CONVERSATION = [
-  { role: 'user', content: 'Build me a greeting component', delay: 0 },
-  { role: 'assistant', content: '', delay: 800, stream: `Sure! Here's a simple greeting component using AgentKit:\n\n\`\`\`tsx\nfunction Greeting() {\n  const state = useReactive({ name: '' })\n  return (\n    <div>\n      <input\n        placeholder="Your name"\n        onChange={e => state.name = e.target.value}\n      />\n      <p>Hello, {state.name || 'world'}!</p>\n    </div>\n  )\n}\n\`\`\`\n\nThis uses \`useReactive\` for instant state updates with zero boilerplate.` },
-  { role: 'user', content: 'Now add a streaming chat to it', delay: 1500 },
-  { role: 'assistant', content: '', delay: 800, stream: `Easy — just add \`useChat\`:\n\n\`\`\`tsx\nimport { useChat, Message, InputBar } from '@agentkit-react/core'\n\nfunction Chat() {\n  const chat = useChat({\n    adapter: anthropic({ model: 'claude-sonnet-4-6' })\n  })\n  return (\n    <ChatContainer>\n      {chat.messages.map(m =>\n        <Message key={m.id} message={m} />\n      )}\n      <InputBar chat={chat} />\n    </ChatContainer>\n  )\n}\n\`\`\`\n\n10 lines. Streaming, auto-scroll, keyboard handling — all included.` },
+// ─── Copy Install Command ───
+function InstallCommand() {
+  const [copied, setCopied] = useState(false)
+  const cmd = 'npm install @agentkit-react/core'
+
+  const copy = () => {
+    navigator.clipboard?.writeText(cmd)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <button onClick={copy} className="install-cmd" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
+      <span className="dollar">$</span>
+      <span>{cmd}</span>
+      <span style={{
+        marginLeft: 8,
+        padding: '2px 8px',
+        borderRadius: 4,
+        fontSize: 11,
+        background: copied ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.06)',
+        color: copied ? '#22c55e' : '#94a3b8',
+        transition: 'all 0.2s',
+        minWidth: 52,
+        textAlign: 'center',
+      }}>
+        {copied ? '✓ Copied' : 'Copy'}
+      </span>
+    </button>
+  )
+}
+
+// ─── Live Interactive Widgets (rendered inside chat) ───
+function WidgetColorPicker() {
+  const [hue, setHue] = useState(210)
+  const colors = [0, 60, 120, 180, 240].map(offset => `hsl(${(hue + offset) % 360}, 72%, 58%)`)
+
+  return (
+    <div style={{ marginTop: 10 }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+        {colors.map((c, i) => (
+          <div key={i} style={{ width: 40, height: 40, borderRadius: 8, background: c, cursor: 'pointer', transition: 'transform 0.15s', border: '2px solid rgba(255,255,255,0.1)' }}
+            onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.15)')}
+            onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+            onClick={() => navigator.clipboard?.writeText(c)}
+          />
+        ))}
+      </div>
+      <input type="range" min={0} max={360} value={hue} onChange={e => setHue(Number(e.target.value))}
+        style={{ width: '100%', accentColor: `hsl(${hue}, 72%, 58%)` }}
+      />
+      <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>Drag to shift hue &middot; Click swatch to copy</div>
+    </div>
+  )
+}
+
+function WidgetTimer() {
+  const [seconds, setSeconds] = useState(0)
+  const [running, setRunning] = useState(true)
+
+  useEffect(() => {
+    if (!running) return
+    const id = setInterval(() => setSeconds(s => s + 1), 1000)
+    return () => clearInterval(id)
+  }, [running])
+
+  const pct = (seconds % 60) / 60
+  const r = 28
+  const circ = 2 * Math.PI * r
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 10 }}>
+      <svg width={72} height={72} style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx={36} cy={36} r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={6} />
+        <circle cx={36} cy={36} r={r} fill="none" stroke="#3b82f6" strokeWidth={6}
+          strokeDasharray={circ} strokeDashoffset={circ * (1 - pct)}
+          strokeLinecap="round" style={{ transition: 'stroke-dashoffset 0.3s' }}
+        />
+        <text x={36} y={38} textAnchor="middle" fill="#e2e8f0" fontSize={14} fontWeight={700}
+          style={{ transform: 'rotate(90deg)', transformOrigin: '36px 36px' }}>
+          {String(Math.floor(seconds / 60)).padStart(2, '0')}:{String(seconds % 60).padStart(2, '0')}
+        </text>
+      </svg>
+      <div>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button onClick={() => setRunning(!running)} style={{ background: running ? 'rgba(239,68,68,0.15)' : 'rgba(34,197,94,0.15)', color: running ? '#ef4444' : '#22c55e', border: 'none', borderRadius: 6, padding: '4px 12px', fontSize: 12, cursor: 'pointer' }}>
+            {running ? 'Pause' : 'Resume'}
+          </button>
+          <button onClick={() => { setSeconds(0); setRunning(true) }} style={{ background: 'rgba(255,255,255,0.06)', color: '#94a3b8', border: 'none', borderRadius: 6, padding: '4px 12px', fontSize: 12, cursor: 'pointer' }}>
+            Reset
+          </button>
+        </div>
+        <div style={{ fontSize: 11, color: '#64748b', marginTop: 6 }}>Live timer — reactive state updates</div>
+      </div>
+    </div>
+  )
+}
+
+function WidgetPoll() {
+  const [votes, setVotes] = useState([
+    { label: 'React', count: 42 },
+    { label: 'Vue', count: 28 },
+    { label: 'Svelte', count: 18 },
+    { label: 'Solid', count: 12 },
+  ])
+  const total = votes.reduce((s, v) => s + v.count, 0)
+
+  const vote = (i: number) => {
+    setVotes(prev => prev.map((v, j) => j === i ? { ...v, count: v.count + 1 } : v))
+  }
+
+  return (
+    <div style={{ marginTop: 10 }}>
+      {votes.map((v, i) => {
+        const pct = Math.round((v.count / total) * 100)
+        return (
+          <div key={v.label} onClick={() => vote(i)} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, cursor: 'pointer', padding: '4px 0' }}>
+            <div style={{ width: 60, fontSize: 12, fontWeight: 600 }}>{v.label}</div>
+            <div style={{ flex: 1, height: 20, background: 'rgba(255,255,255,0.05)', borderRadius: 6, overflow: 'hidden', position: 'relative' }}>
+              <div style={{ height: '100%', width: `${pct}%`, background: `hsl(${210 + i * 30}, 70%, 55%)`, borderRadius: 6, transition: 'width 0.3s ease' }} />
+            </div>
+            <div style={{ width: 36, fontSize: 11, color: '#94a3b8', textAlign: 'right' }}>{pct}%</div>
+          </div>
+        )
+      })}
+      <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>Click to vote &middot; {total} total votes</div>
+    </div>
+  )
+}
+
+// ─── Conversation Script ───
+type MsgItem = { role: 'user' | 'assistant'; content: string; widget?: React.ReactNode }
+
+const SCRIPT: Array<{ role: 'user' | 'assistant'; text: string; widget?: () => React.ReactNode; delay: number }> = [
+  { role: 'user', text: 'Generate a color palette', delay: 0 },
+  { role: 'assistant', text: 'Here\'s an interactive palette — drag the slider to shift the hue, click any swatch to copy:', delay: 600, widget: () => <WidgetColorPicker /> },
+  { role: 'user', text: 'Now create a live timer', delay: 2000 },
+  { role: 'assistant', text: 'Done! A reactive timer with SVG progress ring — all powered by useReactive:', delay: 600, widget: () => <WidgetTimer /> },
+  { role: 'user', text: 'Show me a live poll', delay: 2500 },
+  { role: 'assistant', text: 'Interactive poll with reactive bar charts — click to vote and watch the bars update instantly:', delay: 600, widget: () => <WidgetPoll /> },
 ]
 
+// ─── Live Chat Demo ───
 function LiveChatDemo() {
-  const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([])
+  const [messages, setMessages] = useState<MsgItem[]>([])
+  const [streamText, setStreamText] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
-  const [started, setStarted] = useState(false)
+  const [input, setInput] = useState('')
+  const [demoFinished, setDemoFinished] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const startedRef = useRef(false)
+
+  const scroll = () => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+  }
+
+  useEffect(scroll, [messages, streamText])
+
+  const streamMessage = useCallback(async (text: string, widget?: React.ReactNode) => {
+    setIsStreaming(true)
+    setStreamText('')
+    for (let i = 0; i < text.length; i++) {
+      await new Promise(r => setTimeout(r, 15))
+      setStreamText(text.slice(0, i + 1))
+    }
+    setIsStreaming(false)
+    setStreamText('')
+    setMessages(prev => [...prev, { role: 'assistant', content: text, widget }])
+  }, [])
 
   const runDemo = useCallback(async () => {
-    if (started) return
-    setStarted(true)
-    setMessages([])
+    if (startedRef.current) return
+    startedRef.current = true
 
-    for (const msg of DEMO_CONVERSATION) {
-      await new Promise(r => setTimeout(r, msg.delay))
+    await new Promise(r => setTimeout(r, 1200))
 
-      if (msg.role === 'user') {
-        setMessages(prev => [...prev, { role: 'user', content: msg.content }])
-      } else if (msg.stream) {
-        setIsStreaming(true)
-        setMessages(prev => [...prev, { role: 'assistant', content: '' }])
-        const chars = msg.stream.split('')
-        for (let i = 0; i < chars.length; i++) {
-          await new Promise(r => setTimeout(r, 12))
-          setMessages(prev => {
-            const updated = [...prev]
-            updated[updated.length - 1] = {
-              role: 'assistant',
-              content: msg.stream!.slice(0, i + 1),
-            }
-            return updated
-          })
-        }
-        setIsStreaming(false)
-        await new Promise(r => setTimeout(r, 600))
+    for (const step of SCRIPT) {
+      await new Promise(r => setTimeout(r, step.delay))
+      if (step.role === 'user') {
+        setMessages(prev => [...prev, { role: 'user', content: step.text }])
+      } else {
+        await streamMessage(step.text, step.widget?.())
       }
     }
-  }, [started])
+    setDemoFinished(true)
+  }, [streamMessage])
 
-  useEffect(() => {
-    const timer = setTimeout(runDemo, 1500)
-    return () => clearTimeout(timer)
-  }, [runDemo])
+  useEffect(() => { runDemo() }, [runDemo])
 
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-    }
-  }, [messages])
+  const handleSend = () => {
+    if (!input.trim() || isStreaming) return
+    const text = input
+    setInput('')
+    setMessages(prev => [...prev, { role: 'user', content: text }])
+    setTimeout(async () => {
+      const responses = [
+        { text: 'That\'s a great question! With AgentKit, you can build any interactive UI with just 3 hooks. The streaming architecture means updates render instantly as they arrive.', widget: undefined },
+        { text: 'AgentKit handles all the complexity — streaming, state management, provider switching — so you focus on your product, not boilerplate.', widget: undefined },
+        { text: 'Try it yourself: npm install @agentkit-react/core. You\'ll have a working AI chat in under a minute.', widget: undefined },
+      ]
+      const resp = responses[Math.floor(Math.random() * responses.length)]
+      await streamMessage(resp.text, resp.widget)
+    }, 400)
+  }
 
   return (
     <div className="demo-window" style={{ maxWidth: 520, width: '100%' }}>
@@ -93,33 +242,45 @@ function LiveChatDemo() {
         <div className="demo-dot" style={{ background: '#ef4444' }} />
         <div className="demo-dot" style={{ background: '#eab308' }} />
         <div className="demo-dot" style={{ background: '#22c55e' }} />
-        <span style={{ fontSize: 12, color: '#64748b', marginLeft: 8 }}>AgentKit Demo</span>
+        <span style={{ fontSize: 12, color: '#64748b', marginLeft: 8, fontFamily: 'monospace' }}>AgentKit Demo</span>
         <span className="live-badge">LIVE</span>
       </div>
-      <div ref={scrollRef} className="demo-messages" style={{ maxHeight: 380, overflow: 'auto' }}>
+      <div ref={scrollRef} className="demo-messages" style={{ maxHeight: 420, minHeight: 420, overflow: 'auto' }}>
         {messages.map((msg, i) => (
           <div key={i} className={`demo-msg demo-msg-${msg.role}`}>
             <span style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</span>
-            {isStreaming && i === messages.length - 1 && msg.role === 'assistant' && (
-              <span className="cursor" style={{ marginLeft: 1 }}>|</span>
-            )}
+            {msg.widget}
           </div>
         ))}
+        {isStreaming && streamText && (
+          <div className="demo-msg demo-msg-assistant">
+            <span style={{ whiteSpace: 'pre-wrap' }}>{streamText}</span>
+            <span className="cursor" style={{ marginLeft: 1 }}>|</span>
+          </div>
+        )}
         {messages.length === 0 && (
           <div style={{ color: '#475569', fontSize: 13, textAlign: 'center', padding: '4rem 0' }}>
+            <div style={{ fontSize: 20, marginBottom: 8 }}>⚡</div>
             Starting demo...
           </div>
         )}
       </div>
-      <div className="demo-input-bar">
-        <input className="demo-input" placeholder="Type a message..." disabled />
-        <button className="demo-send">Send</button>
-      </div>
+      <form onSubmit={e => { e.preventDefault(); handleSend() }} className="demo-input-bar">
+        <input
+          className="demo-input"
+          placeholder={demoFinished ? 'Type anything — try it!' : 'Watching demo...'}
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          disabled={!demoFinished}
+          style={{ opacity: demoFinished ? 1 : 0.5 }}
+        />
+        <button type="submit" className="demo-send" disabled={!demoFinished || !input.trim() || isStreaming}>Send</button>
+      </form>
     </div>
   )
 }
 
-// ─── Inline Live Example ───
+// ─── Inline Live Examples ───
 function InlineTodoDemo() {
   const [todos, setTodos] = useState([
     { id: 1, text: 'Try AgentKit', done: true },
@@ -138,10 +299,7 @@ function InlineTodoDemo() {
     <div style={{ background: 'var(--ak-code-bg)', borderRadius: 12, padding: 20, color: '#e2e8f0', maxWidth: 360 }}>
       <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 12, color: '#94a3b8' }}>useReactive Todo</div>
       <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-        <input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && add()}
+        <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && add()}
           placeholder="Add todo..."
           style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '6px 10px', color: '#e2e8f0', fontSize: 13, outline: 'none' }}
         />
@@ -276,9 +434,7 @@ export default function Home(): React.JSX.Element {
               </Link>
             </div>
 
-            <div className="install-cmd" onClick={() => navigator.clipboard?.writeText('npm install @agentkit-react/core')}>
-              <span className="dollar">$</span> npm install @agentkit-react/core
-            </div>
+            <InstallCommand />
           </div>
 
           {/* Right: Live Demo */}
@@ -305,15 +461,15 @@ export default function Home(): React.JSX.Element {
         {/* ══════════ BEFORE / AFTER ══════════ */}
         <section style={{ padding: '4rem 0' }}>
           <h2 className="section-title">Stop writing boilerplate</h2>
-          <p className="section-subtitle">50 lines of stream parsing → 10 lines with AgentKit</p>
+          <p className="section-subtitle">50 lines of stream parsing &rarr; 10 lines with AgentKit</p>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
             <div className="code-panel" style={{ opacity: 0.7 }}>
-              <div className="code-panel-header" style={{ color: '#ef4444' }}>Before — ~50 lines</div>
+              <div className="code-panel-header" style={{ color: '#ef4444' }}>Before &mdash; ~50 lines</div>
               <pre style={{ maxHeight: 320 }}><code>{BEFORE_CODE}</code></pre>
             </div>
             <div className="code-panel" style={{ borderColor: 'var(--ak-accent)' }}>
-              <div className="code-panel-header" style={{ color: 'var(--ak-accent)' }}>After — 10 lines with AgentKit</div>
+              <div className="code-panel-header" style={{ color: 'var(--ak-accent)' }}>After &mdash; 10 lines with AgentKit</div>
               <pre style={{ maxHeight: 320 }}><code>{AFTER_CODE}</code></pre>
             </div>
           </div>
@@ -345,7 +501,7 @@ export default function Home(): React.JSX.Element {
         {/* ══════════ LIVE INLINE EXAMPLES ══════════ */}
         <section style={{ padding: '4rem 0' }}>
           <h2 className="section-title">Try it live</h2>
-          <p className="section-subtitle">Interactive demos — no install required</p>
+          <p className="section-subtitle">Interactive demos &mdash; no install required</p>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
             <InlineTodoDemo />
@@ -354,14 +510,14 @@ export default function Home(): React.JSX.Element {
 
           <p style={{ textAlign: 'center', color: 'var(--ak-text-muted)', fontSize: 14 }}>
             Built with <code>useReactive</code> — the same reactive primitives that power the chat hooks.{' '}
-            <Link to="/docs/examples">See all 12 examples →</Link>
+            <Link to="/docs/examples">See all 12 examples &rarr;</Link>
           </p>
         </section>
 
         {/* ══════════ EXAMPLES GRID ══════════ */}
         <section style={{ padding: '4rem 0' }}>
           <h2 className="section-title">12 Interactive Examples</h2>
-          <p className="section-subtitle">From todo lists to Flappy Bird — all built with AgentKit</p>
+          <p className="section-subtitle">From todo lists to Flappy Bird &mdash; all built with AgentKit</p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
             {EXAMPLES.map(ex => (
