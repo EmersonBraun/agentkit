@@ -1,4 +1,5 @@
 import { formatRetrievedDocuments } from './rag'
+import { generateId, buildMessage, consumeStream, executeToolCall, createEventEmitter } from './primitives'
 import type {
   AdapterRequest,
   ChatConfig,
@@ -11,28 +12,12 @@ import type {
   ToolDefinition,
 } from './types'
 
-let nextId = 0
-
-function generateId(): string {
-  return `msg-${Date.now()}-${nextId++}`
-}
-
 function safeParseArgs(args: string): Record<string, unknown> {
   try {
     const parsed = JSON.parse(args)
-    return parsed && typeof parsed === 'object' ? parsed as Record<string, unknown> : {}
+    return parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : {}
   } catch {
     return {}
-  }
-}
-
-function createSystemMessage(content: string): Message {
-  return {
-    id: generateId(),
-    role: 'system',
-    content,
-    status: 'complete',
-    createdAt: new Date(),
   }
 }
 
@@ -41,15 +26,15 @@ function mergeSystemMessages(messages: Message[], systemPrompt?: string): Messag
   if (messages.some(message => message.role === 'system' && message.content === systemPrompt)) {
     return messages
   }
-  return [createSystemMessage(systemPrompt), ...messages]
+  return [buildMessage({ role: 'system', content: systemPrompt }), ...messages]
 }
 
 function buildRetrievalMessage(documentsText: string): Message | null {
   if (!documentsText) return null
-
-  return createSystemMessage(
-    `Use the retrieved context below when it is relevant.\n\n${documentsText}`
-  )
+  return buildMessage({
+    role: 'system',
+    content: `Use the retrieved context below when it is relevant.\n\n${documentsText}`,
+  })
 }
 
 export function createChatController(initialConfig: ChatConfig): ChatController {
@@ -62,16 +47,19 @@ export function createChatController(initialConfig: ChatConfig): ChatController 
     error: null,
   }
   const listeners = new Set<() => void>()
+  const emitter = createEventEmitter()
   let hydrated = false
+
+  for (const observer of config.observers ?? []) {
+    emitter.addObserver(observer)
+  }
 
   const emit = () => {
     for (const listener of listeners) listener()
   }
 
   const setState = (updater: ChatState | ((current: ChatState) => ChatState)) => {
-    state = typeof updater === 'function'
-      ? updater(state)
-      : updater
+    state = typeof updater === 'function' ? updater(state) : updater
     void persistMessages(state.messages)
     emit()
   }
@@ -79,6 +67,9 @@ export function createChatController(initialConfig: ChatConfig): ChatController 
   const persistMessages = async (messages: Message[]) => {
     try {
       await config.memory?.save(messages)
+      if (config.memory) {
+        emitter.emit({ type: 'memory:save', messageCount: messages.length })
+      }
     } catch {
       // Memory failures should not break chat usage.
     }
@@ -92,6 +83,7 @@ export function createChatController(initialConfig: ChatConfig): ChatController 
       const loaded = await config.memory.load()
       if (loaded.length > 0 && state.messages.length === 0) {
         state = { ...state, messages: loaded }
+        emitter.emit({ type: 'memory:load', messageCount: loaded.length })
         emit()
       }
     } catch {
@@ -104,15 +96,14 @@ export function createChatController(initialConfig: ChatConfig): ChatController 
   const setAssistantMessage = (assistantId: string, updater: (message: Message) => Message) => {
     setState(current => ({
       ...current,
-      messages: current.messages.map(message => (
+      messages: current.messages.map(message =>
         message.id === assistantId ? updater(message) : message
-      )),
+      ),
     }))
   }
 
-  const findTool = (name: string): ToolDefinition | undefined => (
+  const findTool = (name: string): ToolDefinition | undefined =>
     config.tools?.find(tool => tool.name === name)
-  )
 
   const handleToolCall = async (assistantId: string, chunk: StreamChunk) => {
     if (!chunk.toolCall) return
@@ -132,20 +123,17 @@ export function createChatController(initialConfig: ChatConfig): ChatController 
       toolCalls: [...(message.toolCalls ?? []), toolCall],
     }))
 
-    await config.onToolCall?.(toolCall, {
-      messages: state.messages,
-      tool,
-    })
+    await config.onToolCall?.(toolCall, { messages: state.messages, tool })
 
     if (!tool?.execute || tool.requiresConfirmation) {
       if (chunk.toolCall.result) {
         setAssistantMessage(assistantId, message => ({
           ...message,
-          toolCalls: (message.toolCalls ?? []).map(call => (
+          toolCalls: (message.toolCalls ?? []).map(call =>
             call.id === toolCall.id
-              ? { ...call, result: chunk.toolCall?.result, status: 'complete' }
+              ? { ...call, result: chunk.toolCall?.result, status: 'complete' as const }
               : call
-          )),
+          ),
         }))
       }
       return
@@ -153,36 +141,48 @@ export function createChatController(initialConfig: ChatConfig): ChatController 
 
     setAssistantMessage(assistantId, message => ({
       ...message,
-      toolCalls: (message.toolCalls ?? []).map(call => (
-        call.id === toolCall.id
-          ? { ...call, status: 'running' }
-          : call
-      )),
+      toolCalls: (message.toolCalls ?? []).map(call =>
+        call.id === toolCall.id ? { ...call, status: 'running' as const } : call
+      ),
     }))
 
+    emitter.emit({ type: 'tool:start', name: toolCall.name, args })
+    const toolStart = Date.now()
+
     try {
-      const result = await tool.execute(args, {
-        messages: state.messages,
-        call: toolCall,
-      })
+      const result = await executeToolCall(
+        tool,
+        args,
+        { messages: state.messages, call: toolCall },
+        (partial) => {
+          setAssistantMessage(assistantId, message => ({
+            ...message,
+            toolCalls: (message.toolCalls ?? []).map(call =>
+              call.id === toolCall.id ? { ...call, result: partial } : call
+            ),
+          }))
+        },
+      )
       setAssistantMessage(assistantId, message => ({
         ...message,
-        toolCalls: (message.toolCalls ?? []).map(call => (
+        toolCalls: (message.toolCalls ?? []).map(call =>
           call.id === toolCall.id
-            ? { ...call, status: 'complete', result: result == null ? '' : String(result) }
+            ? { ...call, status: 'complete' as const, result }
             : call
-        )),
+        ),
       }))
+      emitter.emit({ type: 'tool:end', name: toolCall.name, result, durationMs: Date.now() - toolStart })
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
-      setAssistantMessage(assistantId, nextMessage => ({
-        ...nextMessage,
-        toolCalls: (nextMessage.toolCalls ?? []).map(call => (
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      setAssistantMessage(assistantId, message => ({
+        ...message,
+        toolCalls: (message.toolCalls ?? []).map(call =>
           call.id === toolCall.id
-            ? { ...call, status: 'error', error: message }
+            ? { ...call, status: 'error' as const, error: errorMessage }
             : call
-        )),
+        ),
       }))
+      emitter.emit({ type: 'error', error: error instanceof Error ? error : new Error(errorMessage) })
     }
   }
 
@@ -209,95 +209,70 @@ export function createChatController(initialConfig: ChatConfig): ChatController 
     const request = await buildAdapterRequest(messages, text)
     source = config.adapter.createSource(request)
 
-    let accumulated = ''
+    const streamStart = Date.now()
+    let firstTokenEmitted = false
 
-    try {
-      const iterator = source.stream()
-      for await (const chunk of iterator) {
-        if (chunk.type === 'text' && chunk.content) {
-          accumulated += chunk.content
-          setAssistantMessage(assistantId, message => ({
-            ...message,
-            content: accumulated,
-          }))
-        } else if (chunk.type === 'reasoning' && chunk.content) {
-          setAssistantMessage(assistantId, message => ({
-            ...message,
-            metadata: {
-              ...message.metadata,
-              reasoning: `${message.metadata?.reasoning ?? ''}${chunk.content}`,
-            },
-          }))
-        } else if (chunk.type === 'tool_call') {
-          await handleToolCall(assistantId, chunk)
-        } else if (chunk.type === 'tool_result' && chunk.content) {
-          setAssistantMessage(assistantId, message => ({
-            ...message,
-            metadata: {
-              ...message.metadata,
-              toolResult: chunk.content,
-            },
-          }))
-        } else if (chunk.type === 'error') {
-          const error = new Error(chunk.content ?? 'Stream error')
-          setAssistantMessage(assistantId, message => ({ ...message, status: 'error' }))
-          setState(current => ({ ...current, status: 'error', error }))
-          config.onError?.(error)
-          return
-        } else if (chunk.type === 'done') {
-          break
+    emitter.emit({ type: 'llm:start', messageCount: request.messages.length })
+
+    await consumeStream(source, {
+      onText(accumulated) {
+        if (!firstTokenEmitted) {
+          emitter.emit({ type: 'llm:first-token', latencyMs: Date.now() - streamStart })
+          firstTokenEmitted = true
         }
-      }
-
-      let completedMessage: Message | undefined
-      setState(current => {
-        const messages = current.messages.map(message => {
-          if (message.id !== assistantId) return message
-          completedMessage = { ...message, status: 'complete' }
-          return completedMessage
+        setAssistantMessage(assistantId, message => ({
+          ...message,
+          content: accumulated,
+        }))
+      },
+      onReasoning(accumulated) {
+        setAssistantMessage(assistantId, message => ({
+          ...message,
+          metadata: { ...message.metadata, reasoning: accumulated },
+        }))
+      },
+      async onToolCall(chunk) {
+        await handleToolCall(assistantId, chunk)
+      },
+      onToolResult(content) {
+        setAssistantMessage(assistantId, message => ({
+          ...message,
+          metadata: { ...message.metadata, toolResult: content },
+        }))
+      },
+      onError(error) {
+        setAssistantMessage(assistantId, message => ({ ...message, status: 'error' }))
+        setState(current => ({ ...current, status: 'error', error }))
+        emitter.emit({ type: 'error', error })
+        config.onError?.(error)
+      },
+      onDone(accumulatedText) {
+        let completedMessage: Message | undefined
+        setState(current => {
+          const updatedMessages = current.messages.map(message => {
+            if (message.id !== assistantId) return message
+            completedMessage = { ...message, status: 'complete' }
+            return completedMessage
+          })
+          return { ...current, messages: updatedMessages, status: 'idle', error: null }
         })
-
-        return {
-          ...current,
-          messages,
-          status: 'idle',
-          error: null,
-        }
-      })
-      if (completedMessage) config.onMessage?.(completedMessage)
-    } catch (error) {
-      const nextError = error instanceof Error ? error : new Error(String(error))
-      setAssistantMessage(assistantId, message => ({ ...message, status: 'error' }))
-      setState(current => ({ ...current, status: 'error', error: nextError }))
-      config.onError?.(nextError)
-    }
+        emitter.emit({ type: 'llm:end', content: accumulatedText, durationMs: Date.now() - streamStart })
+        if (completedMessage) config.onMessage?.(completedMessage)
+      },
+    })
   }
 
   return {
     getState: () => state,
     subscribe(listener) {
       listeners.add(listener)
-      return () => {
-        listeners.delete(listener)
-      }
+      return () => { listeners.delete(listener) }
     },
     async send(text) {
       if (!text.trim()) return
 
-      const userMessage: Message = {
-        id: generateId(),
-        role: 'user',
-        content: text,
-        status: 'complete',
-        createdAt: new Date(),
-      }
-      const assistantMessage: Message = {
-        id: generateId(),
-        role: 'assistant',
-        content: '',
-        status: 'streaming',
-        createdAt: new Date(),
-      }
+      const userMessage = buildMessage({ role: 'user', content: text })
+      const assistantMessage = buildMessage({ role: 'assistant', content: '', status: 'streaming' })
 
       setState(current => ({
         ...current,
@@ -322,13 +297,7 @@ export function createChatController(initialConfig: ChatConfig): ChatController 
       if (lastAssistant.role !== 'assistant' || lastUser.role !== 'user') return
 
       const withoutLast = messages.slice(0, -1)
-      const replacementAssistant: Message = {
-        id: generateId(),
-        role: 'assistant',
-        content: '',
-        status: 'streaming',
-        createdAt: new Date(),
-      }
+      const replacementAssistant = buildMessage({ role: 'assistant', content: '', status: 'streaming' })
 
       setState(current => ({
         ...current,
