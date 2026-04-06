@@ -25,7 +25,7 @@ export function shell(config: ShellConfig = {}): ToolDefinition {
     },
     dispose: async () => {
       if (currentProcess && !currentProcess.killed) {
-        currentProcess.kill('SIGTERM')
+        currentProcess.kill('SIGKILL')
         currentProcess = null
       }
     },
@@ -36,7 +36,6 @@ export function shell(config: ShellConfig = {}): ToolDefinition {
         return
       }
 
-      // Check allow list
       if (allowed) {
         const firstWord = command.trim().split(/\s+/)[0]
         if (!allowed.includes(firstWord)) {
@@ -52,67 +51,53 @@ export function shell(config: ShellConfig = {}): ToolDefinition {
       currentProcess = proc
 
       let totalOutput = 0
-      let killed = false
+      let timedOut = false
 
-      // Timeout
       const timer = setTimeout(() => {
-        if (!proc.killed) {
-          killed = true
-          proc.kill('SIGTERM')
-        }
+        timedOut = true
+        if (!proc.killed) proc.kill('SIGKILL')
       }, timeout)
 
       try {
-        // Merge stdout and stderr into a single async iterable
-        const output: string[] = []
-        let resolveNext: (() => void) | null = null
-        let done = false
+        // Collect all output then yield — simpler and more reliable across platforms
+        const chunks: string[] = []
 
-        const push = (chunk: string) => {
-          totalOutput += chunk.length
-          if (totalOutput > maxOutput) {
-            if (!proc.killed) {
-              killed = true
-              proc.kill('SIGTERM')
-            }
-            return
+        const onData = (prefix: string) => (data: Buffer) => {
+          const text = data.toString()
+          totalOutput += text.length
+          if (totalOutput <= maxOutput) {
+            chunks.push(prefix ? `${prefix}${text}` : text)
+          } else if (!proc.killed) {
+            proc.kill('SIGKILL')
           }
-          output.push(chunk)
-          resolveNext?.()
         }
 
-        proc.stdout?.on('data', (data: Buffer) => push(data.toString()))
-        proc.stderr?.on('data', (data: Buffer) => push(`[stderr] ${data.toString()}`))
+        proc.stdout?.on('data', onData(''))
+        proc.stderr?.on('data', onData('[stderr] '))
 
-        proc.on('close', () => {
-          done = true
-          resolveNext?.()
+        // Wait for process to close
+        const exitCode = await new Promise<number>((resolve) => {
+          proc.on('close', (code) => resolve(code ?? -1))
+          proc.on('error', () => resolve(-1))
         })
 
-        while (!done) {
-          if (output.length > 0) {
-            yield output.shift()!
-          } else {
-            await new Promise<void>(r => { resolveNext = r })
-            resolveNext = null
-          }
+        // Yield all collected chunks
+        for (const chunk of chunks) {
+          yield chunk
         }
 
-        // Flush remaining
-        while (output.length > 0) {
-          yield output.shift()!
-        }
-
-        if (killed && totalOutput > maxOutput) {
-          yield `\n[truncated: output exceeded ${maxOutput} bytes]`
-        } else if (killed) {
+        if (timedOut) {
           yield `\n[killed: command timed out after ${timeout}ms]`
+        } else if (totalOutput > maxOutput) {
+          yield `\n[truncated: output exceeded ${maxOutput} bytes]`
         }
 
-        const exitCode = proc.exitCode ?? -1
         yield `\n[exit code: ${exitCode}]`
       } finally {
         clearTimeout(timer)
+        if (currentProcess && !currentProcess.killed) {
+          currentProcess.kill('SIGKILL')
+        }
         currentProcess = null
       }
     },

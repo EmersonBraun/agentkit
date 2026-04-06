@@ -65,10 +65,10 @@ describe('shell', () => {
   })
 
   it('enforces timeout', async () => {
-    const tool = shell({ timeout: 500 })
-    const result = await executeToolCall(tool, { command: 'sleep 10' }, ctx)
+    const tool = shell({ timeout: 200 })
+    const result = await executeToolCall(tool, { command: 'sleep 30' }, ctx)
     expect(result).toContain('timed out')
-  }, 10_000)
+  }, 5_000)
 
   it('reports non-zero exit code', async () => {
     const tool = shell()
@@ -77,14 +77,12 @@ describe('shell', () => {
   })
 
   it('dispose kills running process', async () => {
-    const tool = shell()
-    // Start a long-running command
-    const promise = executeToolCall(tool, { command: 'sleep 60' }, ctx)
-    // Give it time to start
-    await new Promise(r => setTimeout(r, 100))
-    // Dispose should kill it
+    const tool = shell({ timeout: 5_000 })
+    const promise = executeToolCall(tool, { command: 'sleep 30' }, ctx)
+    // Give it time to spawn
+    await new Promise(r => setTimeout(r, 200))
     await tool.dispose!()
     const result = await promise
     expect(result).toBeTruthy()
-  }, 10_000)
+  }, 5_000)
 })
