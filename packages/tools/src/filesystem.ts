@@ -6,14 +6,9 @@ export interface FilesystemConfig {
 }
 
 function safePath(basePath: string, inputPath: string): string {
-  const resolved = resolve(basePath, inputPath)
-  const rel = relative(basePath, resolved)
-  if (rel.startsWith('..') || resolve(resolved) !== resolved && rel.startsWith('..')) {
-    throw new Error(`Access denied: "${inputPath}" is outside the allowed base path`)
-  }
-  // Double-check the resolved path starts with basePath
   const normalizedBase = resolve(basePath)
-  if (!resolved.startsWith(normalizedBase)) {
+  const resolved = resolve(basePath, inputPath)
+  if (!resolved.startsWith(normalizedBase + '/') && resolved !== normalizedBase) {
     throw new Error(`Access denied: "${inputPath}" is outside the allowed base path`)
   }
   return resolved
