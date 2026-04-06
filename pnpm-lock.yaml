@@ -150,6 +150,9 @@ importers:
       '@agentskit/ink':
         specifier: workspace:*
         version: link:../ink
+      '@agentskit/memory':
+        specifier: workspace:*
+        version: link:../memory
       '@agentskit/skills':
         specifier: workspace:*
         version: link:../skills
