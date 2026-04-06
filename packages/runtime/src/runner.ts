@@ -219,6 +219,24 @@ export function createRuntime(config: RuntimeConfig) {
             continue
           }
 
+          // Check if tool requires confirmation
+          if (tool.requiresConfirmation && config.onConfirm) {
+            const approved = await config.onConfirm(toolCall)
+            if (!approved) {
+              const denialMsg = 'Permission denied: user denied access'
+              toolCall.status = 'error'
+              toolCall.error = denialMsg
+              messages.push(buildMessage({ role: 'tool', content: denialMsg }))
+              continue
+            }
+          } else if (tool.requiresConfirmation && !config.onConfirm) {
+            const denialMsg = `Permission denied: tool "${toolCall.name}" requires confirmation but no onConfirm handler is configured`
+            toolCall.status = 'error'
+            toolCall.error = denialMsg
+            messages.push(buildMessage({ role: 'tool', content: denialMsg }))
+            continue
+          }
+
           // Lazy init for non-delegate tools
           if (!toolCall.name.startsWith('delegate_')) {
             await lifecycle.init(tool)

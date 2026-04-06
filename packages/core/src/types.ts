@@ -160,6 +160,8 @@ export interface ChatController {
   setMessages: (messages: Message[]) => void
   clear: () => Promise<void>
   updateConfig: (config: Partial<ChatConfig>) => void
+  approve: (toolCallId: string) => Promise<void>
+  deny: (toolCallId: string, reason?: string) => Promise<void>
 }
 
 export interface ChatReturn extends ChatState {
@@ -168,6 +170,8 @@ export interface ChatReturn extends ChatState {
   retry: () => Promise<void>
   setInput: (value: string) => void
   clear: () => Promise<void>
+  approve: (toolCallId: string) => Promise<void>
+  deny: (toolCallId: string, reason?: string) => Promise<void>
 }
 
 export interface MemoryRecord {

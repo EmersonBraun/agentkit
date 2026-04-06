@@ -9,3 +9,5 @@ export type { MessageProps } from './Message'
 export type { InputBarProps } from './InputBar'
 export type { ToolCallViewProps } from './ToolCallView'
 export type { ThinkingIndicatorProps } from './ThinkingIndicator'
+export { ToolConfirmation } from "./ToolConfirmation"
+export type { ToolConfirmationProps } from "./ToolConfirmation"

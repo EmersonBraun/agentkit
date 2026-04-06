@@ -30,5 +30,7 @@ export function useChat(config: ChatConfig): ChatReturn {
     retry: controllerRef.current.retry,
     setInput: controllerRef.current.setInput,
     clear: controllerRef.current.clear,
+    approve: controllerRef.current.approve,
+    deny: controllerRef.current.deny,
   }
 }

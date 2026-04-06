@@ -49,6 +49,7 @@ export {
   CodeBlock,
   ToolCallView,
   ThinkingIndicator,
+  ToolConfirmation,
 } from './components'
 
 export type {
@@ -59,4 +60,5 @@ export type {
   CodeBlockProps,
   ToolCallViewProps,
   ThinkingIndicatorProps,
+  ToolConfirmationProps,
 } from './components'
