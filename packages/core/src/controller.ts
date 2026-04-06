@@ -1,5 +1,6 @@
 import { formatRetrievedDocuments } from './rag'
-import { buildMessage, consumeStream, executeToolCall, createEventEmitter, safeParseArgs, createToolLifecycle } from './primitives'
+import { buildMessage, consumeStream, createEventEmitter, safeParseArgs, createToolLifecycle } from './primitives'
+import { buildToolMap, activateSkills, executeSafeTool } from './agent-loop'
 import type {
   AdapterRequest,
   ChatConfig,
@@ -28,28 +29,6 @@ function buildRetrievalMessage(documentsText: string): Message | null {
   })
 }
 
-async function activateSkills(config: ChatConfig): Promise<{
-  systemPrompt: string | undefined
-  skillTools: ToolDefinition[]
-}> {
-  const skills = config.skills ?? []
-  if (skills.length === 0) return { systemPrompt: config.systemPrompt, skillTools: [] }
-
-  const skillPrompts = skills.map(s => `--- ${s.name} ---\n${s.systemPrompt}`)
-  const basePrompt = config.systemPrompt ? `${config.systemPrompt}\n\n` : ''
-  const systemPrompt = `${basePrompt}${skillPrompts.join('\n\n')}`
-
-  const skillTools: ToolDefinition[] = []
-  for (const skill of skills) {
-    if (skill.onActivate) {
-      const activation = await skill.onActivate()
-      skillTools.push(...(activation.tools ?? []))
-    }
-  }
-
-  return { systemPrompt, skillTools }
-}
-
 export function createChatController(initialConfig: ChatConfig): ChatController {
   let config = initialConfig
   let effectiveSystemPrompt = config.systemPrompt
@@ -62,24 +41,22 @@ export function createChatController(initialConfig: ChatConfig): ChatController 
   }
   const listeners = new Set<() => void>()
   const emitter = createEventEmitter()
-  const toolMap = new Map<string, ToolDefinition>()
+  let toolMap = buildToolMap(config.tools)
   let lifecycle = createToolLifecycle(toolMap)
   let hydrated = false
   let skillsActivated = false
 
-  const rebuildToolMap = (extraTools: ToolDefinition[] = []) => {
-    toolMap.clear()
-    for (const tool of config.tools ?? []) toolMap.set(tool.name, tool)
-    for (const tool of extraTools) toolMap.set(tool.name, tool)
+  const rebuildToolMap = (extraTools?: ToolDefinition[]) => {
+    toolMap = buildToolMap(config.tools, extraTools)
+    lifecycle = createToolLifecycle(toolMap)
   }
-  rebuildToolMap()
 
   const ensureSkillsActivated = async () => {
     if (skillsActivated) return
     skillsActivated = true
-    const { systemPrompt, skillTools } = await activateSkills(config)
-    effectiveSystemPrompt = systemPrompt
-    if (skillTools.length > 0) rebuildToolMap(skillTools)
+    const result = await activateSkills(config.skills ?? [], config.systemPrompt)
+    effectiveSystemPrompt = result.systemPrompt
+    if (result.skillTools.length > 0) rebuildToolMap(result.skillTools)
   }
   void ensureSkillsActivated()
 
@@ -135,14 +112,11 @@ export function createChatController(initialConfig: ChatConfig): ChatController 
     }))
   }
 
-  const findTool = (name: string): ToolDefinition | undefined =>
-    toolMap.get(name)
-
   const handleToolCall = async (assistantId: string, chunk: StreamChunk) => {
     if (!chunk.toolCall) return
 
     const args = safeParseArgs(chunk.toolCall.args)
-    const tool = findTool(chunk.toolCall.name)
+    const tool = toolMap.get(chunk.toolCall.name)
     const toolCall: ToolCall = {
       id: chunk.toolCall.id,
       name: chunk.toolCall.name,
@@ -158,7 +132,9 @@ export function createChatController(initialConfig: ChatConfig): ChatController 
 
     await config.onToolCall?.(toolCall, { messages: state.messages, tool })
 
-    if (!tool?.execute || tool.requiresConfirmation) {
+    // Handle requiresConfirmation: controller keeps existing behavior —
+    // sets status to 'requires_confirmation' and waits for external confirmation
+    if (tool?.requiresConfirmation) {
       if (chunk.toolCall.result) {
         setAssistantMessage(assistantId, message => ({
           ...message,
@@ -172,6 +148,26 @@ export function createChatController(initialConfig: ChatConfig): ChatController 
       return
     }
 
+    // No tool or no execute — use executeSafeTool for consistent error handling
+    if (!tool?.execute) {
+      const execResult = await executeSafeTool({
+        tool,
+        toolCall,
+        context: { messages: state.messages, call: toolCall },
+        emitter,
+        lifecycle,
+      })
+      setAssistantMessage(assistantId, message => ({
+        ...message,
+        toolCalls: (message.toolCalls ?? []).map(call =>
+          call.id === toolCall.id
+            ? { ...call, status: 'error' as const, error: execResult.error }
+            : call
+        ),
+      }))
+      return
+    }
+
     setAssistantMessage(assistantId, message => ({
       ...message,
       toolCalls: (message.toolCalls ?? []).map(call =>
@@ -179,46 +175,35 @@ export function createChatController(initialConfig: ChatConfig): ChatController 
       ),
     }))
 
-    await lifecycle.init(tool)
+    const execResult = await executeSafeTool({
+      tool,
+      toolCall,
+      context: { messages: state.messages, call: toolCall },
+      emitter,
+      lifecycle,
+      onPartial: (partial) => {
+        setAssistantMessage(assistantId, message => ({
+          ...message,
+          toolCalls: (message.toolCalls ?? []).map(call =>
+            call.id === toolCall.id ? { ...call, result: partial } : call
+          ),
+        }))
+      },
+    })
 
-    emitter.emit({ type: 'tool:start', name: toolCall.name, args })
-    const toolStart = Date.now()
-
-    try {
-      const result = await executeToolCall(
-        tool,
-        args,
-        { messages: state.messages, call: toolCall },
-        (partial) => {
-          setAssistantMessage(assistantId, message => ({
-            ...message,
-            toolCalls: (message.toolCalls ?? []).map(call =>
-              call.id === toolCall.id ? { ...call, result: partial } : call
-            ),
-          }))
-        },
-      )
-      setAssistantMessage(assistantId, message => ({
-        ...message,
-        toolCalls: (message.toolCalls ?? []).map(call =>
-          call.id === toolCall.id
-            ? { ...call, status: 'complete' as const, result }
-            : call
-        ),
-      }))
-      emitter.emit({ type: 'tool:end', name: toolCall.name, result, durationMs: Date.now() - toolStart })
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error)
-      setAssistantMessage(assistantId, message => ({
-        ...message,
-        toolCalls: (message.toolCalls ?? []).map(call =>
-          call.id === toolCall.id
-            ? { ...call, status: 'error' as const, error: errorMessage }
-            : call
-        ),
-      }))
-      emitter.emit({ type: 'error', error: error instanceof Error ? error : new Error(errorMessage) })
-    }
+    setAssistantMessage(assistantId, message => ({
+      ...message,
+      toolCalls: (message.toolCalls ?? []).map(call =>
+        call.id === toolCall.id
+          ? {
+              ...call,
+              status: execResult.status === 'complete' ? 'complete' as const : 'error' as const,
+              result: execResult.result,
+              error: execResult.error,
+            }
+          : call
+      ),
+    }))
   }
 
   const buildAdapterRequest = async (messages: Message[], text: string): Promise<AdapterRequest> => {
@@ -361,17 +346,15 @@ export function createChatController(initialConfig: ChatConfig): ChatController 
       await config.memory?.clear?.()
     },
     async approve(toolCallId) {
-      // Find the message containing this tool call
       const msg = state.messages.find(m =>
         m.toolCalls?.some(tc => tc.id === toolCallId && tc.status === 'requires_confirmation')
       )
       if (!msg) return
 
       const tc = msg.toolCalls!.find(c => c.id === toolCallId)!
-      const tool = findTool(tc.name)
+      const tool = toolMap.get(tc.name)
       if (!tool?.execute) return
 
-      // Set status to running
       setAssistantMessage(msg.id, message => ({
         ...message,
         toolCalls: (message.toolCalls ?? []).map(call =>
@@ -379,45 +362,35 @@ export function createChatController(initialConfig: ChatConfig): ChatController 
         ),
       }))
 
-      await lifecycle.init(tool)
-      emitter.emit({ type: 'tool:start', name: tc.name, args: tc.args })
-      const toolStart = Date.now()
+      const execResult = await executeSafeTool({
+        tool,
+        toolCall: tc,
+        context: { messages: state.messages, call: tc },
+        emitter,
+        lifecycle,
+        onPartial: (partial) => {
+          setAssistantMessage(msg.id, message => ({
+            ...message,
+            toolCalls: (message.toolCalls ?? []).map(call =>
+              call.id === toolCallId ? { ...call, result: partial } : call
+            ),
+          }))
+        },
+      })
 
-      try {
-        const result = await executeToolCall(
-          tool,
-          tc.args,
-          { messages: state.messages, call: tc },
-          (partial) => {
-            setAssistantMessage(msg.id, message => ({
-              ...message,
-              toolCalls: (message.toolCalls ?? []).map(call =>
-                call.id === toolCallId ? { ...call, result: partial } : call
-              ),
-            }))
-          },
-        )
-        setAssistantMessage(msg.id, message => ({
-          ...message,
-          toolCalls: (message.toolCalls ?? []).map(call =>
-            call.id === toolCallId
-              ? { ...call, status: 'complete' as const, result }
-              : call
-          ),
-        }))
-        emitter.emit({ type: 'tool:end', name: tc.name, result, durationMs: Date.now() - toolStart })
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error)
-        setAssistantMessage(msg.id, message => ({
-          ...message,
-          toolCalls: (message.toolCalls ?? []).map(call =>
-            call.id === toolCallId
-              ? { ...call, status: 'error' as const, error: errorMessage }
-              : call
-          ),
-        }))
-        emitter.emit({ type: 'error', error: error instanceof Error ? error : new Error(errorMessage) })
-      }
+      setAssistantMessage(msg.id, message => ({
+        ...message,
+        toolCalls: (message.toolCalls ?? []).map(call =>
+          call.id === toolCallId
+            ? {
+                ...call,
+                status: execResult.status === 'complete' ? 'complete' as const : 'error' as const,
+                result: execResult.result,
+                error: execResult.error,
+              }
+            : call
+        ),
+      }))
     },
     async deny(toolCallId, reason) {
       const msg = state.messages.find(m =>
