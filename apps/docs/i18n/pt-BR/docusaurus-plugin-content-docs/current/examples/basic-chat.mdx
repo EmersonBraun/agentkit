@@ -1,0 +1,29 @@
+---
+sidebar_position: 2
+---
+
+import { BasicChat } from '@site/src/examples/BasicChat'
+
+# Chat básico
+
+O caso de uso mais simples — conversa com IA em streaming com rolagem automática, botão parar e tratamento de teclado. Tudo em 10 linhas com o AgentsKit.
+
+<BasicChat />
+
+## Com o AgentsKit
+
+```tsx
+import { useChat, ChatContainer, Message, InputBar } from '@agentskit/react'
+import { anthropic } from '@agentskit/adapters'
+import '@agentskit/react/theme'
+
+function Chat() {
+  const chat = useChat({ adapter: anthropic({ apiKey: 'key', model: 'claude-sonnet-4-6' }) })
+  return (
+    <ChatContainer>
+      {chat.messages.map(msg => <Message key={msg.id} message={msg} />)}
+      <InputBar chat={chat} />
+    </ChatContainer>
+  )
+}
+```
