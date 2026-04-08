@@ -1,0 +1,590 @@
+{
+  "theme.ErrorPageContent.title": {
+    "message": "页面已崩溃。",
+    "description": "The title of the fallback page when the page crashed"
+  },
+  "theme.blog.archive.title": {
+    "message": "历史博文",
+    "description": "The page & hero title of the blog archive page"
+  },
+  "theme.blog.archive.description": {
+    "message": "历史博文",
+    "description": "The page & hero description of the blog archive page"
+  },
+  "theme.BackToTopButton.buttonAriaLabel": {
+    "message": "回到顶部",
+    "description": "The ARIA label for the back to top button"
+  },
+  "theme.blog.paginator.navAriaLabel": {
+    "message": "博文列表分页导航",
+    "description": "The ARIA label for the blog pagination"
+  },
+  "theme.blog.paginator.newerEntries": {
+    "message": "较新的博文",
+    "description": "The label used to navigate to the newer blog posts page (previous page)"
+  },
+  "theme.blog.paginator.olderEntries": {
+    "message": "较旧的博文",
+    "description": "The label used to navigate to the older blog posts page (next page)"
+  },
+  "theme.blog.post.paginator.navAriaLabel": {
+    "message": "博文分页导航",
+    "description": "The ARIA label for the blog posts pagination"
+  },
+  "theme.blog.post.paginator.newerPost": {
+    "message": "较新一篇",
+    "description": "The blog post button label to navigate to the newer/previous post"
+  },
+  "theme.blog.post.paginator.olderPost": {
+    "message": "较旧一篇",
+    "description": "The blog post button label to navigate to the older/next post"
+  },
+  "theme.tags.tagsPageLink": {
+    "message": "查看所有标签",
+    "description": "The label of the link targeting the tag list page"
+  },
+  "theme.colorToggle.ariaLabel.mode.system": {
+    "message": "system mode",
+    "description": "The name for the system color mode"
+  },
+  "theme.colorToggle.ariaLabel.mode.light": {
+    "message": "浅色模式",
+    "description": "The name for the light color mode"
+  },
+  "theme.colorToggle.ariaLabel.mode.dark": {
+    "message": "暗黑模式",
+    "description": "The name for the dark color mode"
+  },
+  "theme.colorToggle.ariaLabel": {
+    "message": "切换浅色/暗黑模式（当前为{mode}）",
+    "description": "The ARIA label for the color mode toggle"
+  },
+  "theme.docs.breadcrumbs.navAriaLabel": {
+    "message": "页面路径",
+    "description": "The ARIA label for the breadcrumbs"
+  },
+  "theme.docs.DocCard.categoryDescription.plurals": {
+    "message": "{count} 个项目",
+    "description": "The default description for a category card in the generated index about how many items this category includes"
+  },
+  "theme.docs.paginator.navAriaLabel": {
+    "message": "文件选项卡",
+    "description": "The ARIA label for the docs pagination"
+  },
+  "theme.docs.paginator.previous": {
+    "message": "上一页",
+    "description": "The label used to navigate to the previous doc"
+  },
+  "theme.docs.paginator.next": {
+    "message": "下一页",
+    "description": "The label used to navigate to the next doc"
+  },
+  "theme.docs.tagDocListPageTitle.nDocsTagged": {
+    "message": "{count} 篇文档带有标签",
+    "description": "Pluralized label for \"{count} docs tagged\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
+  },
+  "theme.docs.tagDocListPageTitle": {
+    "message": "{nDocsTagged}「{tagName}」",
+    "description": "The title of the page for a docs tag"
+  },
+  "theme.docs.versions.unreleasedVersionLabel": {
+    "message": "此为 {siteTitle} {versionLabel} 版尚未发行的文档。",
+    "description": "The label used to tell the user that he's browsing an unreleased doc version"
+  },
+  "theme.docs.versions.unmaintainedVersionLabel": {
+    "message": "此为 {siteTitle} {versionLabel} 版的文档，现已不再积极维护。",
+    "description": "The label used to tell the user that he's browsing an unmaintained doc version"
+  },
+  "theme.docs.versions.latestVersionSuggestionLabel": {
+    "message": "最新的文档请参阅 {latestVersionLink} ({versionLabel})。",
+    "description": "The label used to tell the user to check the latest version"
+  },
+  "theme.docs.versions.latestVersionLinkLabel": {
+    "message": "最新版本",
+    "description": "The label used for the latest version suggestion link label"
+  },
+  "theme.docs.versionBadge.label": {
+    "message": "版本：{versionLabel}"
+  },
+  "theme.common.editThisPage": {
+    "message": "编辑此页",
+    "description": "The link label to edit the current page"
+  },
+  "theme.common.headingLinkTitle": {
+    "message": "{heading}的直接链接",
+    "description": "Title for link to heading"
+  },
+  "theme.NotFound.title": {
+    "message": "找不到页面",
+    "description": "The title of the 404 page"
+  },
+  "theme.navbar.mobileVersionsDropdown.label": {
+    "message": "选择版本",
+    "description": "The label for the navbar versions dropdown on mobile view"
+  },
+  "theme.lastUpdated.atDate": {
+    "message": "于 {date} ",
+    "description": "The words used to describe on which date a page has been last updated"
+  },
+  "theme.lastUpdated.byUser": {
+    "message": "由 {user} ",
+    "description": "The words used to describe by who the page has been last updated"
+  },
+  "theme.lastUpdated.lastUpdatedAtBy": {
+    "message": "最后{byUser}{atDate}更新",
+    "description": "The sentence used to display when a page has been last updated, and by who"
+  },
+  "theme.tags.tagsListLabel": {
+    "message": "标签：",
+    "description": "The label alongside a tag list"
+  },
+  "theme.admonition.caution": {
+    "message": "警告",
+    "description": "The default label used for the Caution admonition (:::caution)"
+  },
+  "theme.admonition.danger": {
+    "message": "危险",
+    "description": "The default label used for the Danger admonition (:::danger)"
+  },
+  "theme.admonition.info": {
+    "message": "信息",
+    "description": "The default label used for the Info admonition (:::info)"
+  },
+  "theme.admonition.note": {
+    "message": "备注",
+    "description": "The default label used for the Note admonition (:::note)"
+  },
+  "theme.admonition.tip": {
+    "message": "提示",
+    "description": "The default label used for the Tip admonition (:::tip)"
+  },
+  "theme.admonition.warning": {
+    "message": "注意",
+    "description": "The default label used for the Warning admonition (:::warning)"
+  },
+  "theme.AnnouncementBar.closeButtonAriaLabel": {
+    "message": "关闭",
+    "description": "The ARIA label for close button of announcement bar"
+  },
+  "theme.blog.sidebar.navAriaLabel": {
+    "message": "最近博文导航",
+    "description": "The ARIA label for recent posts in the blog sidebar"
+  },
+  "theme.DocSidebarItem.expandCategoryAriaLabel": {
+    "message": "展开侧边栏分类 '{label}'",
+    "description": "The ARIA label to expand the sidebar category"
+  },
+  "theme.DocSidebarItem.collapseCategoryAriaLabel": {
+    "message": "折叠侧边栏分类 '{label}'",
+    "description": "The ARIA label to collapse the sidebar category"
+  },
+  "theme.IconExternalLink.ariaLabel": {
+    "message": "(opens in new tab)",
+    "description": "The ARIA label for the external link icon"
+  },
+  "theme.NavBar.navAriaLabel": {
+    "message": "主导航",
+    "description": "The ARIA label for the main navigation"
+  },
+  "theme.NotFound.p1": {
+    "message": "我们找不到您要找的页面。",
+    "description": "The first paragraph of the 404 page"
+  },
+  "theme.NotFound.p2": {
+    "message": "请联系原始链接来源网站的所有者，并告知他们链接已损坏。",
+    "description": "The 2nd paragraph of the 404 page"
+  },
+  "theme.TOCCollapsible.toggleButtonLabel": {
+    "message": "本页总览",
+    "description": "The label used by the button on the collapsible TOC component"
+  },
+  "theme.navbar.mobileLanguageDropdown.label": {
+    "message": "选择语言",
+    "description": "The label for the mobile language switcher dropdown"
+  },
+  "theme.blog.post.readMore": {
+    "message": "阅读更多",
+    "description": "The label used in blog post item excerpts to link to full blog posts"
+  },
+  "theme.blog.post.readMoreLabel": {
+    "message": "阅读 {title} 的全文",
+    "description": "The ARIA label for the link to full blog posts from excerpts"
+  },
+  "theme.blog.post.readingTime.plurals": {
+    "message": "阅读需 {readingTime} 分钟",
+    "description": "Pluralized label for \"{readingTime} min read\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
+  },
+  "theme.CodeBlock.copy": {
+    "message": "复制",
+    "description": "The copy button label on code blocks"
+  },
+  "theme.CodeBlock.copied": {
+    "message": "复制成功",
+    "description": "The copied button label on code blocks"
+  },
+  "theme.CodeBlock.copyButtonAriaLabel": {
+    "message": "复制代码到剪贴板",
+    "description": "The ARIA label for copy code blocks button"
+  },
+  "theme.CodeBlock.wordWrapToggle": {
+    "message": "切换自动换行",
+    "description": "The title attribute for toggle word wrapping button of code block lines"
+  },
+  "theme.docs.breadcrumbs.home": {
+    "message": "主页面",
+    "description": "The ARIA label for the home page in the breadcrumbs"
+  },
+  "theme.docs.sidebar.collapseButtonTitle": {
+    "message": "收起侧边栏",
+    "description": "The title attribute for collapse button of doc sidebar"
+  },
+  "theme.docs.sidebar.collapseButtonAriaLabel": {
+    "message": "收起侧边栏",
+    "description": "The title attribute for collapse button of doc sidebar"
+  },
+  "theme.docs.sidebar.navAriaLabel": {
+    "message": "文档侧边栏",
+    "description": "The ARIA label for the sidebar navigation"
+  },
+  "theme.docs.sidebar.closeSidebarButtonAriaLabel": {
+    "message": "关闭导航栏",
+    "description": "The ARIA label for close button of mobile sidebar"
+  },
+  "theme.navbar.mobileSidebarSecondaryMenu.backButtonLabel": {
+    "message": "← 回到主菜单",
+    "description": "The label of the back button to return to main menu, inside the mobile navbar sidebar secondary menu (notably used to display the docs sidebar)"
+  },
+  "theme.docs.sidebar.toggleSidebarButtonAriaLabel": {
+    "message": "切换导航栏",
+    "description": "The ARIA label for hamburger menu button of mobile navigation"
+  },
+  "theme.navbar.mobileDropdown.collapseButton.expandAriaLabel": {
+    "message": "Expand the dropdown",
+    "description": "The ARIA label of the button to expand the mobile dropdown navbar item"
+  },
+  "theme.navbar.mobileDropdown.collapseButton.collapseAriaLabel": {
+    "message": "Collapse the dropdown",
+    "description": "The ARIA label of the button to collapse the mobile dropdown navbar item"
+  },
+  "theme.docs.sidebar.expandButtonTitle": {
+    "message": "展开侧边栏",
+    "description": "The ARIA label and title attribute for expand button of doc sidebar"
+  },
+  "theme.docs.sidebar.expandButtonAriaLabel": {
+    "message": "展开侧边栏",
+    "description": "The ARIA label and title attribute for expand button of doc sidebar"
+  },
+  "theme.blog.post.plurals": {
+    "message": "{count} 篇博文",
+    "description": "Pluralized label for \"{count} posts\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
+  },
+  "theme.blog.tagTitle": {
+    "message": "{nPosts} 含有标签「{tagName}」",
+    "description": "The title of the page for a blog tag"
+  },
+  "theme.blog.author.pageTitle": {
+    "message": "{authorName} - {nPosts}",
+    "description": "The title of the page for a blog author"
+  },
+  "theme.blog.authorsList.pageTitle": {
+    "message": "作者",
+    "description": "The title of the authors page"
+  },
+  "theme.blog.authorsList.viewAll": {
+    "message": "查看所有作者",
+    "description": "The label of the link targeting the blog authors page"
+  },
+  "theme.blog.author.noPosts": {
+    "message": "该作者尚未撰写任何文章。",
+    "description": "The text for authors with 0 blog post"
+  },
+  "theme.contentVisibility.unlistedBanner.title": {
+    "message": "未列出页",
+    "description": "The unlisted content banner title"
+  },
+  "theme.contentVisibility.unlistedBanner.message": {
+    "message": "此页面未列出。搜索引擎不会对其索引，只有拥有直接链接的用户才能访问。",
+    "description": "The unlisted content banner message"
+  },
+  "theme.contentVisibility.draftBanner.title": {
+    "message": "草稿页",
+    "description": "The draft content banner title"
+  },
+  "theme.contentVisibility.draftBanner.message": {
+    "message": "此页面是草稿，仅在开发环境中可见，不会包含在正式版本中。",
+    "description": "The draft content banner message"
+  },
+  "theme.ErrorPageContent.tryAgain": {
+    "message": "重试",
+    "description": "The label of the button to try again rendering when the React error boundary captures an error"
+  },
+  "theme.common.skipToMainContent": {
+    "message": "跳到主要内容",
+    "description": "The skip to content label used for accessibility, allowing to rapidly navigate to main content with keyboard tab/enter navigation"
+  },
+  "theme.tags.tagsPageTitle": {
+    "message": "标签",
+    "description": "The title of the tag list page"
+  },
+  "home.social.meta": {
+    "message": "npm 上的 14 个包 · MIT · 开源"
+  },
+  "home.install.hint": {
+    "message": "CLI、Runtime、Ink、RAG — 完整安装指南 →"
+  },
+  "home.compare.title": {
+    "message": "AgentsKit 在生态中的位置"
+  },
+  "home.compare.subtitle": {
+    "message": "实用视角 — 不是性能基准。按你的技术栈和掌控需求来选择。"
+  },
+  "home.compare.scrollHint": {
+    "message": "表格较宽 — 在小屏幕上请横向滚动以比较各列。"
+  },
+  "home.compare.th.dimension": {
+    "message": "维度"
+  },
+  "home.compare.th.vendor": {
+    "message": "绑定供应商或闭源的 UI SDK"
+  },
+  "home.compare.th.framework": {
+    "message": "强主张的 Web 框架路线"
+  },
+  "home.compare.th.agentskit": {
+    "message": "AgentsKit"
+  },
+  "home.compare.row.ownership": {
+    "message": "所有权"
+  },
+  "home.compare.cell.ownership.vendor": {
+    "message": "常绑定单一供应商控制台、仅云端功能或不透明的升级路径。"
+  },
+  "home.compare.cell.ownership.framework": {
+    "message": "开源，并为特定生态提供清晰的「最佳路径」（例如 React 流式模式）。"
+  },
+  "home.compare.cell.ownership.agentskit.lead": {
+    "message": "MIT、模块化 npm 包"
+  },
+  "home.compare.cell.ownership.agentskit.tail": {
+    "message": "— 你掌控部署；更换适配器而无需重写 UI 层。"
+  },
+  "home.compare.row.ui": {
+    "message": "UI 模型"
+  },
+  "home.compare.cell.ui.vendor": {
+    "message": "预制组件；主题或可扩展性有限。"
+  },
+  "home.compare.cell.ui.framework": {
+    "message": "约定与示例围绕单一技术栈的习惯用法。"
+  },
+  "home.compare.cell.ui.agentskit.lead": {
+    "message": "无头原语"
+  },
+  "home.compare.cell.ui.agentskit.tail": {
+    "message": "加可选主题 — 可接入 MUI、shadcn 或你的设计系统。"
+  },
+  "home.compare.row.surfaces": {
+    "message": "终端形态"
+  },
+  "home.compare.cell.surfaces.vendor": {
+    "message": "通常 Web 优先；终端或无 UI 智能体往往是事后补充。"
+  },
+  "home.compare.cell.surfaces.framework": {
+    "message": "Web 优先；浏览器之外的深度各不相同。"
+  },
+  "home.compare.cell.surfaces.agentskit.lead": {
+    "message": "同一套契约"
+  },
+  "home.compare.cell.surfaces.agentskit.tail": {
+    "message": "适用于 React、Ink（终端）、CLI 与无头的"
+  },
+  "home.compare.row.extension": {
+    "message": "扩展"
+  },
+  "home.compare.cell.extension.vendor": {
+    "message": "插件层级、封闭扩展 API 或供应商专用工具模式。"
+  },
+  "home.compare.cell.extension.framework": {
+    "message": "在框架世界内可组合。"
+  },
+  "home.compare.cell.extension.agentskit.lead": {
+    "message": "共享的核心类型"
+  },
+  "home.compare.cell.extension.agentskit.mid": {
+    "message": "— 适配器、工具、记忆、RAG、skills 在"
+  },
+  "home.compare.note.bestLabel": {
+    "message": "更适合："
+  },
+  "home.compare.note.bestBody": {
+    "message": "浏览器、终端与无头智能体用同一套栈，并能掌控适配器与工具。"
+  },
+  "home.compare.note.skipLabel": {
+    "message": "可以跳过："
+  },
+  "home.compare.note.skipBody": {
+    "message": "单一供应商组件就够，或你已完全投入某一框架的 AI 路线。"
+  },
+  "home.hero.pill": {
+    "message": "开源 · 可扩展 — React、终端与无头"
+  },
+  "home.hero.title": {
+    "message": "面向 JavaScript 的智能体工具包"
+  },
+  "home.hero.gradient": {
+    "message": "React · CLI · Runtime · RAG · Tools"
+  },
+  "home.hero.taglineTail": {
+    "message": "— 各处同一套契约"
+  },
+  "home.hero.body.lead": {
+    "message": "可插拔适配器与共享类型，基于"
+  },
+  "home.hero.body.mid": {
+    "message": "，UI 可选。从"
+  },
+  "home.hero.body.tail1": {
+    "message": "开始；在"
+  },
+  "home.hero.body.tail2": {
+    "message": "、"
+  },
+  "home.hero.body.tail3": {
+    "message": "或"
+  },
+  "home.hero.body.tail4": {
+    "message": "复用同一思路 — 一行切换模型。"
+  },
+  "home.hero.ctaQuickStart": {
+    "message": "运行 2 分钟快速上手"
+  },
+  "home.hero.friction": {
+    "message": "MIT · 无需注册 · 一分钟内跑通流式 UI · 支持 pnpm、yarn、npm"
+  },
+  "home.hero.link.startDocs": {
+    "message": "文档：从这里开始 →"
+  },
+  "home.hero.link.compare": {
+    "message": "对比方案 →"
+  },
+  "home.hero.link.examples": {
+    "message": "10 个在线示例 →"
+  },
+  "home.hero.link.toolDemo": {
+    "message": "工具调用演示 →"
+  },
+  "home.hero.link.ragDemo": {
+    "message": "RAG 聊天演示 →"
+  },
+  "home.hero.link.cli": {
+    "message": "CLI →"
+  },
+  "home.hero.link.npmAll": {
+    "message": "npm 上的全部包 →"
+  },
+  "home.pas.title": {
+    "message": "封闭 SDK 与强主张路线会拖慢你"
+  },
+  "home.pas.subtitle": {
+    "message": "流式场景的边界情况仍由你承担 — 除非你的栈天生可组合"
+  },
+  "home.pas.li.vendor.lead": {
+    "message": "绑定供应商或封闭层"
+  },
+  "home.pas.li.vendor.tail": {
+    "message": "— 升级节奏、仅云端功能与不透明限制，会在你需要自定义工具或自托管推理时束缚你。"
+  },
+  "home.pas.li.framework.lead": {
+    "message": "高度主张的框架"
+  },
+  "home.pas.li.framework.tail": {
+    "message": "— 在「最佳路径」内高效；当产品横跨 Web、终端与无头 worker 且要统一契约时很痛苦。"
+  },
+  "home.pas.li.streams.lead": {
+    "message": "脆弱的手写流式逻辑"
+  },
+  "home.pas.li.streams.tail": {
+    "message": "— 分片、重试和中止仍会渗入体验（卡在「正在输入」、重复消息、丢失工具结果），各端胶水代码不一致时尤甚。"
+  },
+  "home.pas.solve.prefix": {
+    "message": "AgentsKit 采用"
+  },
+  "home.pas.solve.license": {
+    "message": "MIT 并以扩展为先"
+  },
+  "home.pas.solve.suffix": {
+    "message": "：适配器、工具、记忆与 RAG 都建立在共享原语上，让你保持掌控、替换模块而无需重写产品叙事。"
+  },
+  "home.codePair.title": {
+    "message": "从约 50 行胶水代码到约 10 行业务代码"
+  },
+  "home.codePair.subtitle": {
+    "message": "更少代码要评审、测试，并在下个月 API 变动时后悔"
+  },
+  "home.codePair.beforeLabel": {
+    "message": "之前 — 约 50 行"
+  },
+  "home.codePair.afterLabel": {
+    "message": "之后 — 使用 AgentsKit 约 10 行"
+  },
+  "home.ecosystem.lead": {
+    "message": "一套架构，覆盖所有终端"
+  },
+  "home.ecosystem.copy.lead": {
+    "message": "跳到你需要的指南 — 每个链接对应 npm 上的一个"
+  },
+  "home.ecosystem.copy.tail": {
+    "message": "包。"
+  },
+  "home.providers.lead": {
+    "message": "模型提供商 — 一行切换"
+  },
+  "home.features.sectionTitle": {
+    "message": "为什么选择 AgentsKit？"
+  },
+  "home.features.sectionSubtitle": {
+    "message": "应有尽有，没有多余 — 从 UI 到无头智能体同一套故事"
+  },
+  "home.examples.sectionTitle": {
+    "message": "10 个交互示例"
+  },
+  "home.examples.sectionSubtitle": {
+    "message": "每个示例都是聊天 — 这正是 AgentsKit 做的事"
+  },
+  "home.cta.title": {
+    "message": "不到一分钟看到流式效果"
+  },
+  "home.cta.lead": {
+    "message": "先跑快速上手，再叠加工具、记忆与 RAG — 心智模型不变。"
+  },
+  "home.cta.friction": {
+    "message": "MIT · 无需注册 · 开源 — 随意使用、fork 或告诉我们缺什么"
+  },
+  "home.cta.button": {
+    "message": "运行 2 分钟快速上手"
+  },
+  "home.cta.link.examples": {
+    "message": "在线示例 →"
+  },
+  "home.cta.link.agents": {
+    "message": "给编程智能体的提示词 →"
+  },
+  "home.cta.link.star": {
+    "message": "在 GitHub 点星 →"
+  },
+  "home.young.title": {
+    "message": "年轻项目，快速迭代"
+  },
+  "home.young.copy": {
+    "message": "AgentsKit 尚处早期并在扩张 — 欢迎试用，遇到问题请提 issue，并一起塑造路线图。"
+  },
+  "home.young.link.issues": {
+    "message": "Issues →"
+  },
+  "home.young.link.discussions": {
+    "message": "讨论区 →"
+  },
+  "home.young.link.contribute": {
+    "message": "在 GitHub 参与贡献 →"
+  }
+}

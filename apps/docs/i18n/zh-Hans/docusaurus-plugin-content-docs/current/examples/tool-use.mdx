@@ -1,0 +1,35 @@
+---
+sidebar_position: 3
+---
+
+import { ToolUseChat } from '@site/src/examples/ToolUseChat'
+
+# 工具使用
+
+能调用函数的 AI 助手——天气查询、网络搜索、数据库查询。AgentsKit 用可展开卡片渲染工具调用，展示参数与结果。
+
+<ToolUseChat />
+
+## 配合 AgentsKit
+
+`ToolCallView` 组件处理一切：
+
+```tsx
+import { useChat, ChatContainer, Message, ToolCallView } from '@agentskit/react'
+
+function Chat() {
+  const chat = useChat({ adapter })
+  return (
+    <ChatContainer>
+      {chat.messages.map(msg => (
+        <div key={msg.id}>
+          <Message message={msg} />
+          {msg.toolCalls?.map(tc => (
+            <ToolCallView key={tc.id} toolCall={tc} />
+          ))}
+        </div>
+      ))}
+    </ChatContainer>
+  )
+}
+```

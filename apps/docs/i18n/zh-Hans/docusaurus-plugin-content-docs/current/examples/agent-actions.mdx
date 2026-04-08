@@ -1,0 +1,36 @@
+---
+sidebar_position: 8
+---
+
+import { AgentActions } from '@site/src/examples/AgentActions'
+
+# 智能体操作
+
+能生成实时交互式 UI 的 AI 智能体——任务看板、仪表盘、表单。智能体不只回复文本，还能构建可用界面。
+
+<AgentActions />
+
+## 配合 AgentsKit
+
+将 `useChat` 与工具调用结果的自定义渲染结合：
+
+```tsx
+import { useChat, ChatContainer, Message } from '@agentskit/react'
+
+function AgentChat() {
+  const chat = useChat({ adapter })
+  return (
+    <ChatContainer>
+      {chat.messages.map(msg => (
+        <div key={msg.id}>
+          <Message message={msg} />
+          {msg.toolCalls?.map(tc => (
+            <DynamicWidget key={tc.id} type={tc.name} data={JSON.parse(tc.result || '{}')} />
+          ))}
+        </div>
+      ))}
+      <InputBar chat={chat} />
+    </ChatContainer>
+  )
+}
+```
