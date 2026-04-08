@@ -1,0 +1,62 @@
+---
+sidebar_position: 13
+---
+
+import { MultiAgentChat } from '@site/src/examples/MultiAgentChat'
+
+# 多智能体规划
+
+将任务拆成步骤并委派给专家的规划智能体。基于 `@agentskit/react` 与 planner 技能构建。
+
+<MultiAgentChat />
+
+## 代码
+
+```tsx
+import { useChat, ChatContainer, Message, InputBar } from '@agentskit/react'
+import { planner } from '@agentskit/skills'
+import '@agentskit/react/theme'
+
+function MultiAgentDemo() {
+  const chat = useChat({
+    adapter: yourAdapter,
+    skills: [planner],
+    systemPrompt: 'Break tasks into steps. Delegate research and coding to specialists.',
+  })
+
+  return (
+    <ChatContainer>
+      {chat.messages.map(msg => <Message key={msg.id} message={msg} />)}
+      <InputBar chat={chat} placeholder="Give me a complex task..." />
+    </ChatContainer>
+  )
+}
+```
+
+## 真实委派（Runtime）
+
+子智能体独立运行时的多智能体执行：
+
+```typescript
+import { createRuntime } from '@agentskit/runtime'
+import { planner, researcher, coder } from '@agentskit/skills'
+
+const runtime = createRuntime({
+  adapter: yourAdapter,
+  delegates: {
+    researcher: { skill: researcher },
+    coder: { skill: coder },
+  },
+})
+
+const result = await runtime.run('Build a REST API for task management', {
+  skill: planner,
+})
+```
+
+## 试用
+
+```bash
+cd apps/example-multi-agent
+pnpm dev
+```

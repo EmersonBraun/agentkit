@@ -1,0 +1,18 @@
+{
+  "title": {
+    "message": "AgentsKit",
+    "description": "The title in the navbar"
+  },
+  "item.label.Start here": {
+    "message": "入门",
+    "description": "Navbar item with label Start here"
+  },
+  "item.label.Docs": {
+    "message": "文档",
+    "description": "Navbar item with label Docs"
+  },
+  "item.label.GitHub": {
+    "message": "GitHub",
+    "description": "Navbar item with label GitHub"
+  }
+}

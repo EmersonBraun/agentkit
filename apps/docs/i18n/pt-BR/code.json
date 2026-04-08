@@ -1,0 +1,590 @@
+{
+  "theme.ErrorPageContent.title": {
+    "message": "Esta página deu erro.",
+    "description": "The title of the fallback page when the page crashed"
+  },
+  "theme.BackToTopButton.buttonAriaLabel": {
+    "message": "Voltar para o topo",
+    "description": "The ARIA label for the back to top button"
+  },
+  "theme.blog.archive.title": {
+    "message": "Arquivo",
+    "description": "The page & hero title of the blog archive page"
+  },
+  "theme.blog.archive.description": {
+    "message": "Arquivo",
+    "description": "The page & hero description of the blog archive page"
+  },
+  "theme.blog.paginator.navAriaLabel": {
+    "message": "Navegação da página de listagem do blog",
+    "description": "The ARIA label for the blog pagination"
+  },
+  "theme.blog.paginator.newerEntries": {
+    "message": "Publicações mais recentes",
+    "description": "The label used to navigate to the newer blog posts page (previous page)"
+  },
+  "theme.blog.paginator.olderEntries": {
+    "message": "Publicações mais antigas",
+    "description": "The label used to navigate to the older blog posts page (next page)"
+  },
+  "theme.blog.post.paginator.navAriaLabel": {
+    "message": "Navegação da página de publicação do blog",
+    "description": "The ARIA label for the blog posts pagination"
+  },
+  "theme.blog.post.paginator.newerPost": {
+    "message": "Publicação mais recente",
+    "description": "The blog post button label to navigate to the newer/previous post"
+  },
+  "theme.blog.post.paginator.olderPost": {
+    "message": "Publicação mais antiga",
+    "description": "The blog post button label to navigate to the older/next post"
+  },
+  "theme.tags.tagsPageLink": {
+    "message": "Ver todas as etiquetas",
+    "description": "The label of the link targeting the tag list page"
+  },
+  "theme.colorToggle.ariaLabel.mode.system": {
+    "message": "modo do sistema",
+    "description": "The name for the system color mode"
+  },
+  "theme.colorToggle.ariaLabel.mode.light": {
+    "message": "modo claro",
+    "description": "The name for the light color mode"
+  },
+  "theme.colorToggle.ariaLabel.mode.dark": {
+    "message": "modo escuro",
+    "description": "The name for the dark color mode"
+  },
+  "theme.colorToggle.ariaLabel": {
+    "message": "Mudar entre modo claro e escuro ({mode} está ativo)",
+    "description": "The ARIA label for the color mode toggle"
+  },
+  "theme.docs.breadcrumbs.navAriaLabel": {
+    "message": "Trilha",
+    "description": "The ARIA label for the breadcrumbs"
+  },
+  "theme.docs.DocCard.categoryDescription.plurals": {
+    "message": "1 item|{count} itens",
+    "description": "The default description for a category card in the generated index about how many items this category includes"
+  },
+  "theme.docs.paginator.navAriaLabel": {
+    "message": "Páginas de documento",
+    "description": "The ARIA label for the docs pagination"
+  },
+  "theme.docs.paginator.previous": {
+    "message": "Anterior",
+    "description": "The label used to navigate to the previous doc"
+  },
+  "theme.docs.paginator.next": {
+    "message": "Próxima",
+    "description": "The label used to navigate to the next doc"
+  },
+  "theme.docs.tagDocListPageTitle.nDocsTagged": {
+    "message": "Um documento marcado|{count} documentos marcados",
+    "description": "Pluralized label for \"{count} docs tagged\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
+  },
+  "theme.docs.tagDocListPageTitle": {
+    "message": "{nDocsTagged} com \"{tagName}\"",
+    "description": "The title of the page for a docs tag"
+  },
+  "theme.docs.versionBadge.label": {
+    "message": "Versão: {versionLabel}"
+  },
+  "theme.docs.versions.unreleasedVersionLabel": {
+    "message": "Esta é uma documentação não lançada da versão {versionLabel} para {siteTitle}.",
+    "description": "The label used to tell the user that he's browsing an unreleased doc version"
+  },
+  "theme.docs.versions.unmaintainedVersionLabel": {
+    "message": "Esta é a documentação para {siteTitle} {versionLabel}, que não é mais mantida ativamente.",
+    "description": "The label used to tell the user that he's browsing an unmaintained doc version"
+  },
+  "theme.docs.versions.latestVersionSuggestionLabel": {
+    "message": "Para a documentação atualizada, consulte a {latestVersionLink} ({versionLabel}).",
+    "description": "The label used to tell the user to check the latest version"
+  },
+  "theme.docs.versions.latestVersionLinkLabel": {
+    "message": "versão mais recente",
+    "description": "The label used for the latest version suggestion link label"
+  },
+  "theme.common.editThisPage": {
+    "message": "Editar esta página",
+    "description": "The link label to edit the current page"
+  },
+  "theme.common.headingLinkTitle": {
+    "message": "Link direto para {heading}",
+    "description": "Title for link to heading"
+  },
+  "theme.lastUpdated.atDate": {
+    "message": " em {date}",
+    "description": "The words used to describe on which date a page has been last updated"
+  },
+  "theme.lastUpdated.byUser": {
+    "message": " por {user}",
+    "description": "The words used to describe by who the page has been last updated"
+  },
+  "theme.lastUpdated.lastUpdatedAtBy": {
+    "message": "Última atualização{atDate}{byUser}",
+    "description": "The sentence used to display when a page has been last updated, and by who"
+  },
+  "theme.NotFound.title": {
+    "message": "Página não encontrada",
+    "description": "The title of the 404 page"
+  },
+  "theme.navbar.mobileVersionsDropdown.label": {
+    "message": "Versões",
+    "description": "The label for the navbar versions dropdown on mobile view"
+  },
+  "theme.tags.tagsListLabel": {
+    "message": "Etiquetas:",
+    "description": "The label alongside a tag list"
+  },
+  "theme.admonition.caution": {
+    "message": "cuidado",
+    "description": "The default label used for the Caution admonition (:::caution)"
+  },
+  "theme.admonition.danger": {
+    "message": "perigo",
+    "description": "The default label used for the Danger admonition (:::danger)"
+  },
+  "theme.admonition.info": {
+    "message": "informação",
+    "description": "The default label used for the Info admonition (:::info)"
+  },
+  "theme.admonition.note": {
+    "message": "observação",
+    "description": "The default label used for the Note admonition (:::note)"
+  },
+  "theme.admonition.tip": {
+    "message": "dica",
+    "description": "The default label used for the Tip admonition (:::tip)"
+  },
+  "theme.admonition.warning": {
+    "message": "aviso",
+    "description": "The default label used for the Warning admonition (:::warning)"
+  },
+  "theme.AnnouncementBar.closeButtonAriaLabel": {
+    "message": "Fechar",
+    "description": "The ARIA label for close button of announcement bar"
+  },
+  "theme.blog.sidebar.navAriaLabel": {
+    "message": "Navegação das publicações recentes do blog",
+    "description": "The ARIA label for recent posts in the blog sidebar"
+  },
+  "theme.DocSidebarItem.expandCategoryAriaLabel": {
+    "message": "Expandir a categoria '{label}'",
+    "description": "The ARIA label to expand the sidebar category"
+  },
+  "theme.DocSidebarItem.collapseCategoryAriaLabel": {
+    "message": "Recolher a categoria '{label}'",
+    "description": "The ARIA label to collapse the sidebar category"
+  },
+  "theme.IconExternalLink.ariaLabel": {
+    "message": "(opens in new tab)",
+    "description": "The ARIA label for the external link icon"
+  },
+  "theme.NavBar.navAriaLabel": {
+    "message": "Navegação principal",
+    "description": "The ARIA label for the main navigation"
+  },
+  "theme.NotFound.p1": {
+    "message": "Não foi possível encontrar o que você está procurando.",
+    "description": "The first paragraph of the 404 page"
+  },
+  "theme.NotFound.p2": {
+    "message": "Por favor, entre em contato com o dono do site que ligou você à URL original e informe que o link está quebrado.",
+    "description": "The 2nd paragraph of the 404 page"
+  },
+  "theme.navbar.mobileLanguageDropdown.label": {
+    "message": "Línguas",
+    "description": "The label for the mobile language switcher dropdown"
+  },
+  "theme.TOCCollapsible.toggleButtonLabel": {
+    "message": "Nesta página",
+    "description": "The label used by the button on the collapsible TOC component"
+  },
+  "theme.blog.post.readMore": {
+    "message": "Ler mais",
+    "description": "The label used in blog post item excerpts to link to full blog posts"
+  },
+  "theme.blog.post.readMoreLabel": {
+    "message": "Ler mais sobre {title}",
+    "description": "The ARIA label for the link to full blog posts from excerpts"
+  },
+  "theme.blog.post.readingTime.plurals": {
+    "message": "Um minuto para ler|{readingTime} min para ler",
+    "description": "Pluralized label for \"{readingTime} min read\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
+  },
+  "theme.CodeBlock.copy": {
+    "message": "Copiar",
+    "description": "The copy button label on code blocks"
+  },
+  "theme.CodeBlock.copied": {
+    "message": "Copiado",
+    "description": "The copied button label on code blocks"
+  },
+  "theme.CodeBlock.copyButtonAriaLabel": {
+    "message": "Copiar código para a área de transferência",
+    "description": "The ARIA label for copy code blocks button"
+  },
+  "theme.CodeBlock.wordWrapToggle": {
+    "message": "Alternar quebra de linha",
+    "description": "The title attribute for toggle word wrapping button of code block lines"
+  },
+  "theme.docs.breadcrumbs.home": {
+    "message": "Página Inicial",
+    "description": "The ARIA label for the home page in the breadcrumbs"
+  },
+  "theme.docs.sidebar.collapseButtonTitle": {
+    "message": "Recolher painel lateral",
+    "description": "The title attribute for collapse button of doc sidebar"
+  },
+  "theme.docs.sidebar.collapseButtonAriaLabel": {
+    "message": "Recolher painel lateral",
+    "description": "The title attribute for collapse button of doc sidebar"
+  },
+  "theme.docs.sidebar.navAriaLabel": {
+    "message": "Painel lateral de documentos",
+    "description": "The ARIA label for the sidebar navigation"
+  },
+  "theme.docs.sidebar.closeSidebarButtonAriaLabel": {
+    "message": "Fechar painel de navegação",
+    "description": "The ARIA label for close button of mobile sidebar"
+  },
+  "theme.docs.sidebar.toggleSidebarButtonAriaLabel": {
+    "message": "Alternar painel de navegação",
+    "description": "The ARIA label for hamburger menu button of mobile navigation"
+  },
+  "theme.navbar.mobileSidebarSecondaryMenu.backButtonLabel": {
+    "message": "← Voltar para o menu principal",
+    "description": "The label of the back button to return to main menu, inside the mobile navbar sidebar secondary menu (notably used to display the docs sidebar)"
+  },
+  "theme.docs.sidebar.expandButtonTitle": {
+    "message": "Expandir painel lateral",
+    "description": "The ARIA label and title attribute for expand button of doc sidebar"
+  },
+  "theme.docs.sidebar.expandButtonAriaLabel": {
+    "message": "Expandir painel lateral",
+    "description": "The ARIA label and title attribute for expand button of doc sidebar"
+  },
+  "theme.navbar.mobileDropdown.collapseButton.expandAriaLabel": {
+    "message": "Expandir a seleção",
+    "description": "The ARIA label of the button to expand the mobile dropdown navbar item"
+  },
+  "theme.navbar.mobileDropdown.collapseButton.collapseAriaLabel": {
+    "message": "Recolher a seleção",
+    "description": "The ARIA label of the button to collapse the mobile dropdown navbar item"
+  },
+  "theme.blog.post.plurals": {
+    "message": "Uma publicação|{count} publicações",
+    "description": "Pluralized label for \"{count} posts\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
+  },
+  "theme.blog.tagTitle": {
+    "message": "{nPosts} com a etiqueta \"{tagName}\"",
+    "description": "The title of the page for a blog tag"
+  },
+  "theme.blog.author.pageTitle": {
+    "message": "{authorName} - {nPosts}",
+    "description": "The title of the page for a blog author"
+  },
+  "theme.blog.authorsList.pageTitle": {
+    "message": "Autores",
+    "description": "The title of the authors page"
+  },
+  "theme.blog.authorsList.viewAll": {
+    "message": "Ver todos os autores",
+    "description": "The label of the link targeting the blog authors page"
+  },
+  "theme.blog.author.noPosts": {
+    "message": "Este autor ainda não escreveu nenhuma publicação.",
+    "description": "The text for authors with 0 blog post"
+  },
+  "theme.contentVisibility.unlistedBanner.title": {
+    "message": "Página não listada",
+    "description": "The unlisted content banner title"
+  },
+  "theme.contentVisibility.unlistedBanner.message": {
+    "message": "Esta página não está listada. Mecanismos de busca não irão indexá-la, e somente usuários que possuam o link direto poderão acessá-la",
+    "description": "The unlisted content banner message"
+  },
+  "theme.contentVisibility.draftBanner.title": {
+    "message": "Página de rascunho",
+    "description": "The draft content banner title"
+  },
+  "theme.contentVisibility.draftBanner.message": {
+    "message": "Esta página é um rascunho. Ela estará visível apenas no desenvolvimento e será excluída da compilação de produção.",
+    "description": "The draft content banner message"
+  },
+  "theme.ErrorPageContent.tryAgain": {
+    "message": "Tentar novamente",
+    "description": "The label of the button to try again rendering when the React error boundary captures an error"
+  },
+  "theme.common.skipToMainContent": {
+    "message": "Pular para o conteúdo principal",
+    "description": "The skip to content label used for accessibility, allowing to rapidly navigate to main content with keyboard tab/enter navigation"
+  },
+  "theme.tags.tagsPageTitle": {
+    "message": "Etiquetas",
+    "description": "The title of the tag list page"
+  },
+  "home.social.meta": {
+    "message": "14 pacotes no npm · MIT · código aberto"
+  },
+  "home.install.hint": {
+    "message": "CLI, Runtime, Ink, RAG — guia completo de instalação →"
+  },
+  "home.compare.title": {
+    "message": "Onde o AgentsKit se encaixa no cenário"
+  },
+  "home.compare.subtitle": {
+    "message": "Um olhar prático — não é benchmark de desempenho. Escolha o que combina com sua stack e quanto controle você precisa."
+  },
+  "home.compare.scrollHint": {
+    "message": "Esta tabela é larga — role na horizontal em telas pequenas para comparar todas as colunas."
+  },
+  "home.compare.th.dimension": {
+    "message": "Dimensão"
+  },
+  "home.compare.th.vendor": {
+    "message": "SDKs de UI presos a fornecedor ou fechados"
+  },
+  "home.compare.th.framework": {
+    "message": "Caminhos opinativos de frameworks web"
+  },
+  "home.compare.th.agentskit": {
+    "message": "AgentsKit"
+  },
+  "home.compare.row.ownership": {
+    "message": "Propriedade"
+  },
+  "home.compare.cell.ownership.vendor": {
+    "message": "Muitas vezes preso ao console de um fornecedor, recursos só hospedados ou caminhos de upgrade opacos."
+  },
+  "home.compare.cell.ownership.framework": {
+    "message": "Open source com um “caminho feliz” forte para um ecossistema específico (ex.: streaming no React)."
+  },
+  "home.compare.cell.ownership.agentskit.lead": {
+    "message": "MIT, pacotes npm modulares"
+  },
+  "home.compare.cell.ownership.agentskit.tail": {
+    "message": "— você controla o deploy; troque adaptadores sem reescrever a camada de UI."
+  },
+  "home.compare.row.ui": {
+    "message": "Modelo de UI"
+  },
+  "home.compare.cell.ui.vendor": {
+    "message": "Widgets prontos; pouco tema ou saídas limitadas."
+  },
+  "home.compare.cell.ui.framework": {
+    "message": "Convenções e exemplos centrados nos idiomas de um stack."
+  },
+  "home.compare.cell.ui.agentskit.lead": {
+    "message": "Primitivas headless"
+  },
+  "home.compare.cell.ui.agentskit.tail": {
+    "message": "mais tema opcional — use MUI, shadcn ou seu design system."
+  },
+  "home.compare.row.surfaces": {
+    "message": "Superfícies"
+  },
+  "home.compare.cell.surfaces.vendor": {
+    "message": "Em geral web primeiro; terminal ou agentes headless vêm depois."
+  },
+  "home.compare.cell.surfaces.framework": {
+    "message": "Web primeiro; profundidade fora do navegador varia."
+  },
+  "home.compare.cell.surfaces.agentskit.lead": {
+    "message": "Os mesmos contratos"
+  },
+  "home.compare.cell.surfaces.agentskit.tail": {
+    "message": "para React, Ink (terminal), CLI e"
+  },
+  "home.compare.row.extension": {
+    "message": "Extensão"
+  },
+  "home.compare.cell.extension.vendor": {
+    "message": "Níveis de plugin, APIs de extensão fechadas ou esquemas de ferramentas do fornecedor."
+  },
+  "home.compare.cell.extension.framework": {
+    "message": "Componível dentro do mundo do framework."
+  },
+  "home.compare.cell.extension.agentskit.lead": {
+    "message": "Tipos core compartilhados"
+  },
+  "home.compare.cell.extension.agentskit.mid": {
+    "message": "— adaptadores, ferramentas, memória, RAG e skills se compõem em"
+  },
+  "home.compare.note.bestLabel": {
+    "message": "Melhor encaixe:"
+  },
+  "home.compare.note.bestBody": {
+    "message": "um stack no navegador, terminal e agentes headless, com controle sobre adaptadores e ferramentas."
+  },
+  "home.compare.note.skipLabel": {
+    "message": "Pule se:"
+  },
+  "home.compare.note.skipBody": {
+    "message": "um widget de um único fornecedor basta, ou você está totalmente na trilha de IA de um único framework."
+  },
+  "home.hero.pill": {
+    "message": "Código aberto · Extensível — React, terminal e headless"
+  },
+  "home.hero.title": {
+    "message": "Um kit de agentes para JavaScript"
+  },
+  "home.hero.gradient": {
+    "message": "React · CLI · Runtime · RAG · Tools"
+  },
+  "home.hero.taglineTail": {
+    "message": "— os mesmos contratos em todo lugar"
+  },
+  "home.hero.body.lead": {
+    "message": "Adaptadores plugáveis e tipos compartilhados em"
+  },
+  "home.hero.body.mid": {
+    "message": ", UI opcional. Comece em"
+  },
+  "home.hero.body.tail1": {
+    "message": "; reutilize as mesmas ideias em"
+  },
+  "home.hero.body.tail2": {
+    "message": ", a"
+  },
+  "home.hero.body.tail3": {
+    "message": ", ou"
+  },
+  "home.hero.body.tail4": {
+    "message": "— troque de modelo em uma linha."
+  },
+  "home.hero.ctaQuickStart": {
+    "message": "Rodar o início rápido de 2 minutos"
+  },
+  "home.hero.friction": {
+    "message": "MIT · Sem cadastro · Primeira UI com streaming em menos de um minuto · pnpm, yarn ou npm"
+  },
+  "home.hero.link.startDocs": {
+    "message": "Docs: comece aqui →"
+  },
+  "home.hero.link.compare": {
+    "message": "Comparar abordagens →"
+  },
+  "home.hero.link.examples": {
+    "message": "10 exemplos ao vivo →"
+  },
+  "home.hero.link.toolDemo": {
+    "message": "Demo de chamada de ferramentas →"
+  },
+  "home.hero.link.ragDemo": {
+    "message": "Demo de chat RAG →"
+  },
+  "home.hero.link.cli": {
+    "message": "CLI →"
+  },
+  "home.hero.link.npmAll": {
+    "message": "Todos os pacotes no npm →"
+  },
+  "home.pas.title": {
+    "message": "SDKs fechados e caminhos opinativos te atrasam"
+  },
+  "home.pas.subtitle": {
+    "message": "Você ainda assume os casos extremos de streaming — a menos que sua stack seja feita para compor"
+  },
+  "home.pas.li.vendor.lead": {
+    "message": "Camadas presas a fornecedor ou fechadas"
+  },
+  "home.pas.li.vendor.tail": {
+    "message": "— cronogramas de upgrade, recursos só na nuvem e limites opacos te prendem quando você precisa de ferramentas próprias ou inferência self-hosted."
+  },
+  "home.pas.li.framework.lead": {
+    "message": "Frameworks muito opinativos"
+  },
+  "home.pas.li.framework.tail": {
+    "message": "— produtivos no caminho feliz; dolorosos quando o produto cruza web, terminal e workers headless com um contrato só."
+  },
+  "home.pas.li.streams.lead": {
+    "message": "Streams manuais frágeis"
+  },
+  "home.pas.li.streams.tail": {
+    "message": "— chunks parciais, retries e aborts ainda vazam para o UX (“digitando” travado, mensagens duplicadas, resultados de ferramenta perdidos) quando o código cola diverge por superfície."
+  },
+  "home.pas.solve.prefix": {
+    "message": "AgentsKit é"
+  },
+  "home.pas.solve.license": {
+    "message": "MIT e pensado para extensão"
+  },
+  "home.pas.solve.suffix": {
+    "message": ": adaptadores, ferramentas, memória e RAG ficam em primitivas compartilhadas para você manter controle e trocar peças sem reescrever a narrativa do produto."
+  },
+  "home.codePair.title": {
+    "message": "De ~50 linhas de cola para ~10 de produto"
+  },
+  "home.codePair.subtitle": {
+    "message": "Menos código para revisar, testar e lamentar quando a API mudar no mês que vem"
+  },
+  "home.codePair.beforeLabel": {
+    "message": "Antes — ~50 linhas"
+  },
+  "home.codePair.afterLabel": {
+    "message": "Depois — 10 linhas com AgentsKit"
+  },
+  "home.ecosystem.lead": {
+    "message": "Uma arquitetura, todas as superfícies"
+  },
+  "home.ecosystem.copy.lead": {
+    "message": "Vá ao guia que precisa — cada link corresponde a um pacote"
+  },
+  "home.ecosystem.copy.tail": {
+    "message": "no npm."
+  },
+  "home.providers.lead": {
+    "message": "Provedores de modelo — troque em uma linha"
+  },
+  "home.features.sectionTitle": {
+    "message": "Por que AgentsKit?"
+  },
+  "home.features.sectionSubtitle": {
+    "message": "Tudo que você precisa, nada que não — a mesma história da UI aos agentes headless"
+  },
+  "home.examples.sectionTitle": {
+    "message": "10 exemplos interativos"
+  },
+  "home.examples.sectionSubtitle": {
+    "message": "Cada exemplo é um chat — porque é isso que o AgentsKit faz"
+  },
+  "home.cta.title": {
+    "message": "Veja streaming funcionar em menos de um minuto"
+  },
+  "home.cta.lead": {
+    "message": "Rode o início rápido e depois empilhe ferramentas, memória e RAG — o modelo mental não muda."
+  },
+  "home.cta.friction": {
+    "message": "MIT · Sem cadastro · Código aberto — use, faça fork ou diga o que falta"
+  },
+  "home.cta.button": {
+    "message": "Rodar o início rápido de 2 minutos"
+  },
+  "home.cta.link.examples": {
+    "message": "Exemplos ao vivo →"
+  },
+  "home.cta.link.agents": {
+    "message": "Prompt para agentes de código →"
+  },
+  "home.cta.link.star": {
+    "message": "Estrele no GitHub →"
+  },
+  "home.young.title": {
+    "message": "Projeto jovem, evoluindo rápido"
+  },
+  "home.young.copy": {
+    "message": "AgentsKit está em estágio inicial e crescendo — experimente, abra uma issue se algo quebrar e ajude a moldar o roadmap."
+  },
+  "home.young.link.issues": {
+    "message": "Issues →"
+  },
+  "home.young.link.discussions": {
+    "message": "Discussões →"
+  },
+  "home.young.link.contribute": {
+    "message": "Contribuir no GitHub →"
+  }
+}

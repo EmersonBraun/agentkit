@@ -1,0 +1,31 @@
+---
+sidebar_position: 6
+---
+
+import { SupportBot } from '@site/src/examples/SupportBot'
+
+# 客户支持机器人
+
+快捷回复、输入中指示、升级流程。用 AgentsKit 无头组件构建生产级支持体验。
+
+<SupportBot />
+
+## 配合 AgentsKit
+
+```tsx
+import { useChat, ChatContainer, Message, InputBar, ThinkingIndicator } from '@agentskit/react'
+
+function SupportChat() {
+  const chat = useChat({
+    adapter: myAdapter,
+    initialMessages: [{ id: '1', role: 'assistant', content: 'How can I help?', status: 'complete', createdAt: new Date() }],
+  })
+  return (
+    <ChatContainer>
+      {chat.messages.map(msg => <Message key={msg.id} message={msg} />)}
+      <ThinkingIndicator visible={chat.status === 'streaming'} label="Typing..." />
+      <InputBar chat={chat} />
+    </ChatContainer>
+  )
+}
+```

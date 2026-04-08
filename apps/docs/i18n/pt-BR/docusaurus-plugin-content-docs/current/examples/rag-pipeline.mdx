@@ -1,0 +1,65 @@
+---
+sidebar_position: 14
+---
+
+# Pipeline RAG
+
+Ingerir documentos, embedá-los e recuperar contexto relevante durante o chat. Usa `@agentskit/rag` com qualquer embedder e armazenamento vetorial.
+
+## Configuração
+
+```typescript
+import { createRAG } from '@agentskit/rag'
+import { openaiEmbedder } from '@agentskit/adapters'
+
+const rag = createRAG({
+  embed: openaiEmbedder({ apiKey: process.env.OPENAI_API_KEY! }),
+  store: yourVectorStore,  // SQLite, Redis, or in-memory
+  chunkSize: 512,
+  chunkOverlap: 50,
+})
+```
+
+## Ingerir documentos
+
+```typescript
+await rag.ingest([
+  { id: 'readme', content: readFileSync('README.md', 'utf-8'), source: 'README.md' },
+  { id: 'guide', content: readFileSync('docs/guide.md', 'utf-8'), source: 'guide.md' },
+])
+```
+
+## Buscar diretamente
+
+```typescript
+const results = await rag.search('how to configure tools', { topK: 3 })
+results.forEach(doc => {
+  console.log(`[${doc.source}] ${doc.content.slice(0, 100)}...`)
+})
+```
+
+## Usar com chat
+
+`createRAG` devolve um `Retriever` — passe-o direto a `useChat` ou ao runtime:
+
+```tsx
+import { useChat } from '@agentskit/react'
+
+function RAGChat() {
+  const chat = useChat({
+    adapter: yourAdapter,
+    retriever: rag,  // retrieved context auto-injected into system prompt
+  })
+  // ... render chat UI
+}
+```
+
+## Fragmentação customizada
+
+```typescript
+const rag = createRAG({
+  embed: yourEmbedder,
+  store: yourStore,
+  split: (text) => text.split('\n\n'),  // paragraph-based chunking
+})
+```

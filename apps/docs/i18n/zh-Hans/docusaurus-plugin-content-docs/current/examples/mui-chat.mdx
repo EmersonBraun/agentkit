@@ -1,0 +1,39 @@
+---
+sidebar_position: 12
+---
+
+import { MuiChat } from '@site/src/examples/MuiChat'
+
+# MUI 聊天
+
+使用 Material UI 组件样式化的 AgentsKit `useChat` 钩子。本演示复刻 MUI 外观——真实应用中应使用实际 MUI 导入。
+
+<MuiChat />
+
+## 使用真实 MUI
+
+```tsx
+import { useChat } from '@agentskit/react'
+import { Paper, TextField, Button, List, ListItem, Avatar, Typography } from '@mui/material'
+import { anthropic } from '@agentskit/adapters'
+
+function MuiChat() {
+  const chat = useChat({ adapter: anthropic({ apiKey: 'key', model: 'claude-sonnet-4-6' }) })
+  return (
+    <Paper elevation={3} sx={{ height: 500, display: 'flex', flexDirection: 'column' }}>
+      <List sx={{ flex: 1, overflow: 'auto', p: 2 }}>
+        {chat.messages.map(msg => (
+          <ListItem key={msg.id} sx={{ alignItems: 'flex-start' }}>
+            <Avatar sx={{ mr: 1 }}>{msg.role === 'user' ? 'U' : 'A'}</Avatar>
+            <Typography>{msg.content}</Typography>
+          </ListItem>
+        ))}
+      </List>
+      <form onSubmit={e => { e.preventDefault(); chat.send(chat.input) }} style={{ display: 'flex', padding: 16, gap: 8 }}>
+        <TextField fullWidth value={chat.input} onChange={e => chat.setInput(e.target.value)} label="Message" />
+        <Button variant="contained" type="submit">Send</Button>
+      </form>
+    </Paper>
+  )
+}
+```

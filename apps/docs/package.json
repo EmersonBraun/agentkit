@@ -1,11 +1,12 @@
 {
   "name": "@agentskit/docs",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
+    "docs:api": "typedoc --options typedoc.json",
     "start": "docusaurus start",
-    "build": "docusaurus build",
+    "build": "pnpm run docs:api && docusaurus build",
     "serve": "docusaurus serve",
     "clear": "docusaurus clear",
     "lint": "tsc --noEmit"
@@ -15,6 +16,8 @@
     "@agentskit/react": "workspace:*",
     "@docusaurus/core": "^3.7.0",
     "@docusaurus/preset-classic": "^3.7.0",
+    "@docusaurus/theme-common": "^3.7.0",
+    "clsx": "^2.1.1",
     "@mdx-js/react": "^3.0.0",
     "prism-react-renderer": "^2.4.0",
     "react": "^19.2.4",
@@ -27,6 +30,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "gh-pages": "^6.3.0",
+    "typedoc": "0.28.5",
     "typescript": "~6.0.2"
   },
   "browserslist": {
