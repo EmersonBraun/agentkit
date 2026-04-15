@@ -38,42 +38,64 @@ export function ContributorWall({ compact = false }: { compact?: boolean }) {
         </div>
       </div>
 
-      {contribs.length > 0 && (
-        <div className="mb-5 flex flex-wrap gap-1.5">
-          {contribs.slice(0, maxShow).map(c => (
-            <a
-              key={c.login}
-              href={c.html_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              title={c.login}
-              className="inline-block overflow-hidden rounded-full border border-ak-border transition hover:border-ak-blue"
-              style={{ width: avatarSize, height: avatarSize }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={c.avatar_url}
-                alt={c.login}
-                width={avatarSize}
-                height={avatarSize}
-                loading="lazy"
-                style={{ display: 'block' }}
-              />
-            </a>
-          ))}
-          {contribs.length > maxShow && (
-            <a
-              href={`${REPO_URL}/graphs/contributors`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center rounded-full border border-ak-border bg-ak-midnight font-mono text-xs text-ak-graphite hover:border-ak-blue hover:text-ak-blue"
-              style={{ width: avatarSize, height: avatarSize }}
-            >
-              +{contribs.length - maxShow}
-            </a>
-          )}
-        </div>
-      )}
+      <div
+        className="mb-5 flex max-h-[200px] flex-wrap content-start gap-1.5 overflow-y-auto pr-1"
+        style={{ scrollbarWidth: 'thin' }}
+      >
+        {contribs.length === 0 ? (
+          <a
+            href={`${REPO_URL}/graphs/contributors`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full rounded-md border border-ak-border bg-ak-midnight p-2"
+            title="All AgentsKit contributors"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://contrib.rocks/image?repo=EmersonBraun/agentskit"
+              alt="AgentsKit contributors"
+              loading="lazy"
+              style={{ display: 'block', maxWidth: '100%', height: 'auto' }}
+            />
+          </a>
+        ) : (
+          <>
+            {contribs.slice(0, maxShow).map(c => (
+              <a
+                key={c.login}
+                href={c.html_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={c.login}
+                className="inline-block overflow-hidden rounded-full border border-ak-border transition hover:border-ak-blue"
+                style={{ width: avatarSize, height: avatarSize, flex: '0 0 auto' }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={c.avatar_url}
+                  alt={c.login}
+                  width={avatarSize}
+                  height={avatarSize}
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                  style={{ display: 'block' }}
+                />
+              </a>
+            ))}
+            {contribs.length > maxShow && (
+              <a
+                href={`${REPO_URL}/graphs/contributors`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center rounded-full border border-ak-border bg-ak-midnight font-mono text-xs text-ak-graphite hover:border-ak-blue hover:text-ak-blue"
+                style={{ width: avatarSize, height: avatarSize, flex: '0 0 auto' }}
+              >
+                +{contribs.length - maxShow}
+              </a>
+            )}
+          </>
+        )}
+      </div>
 
       <div className="flex flex-wrap gap-2 font-mono text-xs">
         <a href={GOOD_FIRST_URL} className="rounded-md bg-ak-foam px-4 py-2 font-semibold text-ak-midnight hover:bg-white" target="_blank" rel="noopener noreferrer">

@@ -29,6 +29,53 @@ test(ink): cover keyboard navigation across message list
 
 Subject ≤ 72 chars, imperative mood ("add", not "added"). Body wraps at 100.
 
+## Enforcement (planned — good-first-issue available)
+
+Today, commit-message discipline is review-time: maintainers will flag a non-conventional commit and ask you to amend. We want this **automated** — and wiring it up is a perfect first PR.
+
+### Target setup
+
+- **`@commitlint/cli` + `@commitlint/config-conventional`** — validates the message
+- **`commit-msg` git hook** (via husky or lefthook) — blocks invalid commits locally
+- **CI check** — `commitlint` step in `.github/workflows/ci.yml` so bad commits fail the PR
+
+### What a complete PR looks like
+
+1. Add `commitlint.config.cjs`:
+
+   ```js
+   module.exports = { extends: ['@commitlint/config-conventional'] }
+   ```
+
+2. Add devDeps at the **workspace root** `package.json`:
+
+   ```json
+   "@commitlint/cli": "^19.0.0",
+   "@commitlint/config-conventional": "^19.0.0",
+   "husky": "^9.0.0"
+   ```
+
+3. Add `prepare` script + `commit-msg` hook:
+
+   ```bash
+   pnpm exec husky init
+   echo 'pnpm exec commitlint --edit "$1"' > .husky/commit-msg
+   ```
+
+4. Add CI step:
+
+   ```yaml
+   - run: pnpm exec commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.sha }}
+   ```
+
+5. Update this page to reflect reality.
+
+If you want to claim it, comment on issue [`docs(contribute): wire commitlint + husky`](https://github.com/EmersonBraun/agentskit/issues?q=commitlint) (or open one).
+
+### Until then
+
+Eyeball your commit message against the types + examples above. `git commit --amend` is your friend.
+
 ## Changesets (for publishable packages)
 
 If your PR changes a package that ships to npm, add a changeset:

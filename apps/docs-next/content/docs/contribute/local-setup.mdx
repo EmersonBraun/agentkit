@@ -25,8 +25,30 @@ pnpm install
 pnpm build            # build all packages (turborepo-cached)
 pnpm test             # run every package's vitest suite
 pnpm lint             # tsc --noEmit across the workspace
-pnpm dev              # watch mode — rebuilds on save
+pnpm dev              # watch mode — rebuilds packages on save
 ```
+
+## Hot reload
+
+`pnpm dev` runs tsup `--watch` across every package in parallel. When you save a source file:
+
+1. The changed package rebuilds in < 1s (incremental).
+2. Any **app** consuming it (docs-next, example-react, example-ink) hot-reloads automatically — Next.js HMR for `docs-next` / `example-react`, tsx watch for `example-ink`.
+3. No manual rebuild, no restart.
+
+**Tip:** run two terminals:
+
+```bash
+# terminal 1 — rebuild packages on save
+pnpm dev
+
+# terminal 2 — run the app you're iterating on
+pnpm --filter @agentskit/example-react dev
+# or
+pnpm --filter @agentskit/docs-next dev
+```
+
+Edit `packages/react/src/useChat.ts` → example-react re-renders in ~1s. No config needed.
 
 ## Single package
 
