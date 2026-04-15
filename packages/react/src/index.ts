@@ -2,7 +2,6 @@ export {
   createChatController,
   createInMemoryMemory,
   createLocalStorageMemory,
-  createFileMemory,
   createStaticRetriever,
   formatRetrievedDocuments,
 } from '@agentskit/core'

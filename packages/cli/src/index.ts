@@ -1,4 +1,6 @@
 export { createCli } from './commands'
+export { loadConfig } from './config'
+export type { AgentsKitConfig, LoadConfigOptions } from './config'
 export { ChatApp, renderChatHeader } from './chat'
 export { writeStarterProject } from './init'
 export { resolveChatProvider } from './providers'

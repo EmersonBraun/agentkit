@@ -56,29 +56,3 @@ export function createLocalStorageMemory(key: string): ChatMemory {
     },
   }
 }
-
-export function createFileMemory(path: string): ChatMemory {
-  return {
-    async load() {
-      try {
-        const fs = await import('node:fs/promises')
-        const raw = await fs.readFile(path, 'utf8')
-        return deserializeMessages(JSON.parse(raw) as MemoryRecord)
-      } catch {
-        return []
-      }
-    },
-    async save(messages) {
-      const fs = await import('node:fs/promises')
-      await fs.writeFile(path, JSON.stringify(serializeMessages(messages), null, 2), 'utf8')
-    },
-    async clear() {
-      try {
-        const fs = await import('node:fs/promises')
-        await fs.unlink(path)
-      } catch {
-        // Ignore missing files.
-      }
-    },
-  }
-}

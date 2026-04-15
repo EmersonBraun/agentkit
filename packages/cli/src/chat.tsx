@@ -4,7 +4,7 @@ import { ChatContainer, InputBar, Message, ThinkingIndicator, ToolCallView, useC
 import { resolveChatProvider } from './providers'
 import { resolveTools, resolveMemory, skillRegistry } from './resolve'
 
-import type { AgentsKitConfig } from '@agentskit/core'
+import type { AgentsKitConfig } from './config'
 
 export interface ChatCommandOptions {
   provider: string

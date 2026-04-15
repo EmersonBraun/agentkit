@@ -34,7 +34,7 @@
     "@changesets/cli": "2.30.0",
     "@size-limit/file": "^12.1.0",
     "size-limit": "^12.1.0",
-    "turbo": "2.9.5",
+    "turbo": "2.9.6",
     "typescript": "^6.0.2",
     "vitest": "^4.1.4"
   }

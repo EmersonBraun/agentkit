@@ -56,19 +56,26 @@ export interface LoadConfigOptions {
   cwd?: string
 }
 
+/**
+ * Load an AgentsKit config file. Node-only — uses fs/promises.
+ *
+ * Tries in order:
+ *   1. `.agentskit.config.ts` (imported as a module)
+ *   2. `.agentskit.config.json`
+ *   3. `"agentskit"` field in `package.json`
+ *
+ * Returns `undefined` if none found.
+ */
 export async function loadConfig(options?: LoadConfigOptions): Promise<AgentsKitConfig | undefined> {
   const cwd = resolve(options?.cwd ?? process.cwd())
 
-  // 1. Try .agentskit.config.ts
   const tsPath = join(cwd, '.agentskit.config.ts')
   const tsConfig = await loadTsConfig(tsPath)
   if (tsConfig) return tsConfig
 
-  // 2. Try .agentskit.config.json
   const jsonPath = join(cwd, '.agentskit.config.json')
   const jsonConfig = await loadJsonConfig(jsonPath)
   if (jsonConfig) return jsonConfig
 
-  // 3. Try package.json "agentskit" field
   return await loadPackageJsonConfig(cwd)
 }

@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, Box, Text } from 'ink'
 import { ChatContainer, InputBar, Message, ThinkingIndicator, ToolCallView, useChat } from '@agentskit/ink'
-import { createFileMemory } from '@agentskit/core'
+import { fileChatMemory } from '@agentskit/memory'
 import type { AdapterFactory, ToolDefinition } from '@agentskit/core'
 
 const getTimeTool: ToolDefinition = {
@@ -47,7 +47,7 @@ function createDemoAdapter(): AdapterFactory {
   }
 }
 
-const memory = createFileMemory('.example-ink-history.json')
+const memory = fileChatMemory('.example-ink-history.json')
 
 function App() {
   const chat = useChat({
