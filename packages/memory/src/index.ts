@@ -1,3 +1,5 @@
+export { fileChatMemory } from './file-chat'
+
 export { sqliteChatMemory } from './sqlite'
 export type { SqliteChatMemoryConfig } from './sqlite'
 

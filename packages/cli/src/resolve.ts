@@ -1,8 +1,7 @@
-import { createFileMemory } from '@agentskit/core'
 import type { ChatMemory, SkillDefinition, ToolDefinition } from '@agentskit/core'
 import { webSearch, filesystem, shell } from '@agentskit/tools'
 import { researcher, coder, planner, critic, summarizer, composeSkills } from '@agentskit/skills'
-import { sqliteChatMemory } from '@agentskit/memory'
+import { fileChatMemory, sqliteChatMemory } from '@agentskit/memory'
 
 export const skillRegistry: Record<string, SkillDefinition> = {
   researcher,
@@ -61,6 +60,6 @@ export function resolveMemory(backend: string | undefined, memoryPath: string): 
       return sqliteChatMemory({ path: memoryPath.replace(/\.json$/, '.db') })
     case 'file':
     default:
-      return createFileMemory(memoryPath)
+      return fileChatMemory(memoryPath)
   }
 }

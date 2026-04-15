@@ -1,5 +1,5 @@
 export { createChatController } from './controller'
-export { createInMemoryMemory, createLocalStorageMemory, createFileMemory, serializeMessages, deserializeMessages } from './memory'
+export { createInMemoryMemory, createLocalStorageMemory, serializeMessages, deserializeMessages } from './memory'
 export { createStaticRetriever, formatRetrievedDocuments } from './rag'
 export {
   generateId,
@@ -51,5 +51,3 @@ export type {
   EvalResult,
   EvalSuite,
 } from './types'
-export { loadConfig } from "./config"
-export type { AgentsKitConfig, LoadConfigOptions } from "./config"
