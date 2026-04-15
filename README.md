@@ -1,29 +1,32 @@
+<div align="center">
+
 # AgentsKit
 
-**The complete toolkit for building AI agents in JavaScript.** Chat UIs, autonomous agents, tools, skills, memory, RAG, and observability — from prototype to production.
+**The agent toolkit JavaScript actually deserves.**
 
-[![npm version](https://img.shields.io/npm/v/@agentskit/react)](https://www.npmjs.com/package/@agentskit/react)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@agentskit/react)](https://bundlephobia.com/package/@agentskit/react)
-[![license](https://img.shields.io/npm/l/@agentskit/react)](https://github.com/EmersonBraun/agentskit/blob/main/LICENSE)
+A 10KB sacred core. Twelve plug-and-play packages. Zero lock-in. Six formal contracts that make every adapter, tool, skill, memory, retriever, and runtime substitutable.
 
-[Documentation](https://emersonbraun.github.io/agentskit/) | [npm](https://www.npmjs.com/package/@agentskit/react) | [GitHub](https://github.com/EmersonBraun/agentskit)
+[![npm](https://img.shields.io/npm/v/@agentskit/react?label=npm)](https://www.npmjs.com/package/@agentskit/react)
+[![bundle](https://img.shields.io/bundlephobia/minzip/@agentskit/react?label=react%20bundle)](https://bundlephobia.com/package/@agentskit/react)
+[![license](https://img.shields.io/npm/l/@agentskit/react?label=license)](./LICENSE)
 
-## Why AgentsKit?
+[**Documentation**](https://agentskit.io) · [**Manifesto**](./MANIFESTO.md) · [**Origin**](./ORIGIN.md) · [**Architecture**](./docs/architecture/adrs)
 
-- **Ship in minutes, not days.** A streaming chat UI in 10 lines. An autonomous agent in 5. No boilerplate.
-- **Swap providers in one line.** OpenAI, Anthropic, Gemini, Ollama, or any LLM — change one import, everything else stays the same.
-- **Agent-first architecture.** Not just chat — full ReAct loops, tool execution, multi-agent delegation, memory, RAG, and eval built in.
-- **Zero lock-in.** Every package is independently installable. Use only what you need. The entire API fits in 2K tokens — paste it into any LLM and start building.
+</div>
 
-| | AgentsKit | Vercel AI SDK | assistant-ui |
-|---|---------|--------------|-------------|
-| **Setup** | 10 lines to working chat | Headless, needs UI work | 50+ components to learn |
-| **Agents** | ReAct loop, tools, skills, delegation | No runtime | No runtime |
-| **Providers** | 10+ adapters, swap in 1 line | Route-handler based | BYO backend |
-| **Agent-friendly** | Entire API in 2K tokens | Large docs surface | Large docs surface |
-| **Bundle** | Tree-shakeable, split packages | ~30KB | ~80KB |
+---
 
-## Quick Start: Chat UI (React)
+## Why this exists
+
+Building a real AI agent in JavaScript today means cobbling together five libraries that don't fit. Vercel AI SDK is a beautiful chat SDK with no runtime. LangChain.js drags in 200MB and leaks abstractions at every layer. MCP solves tool interop and nothing else. assistant-ui has 53 components and no opinion about how to compose them.
+
+AgentsKit is the missing **kit**: small, contracted, composable. Six packages you can use alone, twelve that combine without ceremony. You stay in plain JavaScript the entire time.
+
+> Read the [origin story](./ORIGIN.md) for the long version. Read the [manifesto](./MANIFESTO.md) for the principles we hold ourselves to.
+
+---
+
+## Quick start — chat in 10 lines
 
 ```bash
 npm install @agentskit/react @agentskit/adapters
@@ -34,26 +37,32 @@ import { useChat, ChatContainer, Message, InputBar } from '@agentskit/react'
 import { anthropic } from '@agentskit/adapters'
 import '@agentskit/react/theme'
 
-function Chat() {
-  const chat = useChat({
-    adapter: anthropic({ apiKey: process.env.ANTHROPIC_API_KEY!, model: 'claude-sonnet-4-6' }),
-  })
+export default function Chat() {
+  const chat = useChat({ adapter: anthropic({ apiKey: KEY, model: 'claude-sonnet-4-6' }) })
   return (
     <ChatContainer>
-      {chat.messages.map(msg => <Message key={msg.id} message={msg} />)}
+      {chat.messages.map(m => <Message key={m.id} message={m} />)}
       <InputBar chat={chat} />
     </ChatContainer>
   )
 }
 ```
 
-You get streaming, tool calls, memory, and a default theme out of the box.
+Streaming, tool calls, default styling, abortable. No setup. No boilerplate.
 
-## Quick Start: Autonomous Agent (No UI)
+---
 
-```bash
-npm install @agentskit/runtime @agentskit/adapters @agentskit/tools
+## Before and after
+
+**Before** — the typical "JS agent" stack:
+
+```ts
+// Pick your favorite: LangChain, raw fetch, Vercel AI SDK + custom runtime,
+// MCP client + custom UI, manual ReAct loop, hand-rolled streaming...
+// Then wire memory. Then wire tools. Then wire delegation. Then debug.
 ```
+
+**After** — AgentsKit:
 
 ```ts
 import { createRuntime } from '@agentskit/runtime'
@@ -61,54 +70,76 @@ import { openai } from '@agentskit/adapters'
 import { webSearch, filesystem } from '@agentskit/tools'
 
 const runtime = createRuntime({
-  adapter: openai({ apiKey: process.env.OPENAI_API_KEY!, model: 'gpt-4o' }),
+  adapter: openai({ apiKey: KEY, model: 'gpt-4o' }),
   tools: [webSearch(), ...filesystem({ basePath: './workspace' })],
 })
 
 const result = await runtime.run('Research the top 3 AI frameworks and save a summary')
-console.log(result.content)   // final answer
-console.log(result.steps)     // how many think→act cycles
-console.log(result.toolCalls) // every tool call made
 ```
 
-## Quick Start: Terminal Chat
+That's an autonomous agent. With a tool registry. With memory. With observability hooks. Two imports, six lines.
 
-```bash
-npm install -g @agentskit/cli
-agentskit chat --provider ollama --model llama3.1
-agentskit chat --provider openai --tools web_search,shell --skill researcher
-```
-
-## Swap providers in one line
+Swap providers in **one** line — every other line stays the same:
 
 ```ts
 import { anthropic, openai, gemini, ollama, deepseek, grok } from '@agentskit/adapters'
 
 useChat({ adapter: anthropic({ apiKey, model: 'claude-sonnet-4-6' }) })
 useChat({ adapter: openai({ apiKey, model: 'gpt-4o' }) })
-useChat({ adapter: gemini({ apiKey, model: 'gemini-2.5-flash' }) })
-useChat({ adapter: ollama({ model: 'llama3.1' }) })  // local, no API key
+useChat({ adapter: ollama({ model: 'llama3.1' }) })          // local, no key
 ```
 
-## The Ecosystem
+---
 
-| Package | What it does | When to use it |
-|---------|-------------|----------------|
-| [`@agentskit/core`](packages/core) | Types, contracts, shared primitives | You're building a framework on top of AgentsKit |
-| [`@agentskit/react`](packages/react) | React hooks + headless UI components | Building chat UIs in the browser |
-| [`@agentskit/ink`](packages/ink) | Terminal UI components (Ink) | Building chat UIs in the terminal |
-| [`@agentskit/adapters`](packages/adapters) | 10+ LLM provider adapters + embedders | Connecting to any LLM |
-| [`@agentskit/cli`](packages/cli) | CLI commands (chat, init, run) | Quick prototyping, scripting |
-| [`@agentskit/runtime`](packages/runtime) | Autonomous agent runtime (ReAct loop) | Running agents without UI |
-| [`@agentskit/tools`](packages/tools) | Web search, filesystem, shell tools | Giving agents real-world capabilities |
-| [`@agentskit/skills`](packages/skills) | Pre-built behavioral prompts | Making agents good at specific tasks |
-| [`@agentskit/memory`](packages/memory) | SQLite, Redis, vector storage | Persisting conversations and knowledge |
-| [`@agentskit/rag`](packages/rag) | Retrieval-augmented generation | Adding knowledge to agents |
-| [`@agentskit/observability`](packages/observability) | Console, LangSmith, OpenTelemetry | Debugging and monitoring agents |
-| [`@agentskit/sandbox`](packages/sandbox) | Secure code execution (E2B) | Letting agents run code safely |
-| [`@agentskit/eval`](packages/eval) | Agent evaluation and benchmarking | Measuring agent quality in CI/CD |
+## How AgentsKit compares
 
-## Multi-Agent Delegation
+| | AgentsKit | Vercel AI SDK | LangChain.js | assistant-ui |
+|---|---|---|---|---|
+| **Core size** | 10KB gzip, zero deps | ~30KB | hundreds of MB transitively | n/a (UI only) |
+| **Agent runtime** | First-class (ReAct, tools, skills, delegation, memory, RAG) | None | Yes, but heavy | None |
+| **Provider swap** | One line | Route-handler-shaped | Per-class wiring | BYO backend |
+| **UI surfaces** | React + Ink + headless | React | None | React |
+| **Formal contracts** | Six versioned ADRs | Implicit | Implicit | Implicit |
+| **Edge-ready** | Yes (10KB core, no Node-only deps) | Mostly | No | n/a |
+
+### When you should NOT use AgentsKit
+
+We are honest about this:
+
+- **You only need a single OpenAI streaming call.** Use the `openai` SDK directly — AgentsKit is overkill.
+- **You're shipping a chat SDK to consumers, not an agent.** Vercel AI SDK is purpose-built for that and excellent.
+- **You need Python.** AgentsKit is JavaScript-first by design. Use a Python framework.
+- **You require enterprise-grade observability today.** AgentsKit's observability layer is good but young; LangSmith/Arize/Helicone are more mature integrations right now.
+- **You can't accept a v0.x semver story.** We're pre-1.0 with formal contracts already locked, but real production teams may want a stable v1.0.0 first.
+
+---
+
+## The ecosystem
+
+Pick what you need. Every package works alone. Combinations work without glue code.
+
+| Package | What it does | Stability |
+|---|---|---|
+| [`@agentskit/core`](packages/core) | Types, contracts, primitives | stable |
+| [`@agentskit/adapters`](packages/adapters) | Provider adapters (OpenAI, Anthropic, Gemini, Ollama, DeepSeek, Grok, …) | stable |
+| [`@agentskit/react`](packages/react) | React hooks + headless UI | stable |
+| [`@agentskit/ink`](packages/ink) | Terminal UI (Ink) components | stable |
+| [`@agentskit/cli`](packages/cli) | CLI: chat, init, run | stable |
+| [`@agentskit/runtime`](packages/runtime) | Autonomous agent runtime (ReAct loop, delegation) | stable |
+| [`@agentskit/tools`](packages/tools) | Web search, filesystem, shell | stable |
+| [`@agentskit/skills`](packages/skills) | Pre-built behavioral prompts | stable |
+| [`@agentskit/memory`](packages/memory) | Chat + vector memory (SQLite, Redis, file) | stable |
+| [`@agentskit/rag`](packages/rag) | Plug-and-play RAG | stable |
+| [`@agentskit/observability`](packages/observability) | Console, LangSmith, OpenTelemetry | beta |
+| [`@agentskit/sandbox`](packages/sandbox) | Secure code execution | beta |
+| [`@agentskit/eval`](packages/eval) | Agent evaluation and benchmarking | beta |
+| [`@agentskit/templates`](packages/templates) | Authoring toolkit for skills/tools | stable |
+
+The whole catalog is one `pnpm dlx agentskit init` away.
+
+---
+
+## Multi-agent delegation
 
 ```ts
 import { planner, researcher, coder } from '@agentskit/skills'
@@ -117,17 +148,62 @@ const result = await runtime.run('Build a landing page about quantum computing',
   skill: planner,
   delegates: {
     researcher: { skill: researcher, tools: [webSearch()], maxSteps: 3 },
-    coder: { skill: coder, tools: [...filesystem({ basePath: './src' })], maxSteps: 8 },
+    coder:      { skill: coder, tools: [...filesystem({ basePath: './src' })], maxSteps: 8 },
   },
 })
 ```
 
-The planner breaks the task into subtasks, delegates research and coding to specialist agents, and assembles the final result.
+The planner decomposes the task. The researcher and coder execute their parts. Delegation happens through a tool the model already knows how to call — no special syntax to learn.
 
-## For AI Agents
+---
 
-The entire API fits in **under 2,000 tokens**. See the [agent-friendly reference](https://emersonbraun.github.io/agentskit/docs/getting-started/for-ai-agents) — paste it into your LLM context and start generating.
+## Terminal chat (Ink)
+
+```bash
+npm install -g @agentskit/cli
+agentskit chat --provider ollama --model llama3.1
+agentskit chat --provider openai --tools web_search,shell --skill researcher
+```
+
+The same `useChat` mental model. Real keyboard input. Real streaming. Real tools.
+
+---
+
+## For AI agents reading this
+
+The full public API fits in **under 2,000 tokens**. Paste the [agent-friendly reference](https://agentskit.io/docs/getting-started/for-ai-agents) into your LLM context and start generating real AgentsKit code immediately. We treat agents as first-class consumers of our docs.
+
+---
+
+## Architecture and contracts
+
+Six ADRs define the substrate:
+
+| ADR | Contract |
+|---|---|
+| [0001](./docs/architecture/adrs/0001-adapter-contract.md) | Adapter — LLM provider seam |
+| [0002](./docs/architecture/adrs/0002-tool-contract.md) | Tool — function the model calls |
+| [0003](./docs/architecture/adrs/0003-memory-contract.md) | Memory — chat history + vector store + embed |
+| [0004](./docs/architecture/adrs/0004-retriever-contract.md) | Retriever — context fetching |
+| [0005](./docs/architecture/adrs/0005-skill-contract.md) | Skill — declarative persona |
+| [0006](./docs/architecture/adrs/0006-runtime-contract.md) | Runtime — the loop that composes them all |
+
+Read these once and you can predict how every package behaves.
+
+---
+
+## Status
+
+We are pre-1.0. The substrate (`@agentskit/core`, the six contracts, the bundle/coverage CI gates) is locked. New packages and adapters land continuously. See the [Phase 0 PRD](https://github.com/EmersonBraun/agentskit/issues/211) for the current foundation work and the [Master PRD](https://github.com/EmersonBraun/agentskit/issues/113) for what comes next.
+
+---
+
+## Contributing
+
+Read the [Manifesto](./MANIFESTO.md) first. Then [`CONTRIBUTING.md`](./CONTRIBUTING.md). Open an [RFC](https://github.com/EmersonBraun/agentskit/issues/new?template=rfc.yml) for anything that touches a contract.
+
+---
 
 ## License
 
-MIT
+MIT — see [`LICENSE`](./LICENSE).
