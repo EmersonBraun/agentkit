@@ -106,6 +106,14 @@ export async function generateMetadata(props: {
 
   const slugPath = params.slug?.join('/') ?? ''
   const canonical = slugPath ? `${SITE}/docs/${slugPath}` : `${SITE}/docs`
+  const section = params.slug?.[0] ?? ''
+  const ogUrl = `${SITE}/api/og?title=${encodeURIComponent(page.data.title)}&description=${encodeURIComponent(page.data.description ?? '')}${section ? `&section=${encodeURIComponent(section)}` : ''}`
+  const ogImage = {
+    url: ogUrl,
+    width: 1200,
+    height: 630,
+    alt: page.data.title,
+  }
 
   return {
     title: page.data.title,
@@ -116,11 +124,13 @@ export async function generateMetadata(props: {
       description: page.data.description,
       url: canonical,
       type: 'article',
+      images: [ogImage],
     },
     twitter: {
       card: 'summary_large_image',
       title: page.data.title,
       description: page.data.description,
+      images: [ogUrl],
     },
   }
 }

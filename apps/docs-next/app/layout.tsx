@@ -35,6 +35,11 @@ export const metadata = {
   alternates: {
     canonical: SITE_URL,
   },
+  verification: {
+    // Fill after verifying site in Google Search Console + Bing Webmaster:
+    // google: 'YOUR_GSC_META_CONTENT',
+    // other: { 'msvalidate.01': 'YOUR_BING_CONTENT' },
+  },
   robots: {
     index: true,
     follow: true,
