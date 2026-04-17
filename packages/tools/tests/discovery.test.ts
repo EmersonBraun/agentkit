@@ -4,10 +4,11 @@ import { listTools } from '../src/discovery'
 describe('listTools', () => {
   it('returns metadata for all built-in tools', () => {
     const tools = listTools()
-    expect(tools.length).toBe(5)
+    expect(tools.length).toBe(6)
 
     const names = tools.map(t => t.name)
     expect(names).toContain('web_search')
+    expect(names).toContain('fetch_url')
     expect(names).toContain('read_file')
     expect(names).toContain('write_file')
     expect(names).toContain('list_directory')

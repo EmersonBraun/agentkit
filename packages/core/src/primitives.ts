@@ -10,6 +10,7 @@ import type {
   ToolDefinition,
   ToolExecutionContext,
 } from './types'
+import type { TokenUsage } from './types/stream'
 
 let nextId = 0
 
@@ -120,6 +121,7 @@ export interface ConsumeStreamHandlers {
   onReasoning?: (accumulated: string) => void
   onToolCall?: (chunk: StreamChunk) => Promise<void> | void
   onToolResult?: (content: string) => void
+  onUsage?: (usage: TokenUsage) => void
   onError?: (error: Error) => void
   onDone: (accumulatedText: string) => void
 }
@@ -144,6 +146,8 @@ export async function consumeStream(
         await handlers.onToolCall?.(chunk)
       } else if (chunk.type === 'tool_result' && chunk.content) {
         handlers.onToolResult?.(chunk.content)
+      } else if (chunk.type === 'usage' && chunk.usage) {
+        handlers.onUsage?.(chunk.usage)
       } else if (chunk.type === 'error') {
         handlers.onError?.(new AdapterError({
           code: ErrorCodes.AK_ADAPTER_STREAM_FAILED,

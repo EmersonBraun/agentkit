@@ -115,6 +115,18 @@ export async function* parseOpenAIStream(stream: ReadableStream): AsyncIterableI
           }
         }
       }
+
+      // Final usage chunk — emitted when `stream_options.include_usage` is set.
+      if (event.usage) {
+        yield {
+          type: 'usage',
+          usage: {
+            promptTokens: event.usage.prompt_tokens ?? 0,
+            completionTokens: event.usage.completion_tokens ?? 0,
+            totalTokens: event.usage.total_tokens ?? 0,
+          },
+        }
+      }
     } catch {
       // Ignore malformed events.
     }
@@ -166,6 +178,27 @@ export async function* parseAnthropicStream(stream: ReadableStream): AsyncIterab
           }
           pendingToolCalls.delete(index)
         }
+      } else if (event.type === 'message_delta' && event.usage) {
+        // Anthropic emits output_tokens on `message_delta`, input_tokens on
+        // `message_start`. We publish whatever we have on the delta — the
+        // consumer accumulates across turns.
+        yield {
+          type: 'usage',
+          usage: {
+            promptTokens: event.usage.input_tokens ?? 0,
+            completionTokens: event.usage.output_tokens ?? 0,
+            totalTokens: (event.usage.input_tokens ?? 0) + (event.usage.output_tokens ?? 0),
+          },
+        }
+      } else if (event.type === 'message_start' && event.message?.usage) {
+        yield {
+          type: 'usage',
+          usage: {
+            promptTokens: event.message.usage.input_tokens ?? 0,
+            completionTokens: 0,
+            totalTokens: event.message.usage.input_tokens ?? 0,
+          },
+        }
       } else if (event.type === 'message_stop') {
         // Flush any remaining tool calls
         for (const [, tc] of pendingToolCalls) {
@@ -193,6 +226,18 @@ export async function* parseGeminiStream(stream: ReadableStream): AsyncIterableI
   for await (const data of readSSELines(stream)) {
     try {
       const event = JSON.parse(data)
+
+      if (event.usageMetadata) {
+        yield {
+          type: 'usage',
+          usage: {
+            promptTokens: event.usageMetadata.promptTokenCount ?? 0,
+            completionTokens: event.usageMetadata.candidatesTokenCount ?? 0,
+            totalTokens: event.usageMetadata.totalTokenCount ?? 0,
+          },
+        }
+      }
+
       const parts = event.candidates?.[0]?.content?.parts
       if (!Array.isArray(parts)) continue
 
@@ -243,6 +288,18 @@ export async function* parseOllamaStream(stream: ReadableStream): AsyncIterableI
         }
       }
       if (event.done) {
+        if (typeof event.prompt_eval_count === 'number' || typeof event.eval_count === 'number') {
+          const promptTokens = event.prompt_eval_count ?? 0
+          const completionTokens = event.eval_count ?? 0
+          yield {
+            type: 'usage',
+            usage: {
+              promptTokens,
+              completionTokens,
+              totalTokens: promptTokens + completionTokens,
+            },
+          }
+        }
         yield { type: 'done' }
         return
       }

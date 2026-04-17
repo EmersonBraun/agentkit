@@ -36,6 +36,7 @@ export function openai(config: OpenAIConfig): AdapterFactory {
         temperature: request.context?.temperature,
         max_tokens: request.context?.maxTokens,
         stream: true,
+        stream_options: { include_usage: true },
       }
 
       return createStreamSource(

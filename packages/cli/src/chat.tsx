@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 import { Box, Text } from 'ink'
 import {
   ChatContainer,
@@ -7,11 +7,13 @@ import {
   StatusHeader,
   ThinkingIndicator,
   ToolCallView,
+  ToolConfirmation,
   useChat,
 } from '@agentskit/ink'
 import type { Message as ChatMessage, ToolCall } from '@agentskit/core'
 import { resolveChatProvider } from './providers'
 import { resolveTools, resolveMemory, skillRegistry } from './resolve'
+import { derivePreview, writeSessionMeta } from './sessions'
 
 import type { AgentsKitConfig } from './config'
 
@@ -20,6 +22,7 @@ export interface ChatCommandOptions {
   model?: string
   system?: string
   memoryPath?: string
+  sessionId?: string
   apiKey?: string
   baseUrl?: string
   tools?: string
@@ -83,6 +86,32 @@ export function ChatApp(options: ChatCommandOptions) {
     skills,
   })
 
+  // Update session metadata on every message change so `--list-sessions`
+  // shows accurate preview, counts, and last-updated time. Best-effort;
+  // failures are swallowed so a read-only fs never breaks the UI.
+  const sessionCreatedAtRef = useRef<string | undefined>(undefined)
+  useEffect(() => {
+    const sessionId = options.sessionId
+    if (!sessionId || sessionId === 'custom') return
+    if (!sessionCreatedAtRef.current) {
+      sessionCreatedAtRef.current = new Date().toISOString()
+    }
+    try {
+      writeSessionMeta({
+        id: sessionId,
+        cwd: process.cwd(),
+        createdAt: sessionCreatedAtRef.current,
+        updatedAt: new Date().toISOString(),
+        messageCount: chat.messages.length,
+        preview: derivePreview(chat.messages),
+        provider: runtime.provider,
+        model: runtime.model,
+      })
+    } catch {
+      // ignore
+    }
+  }, [options.sessionId, chat.messages, runtime.provider, runtime.model])
+
   const turns = useMemo(() => groupIntoTurns(chat.messages), [chat.messages])
   const toolNames = options.tools ? options.tools.split(',').map(s => s.trim()).filter(Boolean) : []
 
@@ -94,6 +123,8 @@ export function ChatApp(options: ChatCommandOptions) {
         mode={runtime.mode}
         tools={toolNames}
         messageCount={chat.messages.length}
+        sessionId={options.sessionId}
+        usage={chat.usage}
       />
 
       <ChatContainer>
@@ -112,7 +143,16 @@ export function ChatApp(options: ChatCommandOptions) {
                     ) : null}
                     <Message message={message} />
                     {message.toolCalls?.map((toolCall: ToolCall) => (
-                      <ToolCallView key={toolCall.id} toolCall={toolCall} expanded />
+                      <Box key={toolCall.id} flexDirection="column">
+                        <ToolCallView toolCall={toolCall} expanded />
+                        {toolCall.status === 'requires_confirmation' ? (
+                          <ToolConfirmation
+                            toolCall={toolCall}
+                            onApprove={chat.approve}
+                            onDeny={chat.deny}
+                          />
+                        ) : null}
+                      </Box>
                     ))}
                   </Box>
                 )
