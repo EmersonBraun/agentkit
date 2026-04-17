@@ -43,6 +43,10 @@ agentskit init --template ink --dir my-cli
 agentskit run --help
 ```
 
+### agentskit init
+
+![agentskit init](https://raw.githubusercontent.com/AgentsKit-io/agentskit/main/apps/docs-next/public/demos/init.gif)
+
 ## Features
 
 - `agentskit chat` — interactive streaming chat in the terminal powered by `@agentskit/ink`
