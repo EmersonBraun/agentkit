@@ -220,6 +220,13 @@ export function ChatApp(options: ChatCommandOptions) {
         label={toolNames.length > 0 ? 'agent working' : 'thinking'}
       />
 
+      {chat.error ? (
+        <Box borderStyle="round" borderColor="red" paddingX={1} flexDirection="column">
+          <Text color="red" bold>✗ {chat.error.name || 'Error'}</Text>
+          <Text color="red">{chat.error.message}</Text>
+        </Box>
+      ) : null}
+
       <InputBar
         chat={chat}
         placeholder="Type a message and press Enter..."
