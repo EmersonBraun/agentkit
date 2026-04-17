@@ -335,13 +335,13 @@ const res = await chain.invoke({ query: 'What was said about X?' })
 
 ```ts
 import { createRuntime } from '@agentskit/runtime'
-import { openai, openaiEmbed } from '@agentskit/adapters'
+import { openai, openaiEmbedder } from '@agentskit/adapters'
 import { createRAG } from '@agentskit/rag'
 import { fileVectorMemory } from '@agentskit/memory'
 
 const rag = createRAG({
   store: fileVectorMemory({ path: './embeddings.json' }),
-  embed: openaiEmbed({ apiKey: KEY, model: 'text-embedding-3-small' }),
+  embed: openaiEmbedder({ apiKey: KEY, model: 'text-embedding-3-small' }),
 })
 
 await rag.ingest(texts.map((content, i) => ({ id: String(i), content })))
