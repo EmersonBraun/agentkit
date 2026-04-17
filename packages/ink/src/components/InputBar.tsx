@@ -12,6 +12,12 @@ export interface InputBarProps {
    * from `chat.messages`.
    */
   history?: string[]
+  /**
+   * Optional hook called on Enter before `chat.send`. Return `true` if the
+   * handler consumed the input (e.g. a slash command); the bar will skip
+   * calling `chat.send` and clear the input itself.
+   */
+  onSubmitInput?: (input: string) => boolean | Promise<boolean>
 }
 
 const CURSOR_MS = 500
@@ -27,6 +33,7 @@ export function InputBar({
   placeholder = 'Type a message...',
   disabled = false,
   history,
+  onSubmitInput,
 }: InputBarProps) {
   const isBusy = disabled || chat.status === 'streaming'
   const [cursorOn, setCursorOn] = useState(true)
@@ -71,11 +78,21 @@ export function InputBar({
     }
 
     if (key.return) {
-      if (chat.input.trim()) {
-        setHistoryIndex(-1)
-        liveDraftRef.current = ''
-        void chat.send(chat.input)
+      const value = chat.input
+      if (!value.trim()) return
+      setHistoryIndex(-1)
+      liveDraftRef.current = ''
+      if (onSubmitInput) {
+        void Promise.resolve(onSubmitInput(value)).then(consumed => {
+          if (consumed) {
+            chat.setInput('')
+            return
+          }
+          void chat.send(value)
+        })
+        return
       }
+      void chat.send(value)
       return
     }
 

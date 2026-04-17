@@ -14,6 +14,14 @@ import type { Message as ChatMessage, ToolCall } from '@agentskit/core'
 import { resolveChatProvider } from './providers'
 import { resolveTools, resolveMemory, skillRegistry } from './resolve'
 import { derivePreview, writeSessionMeta } from './sessions'
+import {
+  builtinSlashCommands,
+  createSlashRegistry,
+  parseSlashCommand,
+  type FeedbackKind,
+  type SlashCommand,
+  type SlashCommandContext,
+} from './slash-commands'
 
 import type { AgentsKitConfig } from './config'
 
@@ -29,6 +37,12 @@ export interface ChatCommandOptions {
   skill?: string
   memoryBackend?: string
   agentsKitConfig?: AgentsKitConfig
+  /**
+   * Extra slash commands appended to the built-ins. Later entries with
+   * the same name override earlier ones, so consumers can replace a
+   * built-in by re-registering its name.
+   */
+  slashCommands?: SlashCommand[]
 }
 
 /**
@@ -58,25 +72,34 @@ function groupIntoTurns(messages: ChatMessage[]): ChatMessage[][] {
 }
 
 export function ChatApp(options: ChatCommandOptions) {
-  const runtime = useMemo(() => resolveChatProvider(options), [
-    options.apiKey,
-    options.baseUrl,
-    options.model,
-    options.provider,
-  ])
+  // Mutable runtime — slash commands like `/model foo` update these without
+  // restarting the chat. `useChat` re-reads its config every render, so
+  // re-memoizing the adapter/tools below threads the change through to the
+  // controller via `updateConfig`.
+  const [provider, setProvider] = useState(options.provider)
+  const [model, setModel] = useState(options.model)
+  const [apiKey, setApiKey] = useState(options.apiKey)
+  const [baseUrl, setBaseUrl] = useState(options.baseUrl)
+  const [toolsFlag, setToolsFlag] = useState<string | undefined>(options.tools)
+  const [skillFlag, setSkillFlag] = useState<string | undefined>(options.skill)
+
+  const runtime = useMemo(
+    () => resolveChatProvider({ provider, model, apiKey, baseUrl }),
+    [provider, model, apiKey, baseUrl],
+  )
 
   const memory = useMemo(
     () => resolveMemory(options.memoryBackend, options.memoryPath ?? '.agentskit-history.json'),
     [options.memoryPath, options.memoryBackend]
   )
-  const tools = useMemo(() => resolveTools(options.tools), [options.tools])
+  const tools = useMemo(() => resolveTools(toolsFlag), [toolsFlag])
   const skills = useMemo(() => {
-    if (!options.skill) return undefined
-    const names = options.skill.split(',').map(s => s.trim())
+    if (!skillFlag) return undefined
+    const names = skillFlag.split(',').map(s => s.trim())
     const resolved = names.map(n => skillRegistry[n]).filter(Boolean)
     if (resolved.length === 0) return undefined
     return resolved
-  }, [options.skill])
+  }, [skillFlag])
 
   const chat = useChat({
     adapter: runtime.adapter,
@@ -153,7 +176,59 @@ export function ChatApp(options: ChatCommandOptions) {
   }, [options.sessionId, messageCount, firstUserContent, runtime.provider, runtime.model])
 
   const turns = useMemo(() => groupIntoTurns(chat.messages), [chat.messages])
-  const toolNames = options.tools ? options.tools.split(',').map(s => s.trim()).filter(Boolean) : []
+  const toolNames = toolsFlag ? toolsFlag.split(',').map(s => s.trim()).filter(Boolean) : []
+
+  // Slash-command feedback line (e.g. "Model → gpt-4o"). Cleared when the
+  // user sends their next non-command input.
+  const [feedback, setFeedback] = useState<{ message: string; kind: FeedbackKind } | null>(null)
+
+  const slashCommands = useMemo<SlashCommand[]>(
+    () => [...builtinSlashCommands, ...(options.slashCommands ?? [])],
+    [options.slashCommands],
+  )
+  const slashRegistry = useMemo(() => createSlashRegistry(slashCommands), [slashCommands])
+
+  const handleSubmitInput = async (raw: string): Promise<boolean> => {
+    const parsed = parseSlashCommand(raw)
+    if (!parsed) {
+      setFeedback(null)
+      return false
+    }
+    const cmd = slashRegistry.get(parsed.name)
+    if (!cmd) {
+      setFeedback({
+        message: `Unknown command: /${parsed.name}. Type /help for the list.`,
+        kind: 'error',
+      })
+      return true
+    }
+    const ctx: SlashCommandContext = {
+      chat,
+      runtime: {
+        provider: runtime.provider,
+        model: runtime.model,
+        mode: runtime.mode,
+        baseUrl,
+        tools: toolsFlag,
+        skill: skillFlag,
+      },
+      setProvider,
+      setModel,
+      setApiKey,
+      setBaseUrl,
+      setTools: setToolsFlag,
+      setSkill: setSkillFlag,
+      feedback: (message, kind = 'info') => setFeedback({ message, kind }),
+      commands: slashCommands,
+    }
+    try {
+      await cmd.run(ctx, parsed.args)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      setFeedback({ message: `/${parsed.name} failed: ${message}`, kind: 'error' })
+    }
+    return true
+  }
 
   // True while any tool call is awaiting user approval. Disables the input
   // bar so its arrow-key history navigation doesn't fight ToolConfirmation
@@ -227,13 +302,34 @@ export function ChatApp(options: ChatCommandOptions) {
         </Box>
       ) : null}
 
+      {feedback ? (
+        <Box borderStyle="round" borderColor={feedbackBorder(feedback.kind)} paddingX={1}>
+          <Text color={feedbackBorder(feedback.kind)}>{feedback.message}</Text>
+        </Box>
+      ) : null}
+
       <InputBar
         chat={chat}
-        placeholder="Type a message and press Enter..."
+        placeholder="Type a message or /help for commands"
         disabled={awaitingConfirmation}
+        onSubmitInput={handleSubmitInput}
       />
     </Box>
   )
+}
+
+function feedbackBorder(kind: FeedbackKind): string {
+  switch (kind) {
+    case 'error':
+      return 'red'
+    case 'warn':
+      return 'yellow'
+    case 'success':
+      return 'green'
+    case 'info':
+    default:
+      return 'cyan'
+  }
 }
 
 export function renderChatHeader(options: ChatCommandOptions): string {
