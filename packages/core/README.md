@@ -67,11 +67,11 @@ try {
   if (err instanceof ToolError) {
     // err.code     → 'AK_TOOL_EXEC_FAILED'
     // err.hint     → actionable suggestion
-    // err.docsUrl  → https://agentskit.dev/docs/tools
+    // err.docsUrl  → https://www.agentskit.io/docs/tools
     console.error(err.toString())
     // error[AK_TOOL_EXEC_FAILED]: ...
     //   --> Hint: ...
-    //   --> Docs: https://agentskit.dev/docs/tools
+    //   --> Docs: https://www.agentskit.io/docs/tools
   }
 }
 ```
