@@ -148,6 +148,18 @@ export function ChatApp(options: ChatCommandOptions) {
   const turns = useMemo(() => groupIntoTurns(chat.messages), [chat.messages])
   const toolNames = options.tools ? options.tools.split(',').map(s => s.trim()).filter(Boolean) : []
 
+  // True while any tool call is awaiting user approval. Disables the input
+  // bar so its arrow-key history navigation doesn't fight ToolConfirmation
+  // for the same key presses.
+  const awaitingConfirmation = useMemo(
+    () => chat.messages.some(message =>
+      message.toolCalls?.some(
+        call => call.status === 'requires_confirmation' && !sessionAllowed.has(call.name)
+      )
+    ),
+    [chat.messages, sessionAllowed]
+  )
+
   return (
     <Box flexDirection="column" gap={1}>
       <StatusHeader
@@ -201,7 +213,11 @@ export function ChatApp(options: ChatCommandOptions) {
         label={toolNames.length > 0 ? 'agent working' : 'thinking'}
       />
 
-      <InputBar chat={chat} placeholder="Type a message and press Enter…" />
+      <InputBar
+        chat={chat}
+        placeholder="Type a message and press Enter..."
+        disabled={awaitingConfirmation}
+      />
     </Box>
   )
 }
