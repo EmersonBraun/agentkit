@@ -1,16 +1,29 @@
 import type { AdapterRequest, Message, StreamChunk, StreamSource } from '@agentskit/core'
 
 export function toProviderMessages(messages: Message[]) {
-  return messages.map(message => {
+  // Track which tool_call ids were declared by preceding assistant turns so
+  // we can drop orphan tool messages — the OpenAI Chat Completions API
+  // rejects a tool message whose tool_call_id isn't bound to a previous
+  // assistant message.
+  const knownToolCallIds = new Set<string>()
+  const output: Array<Record<string, unknown>> = []
+
+  for (const message of messages) {
     if (message.role === 'tool') {
-      return {
+      const id = message.toolCallId
+      // Orphan (no id, or id not declared) — skip; it would 400 the API.
+      if (!id || !knownToolCallIds.has(id)) continue
+      output.push({
         role: 'tool' as const,
         content: message.content,
-        tool_call_id: message.toolCallId,
-      }
+        tool_call_id: id,
+      })
+      continue
     }
+
     if (message.role === 'assistant' && message.toolCalls && message.toolCalls.length > 0) {
-      return {
+      for (const tc of message.toolCalls) knownToolCallIds.add(tc.id)
+      output.push({
         role: 'assistant' as const,
         content: message.content || null,
         tool_calls: message.toolCalls.map(tc => ({
@@ -21,10 +34,21 @@ export function toProviderMessages(messages: Message[]) {
             arguments: typeof tc.args === 'string' ? tc.args : JSON.stringify(tc.args ?? {}),
           },
         })),
-      }
+      })
+      continue
     }
-    return { role: message.role, content: message.content }
-  })
+
+    // Skip assistant messages with no content AND no tool calls. These
+    // happen when a turn was interrupted (Ctrl+C, crashed adapter, etc.)
+    // and the placeholder assistant message never received content —
+    // sending `{role:'assistant', content:''}` back to the provider either
+    // 400s or confuses the model into silence on the next turn.
+    if (message.role === 'assistant' && !message.content) continue
+
+    output.push({ role: message.role, content: message.content })
+  }
+
+  return output
 }
 
 export async function* readSSELines(stream: ReadableStream): AsyncIterableIterator<string> {
