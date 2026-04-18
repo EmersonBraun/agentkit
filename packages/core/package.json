@@ -36,6 +36,11 @@
       "types": "./dist/agent-schema.d.ts",
       "import": "./dist/agent-schema.js",
       "require": "./dist/agent-schema.cjs"
+    },
+    "./prompt-experiments": {
+      "types": "./dist/prompt-experiments.d.ts",
+      "import": "./dist/prompt-experiments.js",
+      "require": "./dist/prompt-experiments.cjs"
     }
   },
   "files": [

@@ -16,6 +16,13 @@ export type { CostGuardOptions, TokenPrice } from './cost-guard'
 export { approximateCounter, countTokens, countTokensDetailed, createProviderCounter } from './token-counter'
 export type { ProviderTokenCounterOptions } from './token-counter'
 
+export {
+  buildTraceReport,
+  renderTraceViewerHtml,
+  createFileTraceSink,
+} from './trace-viewer'
+export type { TraceReport, FileTraceSink } from './trace-viewer'
+
 export { createDevtoolsServer, toSseFrame } from './devtools'
 export type {
   DevtoolsServer,

@@ -30,6 +30,9 @@
     "adapter-router",
     "adapter-ensemble",
     "fallback-chain",
-    "devtools-server"
+    "devtools-server",
+    "trace-viewer",
+    "evals-ci",
+    "prompt-experiments"
   ]
 }
