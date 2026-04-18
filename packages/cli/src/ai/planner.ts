@@ -1,5 +1,5 @@
 import type { AdapterFactory, AdapterRequest, Message } from '@agentskit/core'
-import { validateAgentSchema, type AgentSchema } from '@agentskit/core'
+import { validateAgentSchema, type AgentSchema } from '@agentskit/core/agent-schema'
 
 export type AgentPlanner = (description: string) => Promise<AgentSchema>
 

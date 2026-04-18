@@ -33,7 +33,7 @@ Built into `@agentskit/core`.
 ```
 
 ```ts
-import { parseAgentSchema } from '@agentskit/core'
+import { parseAgentSchema } from '@agentskit/core/agent-schema'
 import { readFileSync } from 'node:fs'
 
 const schema = parseAgentSchema(readFileSync('agents/support-bot.json', 'utf8'))
@@ -67,7 +67,7 @@ const schema = parseAgentSchema(readFileSync('agents/support-bot.yaml', 'utf8'),
 Useful for monorepos that want `import { agent } from './agent.gen.ts'`.
 
 ```ts
-import { parseAgentSchema, renderAgentSchemaModule } from '@agentskit/core'
+import { parseAgentSchema, renderAgentSchemaModule } from '@agentskit/core/agent-schema'
 import { writeFileSync, readFileSync } from 'node:fs'
 
 const schema = parseAgentSchema(readFileSync('agents/support-bot.json', 'utf8'))

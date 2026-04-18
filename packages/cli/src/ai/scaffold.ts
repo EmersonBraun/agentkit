@@ -1,4 +1,4 @@
-import type { AgentSchema, AgentSchemaTool } from '@agentskit/core'
+import type { AgentSchema, AgentSchemaTool } from '@agentskit/core/agent-schema'
 
 export interface ScaffoldFile {
   path: string

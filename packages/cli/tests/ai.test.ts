@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { mkdtempSync, rmSync, readFileSync, existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import type { AdapterFactory, AgentSchema, StreamChunk } from '@agentskit/core'
+import type { AdapterFactory, StreamChunk } from '@agentskit/core'
+import type { AgentSchema } from '@agentskit/core/agent-schema'
 import { scaffoldAgent, writeScaffold, createAdapterPlanner } from '../src/ai'
 
 const minimalSchema: AgentSchema = {

@@ -180,5 +180,5 @@ export function parseAgentSchema(text: string, options: ParseAgentSchemaOptions 
  */
 export function renderAgentSchemaModule(schema: AgentSchema): string {
   const literal = JSON.stringify(schema, null, 2)
-  return `import type { AgentSchema } from '@agentskit/core'\n\nexport const agent = ${literal} as const satisfies AgentSchema\n`
+  return `import type { AgentSchema } from '@agentskit/core/agent-schema'\n\nexport const agent = ${literal} as const satisfies AgentSchema\n`
 }

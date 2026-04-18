@@ -31,6 +31,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./agent-schema": {
+      "types": "./dist/agent-schema.d.ts",
+      "import": "./dist/agent-schema.js",
+      "require": "./dist/agent-schema.cjs"
     }
   },
   "files": [
