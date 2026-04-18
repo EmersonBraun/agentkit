@@ -1,0 +1,161 @@
+import { describe, expect, it } from 'vitest'
+import type { AdapterFactory, AdapterRequest, StreamChunk } from '@agentskit/core'
+import { createFallbackAdapter } from '../src/fallback'
+
+function req(): AdapterRequest {
+  return { messages: [{ id: '1', role: 'user', content: 'x', status: 'complete', createdAt: new Date(0) }] }
+}
+
+function ok(text: string): AdapterFactory {
+  return {
+    createSource: () => ({
+      abort: () => {},
+      stream: async function* () {
+        yield { type: 'text', content: text } as StreamChunk
+        yield { type: 'done' } as StreamChunk
+      },
+    }),
+  }
+}
+
+function throwsOnOpen(): AdapterFactory {
+  return {
+    createSource: () => {
+      throw new Error('cannot open')
+    },
+  }
+}
+
+function throwsOnFirst(): AdapterFactory {
+  return {
+    createSource: () => ({
+      abort: () => {},
+      stream: async function* () {
+        throw new Error('explodes before first chunk')
+      },
+    }),
+  }
+}
+
+function emitsNone(): AdapterFactory {
+  return {
+    createSource: () => ({
+      abort: () => {},
+      stream: async function* () {
+        // yields nothing
+      },
+    }),
+  }
+}
+
+async function collect(factory: AdapterFactory): Promise<StreamChunk[]> {
+  const out: StreamChunk[] = []
+  for await (const c of factory.createSource(req()).stream()) out.push(c)
+  return out
+}
+
+describe('createFallbackAdapter', () => {
+  it('rejects empty candidate list', () => {
+    expect(() => createFallbackAdapter([])).toThrow(/at least one candidate/)
+  })
+
+  it('uses the first candidate when it succeeds', async () => {
+    const f = createFallbackAdapter([
+      { id: 'a', adapter: ok('A') },
+      { id: 'b', adapter: ok('B') },
+    ])
+    const chunks = await collect(f)
+    expect(chunks[0]!.content).toBe('A')
+  })
+
+  it('falls through when createSource throws', async () => {
+    const f = createFallbackAdapter([
+      { id: 'a', adapter: throwsOnOpen() },
+      { id: 'b', adapter: ok('B') },
+    ])
+    const chunks = await collect(f)
+    expect(chunks[0]!.content).toBe('B')
+  })
+
+  it('falls through when first chunk throws', async () => {
+    const f = createFallbackAdapter([
+      { id: 'a', adapter: throwsOnFirst() },
+      { id: 'b', adapter: ok('B') },
+    ])
+    const chunks = await collect(f)
+    expect(chunks[0]!.content).toBe('B')
+  })
+
+  it('falls through when a candidate emits zero chunks', async () => {
+    const f = createFallbackAdapter([
+      { id: 'a', adapter: emitsNone() },
+      { id: 'b', adapter: ok('B') },
+    ])
+    const chunks = await collect(f)
+    expect(chunks[0]!.content).toBe('B')
+  })
+
+  it('aggregates errors when every candidate fails', async () => {
+    const f = createFallbackAdapter([
+      { id: 'a', adapter: throwsOnOpen() },
+      { id: 'b', adapter: throwsOnFirst() },
+    ])
+    await expect(collect(f)).rejects.toThrow(/all fallback candidates failed.*a:.*b:/)
+  })
+
+  it('onFallback observes each hop', async () => {
+    const hops: string[] = []
+    const f = createFallbackAdapter(
+      [
+        { id: 'a', adapter: throwsOnOpen() },
+        { id: 'b', adapter: ok('B') },
+      ],
+      { onFallback: x => hops.push(`${x.id}@${x.index}:${x.error.message}`) },
+    )
+    await collect(f)
+    expect(hops[0]).toMatch(/^a@0:cannot open/)
+  })
+
+  it('shouldRetry=false stops the chain and rethrows', async () => {
+    const f = createFallbackAdapter(
+      [
+        { id: 'a', adapter: throwsOnOpen() },
+        { id: 'b', adapter: ok('B') },
+      ],
+      { shouldRetry: () => false },
+    )
+    await expect(collect(f)).rejects.toThrow(/cannot open/)
+  })
+
+  it('committed candidate propagates mid-stream errors without retrying', async () => {
+    const flaky: AdapterFactory = {
+      createSource: () => ({
+        abort: () => {},
+        stream: async function* () {
+          yield { type: 'text', content: 'partial' } as StreamChunk
+          throw new Error('mid-stream')
+        },
+      }),
+    }
+    const f = createFallbackAdapter([
+      { id: 'flaky', adapter: flaky },
+      { id: 'backup', adapter: ok('backup') },
+    ])
+    const iter = f.createSource(req()).stream()[Symbol.asyncIterator]()
+    const first = await iter.next()
+    expect(first.value.content).toBe('partial')
+    await expect(iter.next()).rejects.toThrow(/mid-stream/)
+  })
+
+  it('abort stops further fallthrough', async () => {
+    const f = createFallbackAdapter([
+      { id: 'a', adapter: throwsOnOpen() },
+      { id: 'b', adapter: ok('B') },
+    ])
+    const source = f.createSource(req())
+    source.abort()
+    const out: StreamChunk[] = []
+    for await (const c of source.stream()) out.push(c)
+    expect(out).toHaveLength(0)
+  })
+})

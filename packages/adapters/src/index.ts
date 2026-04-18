@@ -27,6 +27,16 @@ export type { RetryOptions } from './utils'
 export { createRouter } from './router'
 export type { RouterCandidate, RouterOptions, RouterPolicy } from './router'
 
+export { createEnsembleAdapter } from './ensemble'
+export type {
+  EnsembleCandidate,
+  EnsembleBranchResult,
+  EnsembleAggregator,
+  EnsembleOptions,
+} from './ensemble'
+export { createFallbackAdapter } from './fallback'
+export type { FallbackCandidate, FallbackOptions } from './fallback'
+
 export { mockAdapter, recordingAdapter, replayAdapter, inMemorySink } from './mock'
 export type {
   MockAdapterOptions,
