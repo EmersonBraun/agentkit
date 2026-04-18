@@ -1,0 +1,70 @@
+name: 'AgentsKit evals'
+description: 'Run an AgentsKit eval suite, upload JUnit + Markdown reports, fail the job below a min-accuracy threshold.'
+author: 'AgentsKit'
+
+inputs:
+  script:
+    description: 'Path to the eval runner. Should import your suite and invoke `reportToCi` from `@agentskit/eval/ci`.'
+    required: true
+  node-version:
+    description: 'Node.js version to install.'
+    required: false
+    default: '20'
+  package-manager:
+    description: 'pnpm | npm | yarn'
+    required: false
+    default: 'pnpm'
+  min-accuracy:
+    description: 'Fail the job when accuracy < this (0..1). Pass through via env.'
+    required: false
+    default: '1'
+  out-dir:
+    description: 'Directory to write JUnit + Markdown reports into.'
+    required: false
+    default: 'agentskit-evals'
+  upload-artifact:
+    description: 'Set to `false` to skip the upload-artifact step.'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Install pnpm
+      if: ${{ inputs.package-manager == 'pnpm' }}
+      uses: pnpm/action-setup@v4
+
+    - name: Install deps (pnpm)
+      if: ${{ inputs.package-manager == 'pnpm' }}
+      shell: bash
+      run: pnpm install --frozen-lockfile
+
+    - name: Install deps (npm)
+      if: ${{ inputs.package-manager == 'npm' }}
+      shell: bash
+      run: npm ci
+
+    - name: Install deps (yarn)
+      if: ${{ inputs.package-manager == 'yarn' }}
+      shell: bash
+      run: yarn install --frozen-lockfile
+
+    - name: Run evals
+      shell: bash
+      env:
+        AGENTSKIT_EVAL_MIN_ACCURACY: ${{ inputs.min-accuracy }}
+        AGENTSKIT_EVAL_OUT_DIR: ${{ inputs.out-dir }}
+      run: node --enable-source-maps ${{ inputs.script }}
+
+    - name: Upload report artifacts
+      if: ${{ inputs.upload-artifact == 'true' && always() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: agentskit-evals
+        path: ${{ inputs.out-dir }}
+        if-no-files-found: warn

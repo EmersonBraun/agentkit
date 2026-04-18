@@ -6,6 +6,7 @@ export default defineConfig({
     replay: 'src/replay/index.ts',
     snapshot: 'src/snapshot/index.ts',
     diff: 'src/diff/index.ts',
+    ci: 'src/ci/index.ts',
   },
   format: ['esm', 'cjs'],
   dts: { compilerOptions: { ignoreDeprecations: "6.0" } },
