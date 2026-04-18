@@ -27,6 +27,9 @@
     "multi-modal",
     "schema-first-agent",
     "agentskit-ai",
-    "adapter-router"
+    "adapter-router",
+    "adapter-ensemble",
+    "fallback-chain",
+    "devtools-server"
   ]
 }

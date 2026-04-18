@@ -15,3 +15,11 @@ export type { CostGuardOptions, TokenPrice } from './cost-guard'
 
 export { approximateCounter, countTokens, countTokensDetailed, createProviderCounter } from './token-counter'
 export type { ProviderTokenCounterOptions } from './token-counter'
+
+export { createDevtoolsServer, toSseFrame } from './devtools'
+export type {
+  DevtoolsServer,
+  DevtoolsServerOptions,
+  DevtoolsClient,
+  DevtoolsEnvelope,
+} from './devtools'
