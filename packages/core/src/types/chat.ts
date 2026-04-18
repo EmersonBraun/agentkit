@@ -1,5 +1,5 @@
 import type { MaybePromise } from './common'
-import type { StreamStatus } from './stream'
+import type { StreamStatus, TokenUsage } from './stream'
 import type { Message } from './message'
 import type { ToolCall, ToolCallHandlerContext, ToolDefinition } from './tool'
 import type { AdapterFactory } from './adapter'
@@ -36,6 +36,12 @@ export interface ChatState {
   status: StreamStatus
   input: string
   error: Error | null
+  /**
+   * Token usage accumulated across every LLM call in this chat session.
+   * Populated when the adapter surfaces usage (OpenAI, Anthropic, Gemini,
+   * Ollama all do). Zeroed by `clear()`.
+   */
+  usage: TokenUsage
 }
 
 export interface EditOptions {

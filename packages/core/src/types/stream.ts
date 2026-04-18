@@ -7,10 +7,17 @@ export interface StreamToolCallPayload {
   result?: string
 }
 
+export interface TokenUsage {
+  promptTokens: number
+  completionTokens: number
+  totalTokens: number
+}
+
 export interface StreamChunk {
-  type: 'text' | 'tool_call' | 'tool_result' | 'reasoning' | 'error' | 'done'
+  type: 'text' | 'tool_call' | 'tool_result' | 'reasoning' | 'usage' | 'error' | 'done'
   content?: string
   toolCall?: StreamToolCallPayload
+  usage?: TokenUsage
   metadata?: Record<string, unknown>
 }
 

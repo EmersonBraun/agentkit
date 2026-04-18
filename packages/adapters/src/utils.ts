@@ -1,16 +1,29 @@
 import type { AdapterRequest, Message, StreamChunk, StreamSource } from '@agentskit/core'
 
 export function toProviderMessages(messages: Message[]) {
-  return messages.map(message => {
+  // Track which tool_call ids were declared by preceding assistant turns so
+  // we can drop orphan tool messages — the OpenAI Chat Completions API
+  // rejects a tool message whose tool_call_id isn't bound to a previous
+  // assistant message.
+  const knownToolCallIds = new Set<string>()
+  const output: Array<Record<string, unknown>> = []
+
+  for (const message of messages) {
     if (message.role === 'tool') {
-      return {
+      const id = message.toolCallId
+      // Orphan (no id, or id not declared) — skip; it would 400 the API.
+      if (!id || !knownToolCallIds.has(id)) continue
+      output.push({
         role: 'tool' as const,
         content: message.content,
-        tool_call_id: message.toolCallId,
-      }
+        tool_call_id: id,
+      })
+      continue
     }
+
     if (message.role === 'assistant' && message.toolCalls && message.toolCalls.length > 0) {
-      return {
+      for (const tc of message.toolCalls) knownToolCallIds.add(tc.id)
+      output.push({
         role: 'assistant' as const,
         content: message.content || null,
         tool_calls: message.toolCalls.map(tc => ({
@@ -21,10 +34,21 @@ export function toProviderMessages(messages: Message[]) {
             arguments: typeof tc.args === 'string' ? tc.args : JSON.stringify(tc.args ?? {}),
           },
         })),
-      }
+      })
+      continue
     }
-    return { role: message.role, content: message.content }
-  })
+
+    // Skip assistant messages with no content AND no tool calls. These
+    // happen when a turn was interrupted (Ctrl+C, crashed adapter, etc.)
+    // and the placeholder assistant message never received content —
+    // sending `{role:'assistant', content:''}` back to the provider either
+    // 400s or confuses the model into silence on the next turn.
+    if (message.role === 'assistant' && !message.content) continue
+
+    output.push({ role: message.role, content: message.content })
+  }
+
+  return output
 }
 
 export async function* readSSELines(stream: ReadableStream): AsyncIterableIterator<string> {
@@ -115,6 +139,18 @@ export async function* parseOpenAIStream(stream: ReadableStream): AsyncIterableI
           }
         }
       }
+
+      // Final usage chunk — emitted when `stream_options.include_usage` is set.
+      if (event.usage) {
+        yield {
+          type: 'usage',
+          usage: {
+            promptTokens: event.usage.prompt_tokens ?? 0,
+            completionTokens: event.usage.completion_tokens ?? 0,
+            totalTokens: event.usage.total_tokens ?? 0,
+          },
+        }
+      }
     } catch {
       // Ignore malformed events.
     }
@@ -166,6 +202,27 @@ export async function* parseAnthropicStream(stream: ReadableStream): AsyncIterab
           }
           pendingToolCalls.delete(index)
         }
+      } else if (event.type === 'message_delta' && event.usage) {
+        // Anthropic emits output_tokens on `message_delta`, input_tokens on
+        // `message_start`. We publish whatever we have on the delta — the
+        // consumer accumulates across turns.
+        yield {
+          type: 'usage',
+          usage: {
+            promptTokens: event.usage.input_tokens ?? 0,
+            completionTokens: event.usage.output_tokens ?? 0,
+            totalTokens: (event.usage.input_tokens ?? 0) + (event.usage.output_tokens ?? 0),
+          },
+        }
+      } else if (event.type === 'message_start' && event.message?.usage) {
+        yield {
+          type: 'usage',
+          usage: {
+            promptTokens: event.message.usage.input_tokens ?? 0,
+            completionTokens: 0,
+            totalTokens: event.message.usage.input_tokens ?? 0,
+          },
+        }
       } else if (event.type === 'message_stop') {
         // Flush any remaining tool calls
         for (const [, tc] of pendingToolCalls) {
@@ -193,6 +250,18 @@ export async function* parseGeminiStream(stream: ReadableStream): AsyncIterableI
   for await (const data of readSSELines(stream)) {
     try {
       const event = JSON.parse(data)
+
+      if (event.usageMetadata) {
+        yield {
+          type: 'usage',
+          usage: {
+            promptTokens: event.usageMetadata.promptTokenCount ?? 0,
+            completionTokens: event.usageMetadata.candidatesTokenCount ?? 0,
+            totalTokens: event.usageMetadata.totalTokenCount ?? 0,
+          },
+        }
+      }
+
       const parts = event.candidates?.[0]?.content?.parts
       if (!Array.isArray(parts)) continue
 
@@ -243,6 +312,18 @@ export async function* parseOllamaStream(stream: ReadableStream): AsyncIterableI
         }
       }
       if (event.done) {
+        if (typeof event.prompt_eval_count === 'number' || typeof event.eval_count === 'number') {
+          const promptTokens = event.prompt_eval_count ?? 0
+          const completionTokens = event.eval_count ?? 0
+          yield {
+            type: 'usage',
+            usage: {
+              promptTokens,
+              completionTokens,
+              totalTokens: promptTokens + completionTokens,
+            },
+          }
+        }
         yield { type: 'done' }
         return
       }

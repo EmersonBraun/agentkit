@@ -6,10 +6,21 @@ export interface OpenAIConfig {
   model: string
   baseUrl?: string
   retry?: RetryOptions
+  /**
+   * Ask the provider to include token usage in the final stream chunk via
+   * `stream_options: { include_usage: true }`. Off by default because some
+   * OpenAI-compatible providers (OpenRouter proxies to a long tail of
+   * backends) reject unknown params with a 4xx and break the whole stream.
+   * Turn this on for vanilla `api.openai.com`.
+   */
+  includeUsage?: boolean
 }
 
 export function openai(config: OpenAIConfig): AdapterFactory {
   const { apiKey, model, baseUrl = 'https://api.openai.com', retry } = config
+  // Auto: on for canonical OpenAI, off for every other compatible endpoint
+  // where the param is a known source of 4xx surprises.
+  const includeUsage = config.includeUsage ?? baseUrl.startsWith('https://api.openai.com')
 
   return {
     capabilities: {
@@ -22,7 +33,7 @@ export function openai(config: OpenAIConfig): AdapterFactory {
       usage: true,
     },
     createSource: (request: AdapterRequest): StreamSource => {
-      const body = {
+      const body: Record<string, unknown> = {
         model,
         messages: toProviderMessages(request.messages),
         tools: request.context?.tools?.map(tool => ({
@@ -37,6 +48,7 @@ export function openai(config: OpenAIConfig): AdapterFactory {
         max_tokens: request.context?.maxTokens,
         stream: true,
       }
+      if (includeUsage) body.stream_options = { include_usage: true }
 
       return createStreamSource(
         (signal) => fetch(`${baseUrl}/v1/chat/completions`, {

@@ -38,6 +38,7 @@ export function createChatController(initialConfig: ChatConfig): ChatController 
     status: 'idle',
     input: '',
     error: null,
+    usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
   }
   const listeners = new Set<() => void>()
   const emitter = createEventEmitter()
@@ -267,6 +268,22 @@ export function createChatController(initialConfig: ChatConfig): ChatController 
           metadata: { ...message.metadata, toolResult: content },
         }))
       },
+      onUsage(usage) {
+        // Attach to this turn's assistant message + accumulate the session total.
+        setState(current => ({
+          ...current,
+          messages: current.messages.map(message =>
+            message.id === assistantId
+              ? { ...message, metadata: { ...message.metadata, usage } }
+              : message
+          ),
+          usage: {
+            promptTokens: current.usage.promptTokens + (usage.promptTokens ?? 0),
+            completionTokens: current.usage.completionTokens + (usage.completionTokens ?? 0),
+            totalTokens: current.usage.totalTokens + (usage.totalTokens ?? 0),
+          },
+        }))
+      },
       onError(error) {
         errored = true
         setAssistantMessage(assistantId, message => ({ ...message, status: 'error' }))
@@ -324,38 +341,44 @@ export function createChatController(initialConfig: ChatConfig): ChatController 
   }
 
   /**
-   * Runs one `send` — an LLM turn, plus any follow-up turns needed to feed
-   * completed tool results back to the model. Loop stops when the model
-   * produces a final answer (no new tool calls), any tool is still pending
-   * confirmation, an error fires, or the iteration cap is hit.
+   * Resume the agent loop after tool calls on `assistantId` have settled
+   * (no new LLM turn has been issued yet). Used by both `startStream` and
+   * `approve`/`deny` so the flow is identical whether tools auto-run or
+   * wait for user confirmation.
    */
-  const startStream = async (assistantId: string, text: string) => {
+  const resumeAgentLoop = async (assistantId: string) => {
     const maxIterations = config.maxToolIterations ?? DEFAULT_MAX_TOOL_ITERATIONS
     let currentAssistantId = assistantId
-    let queryText = text
 
     for (let iteration = 0; iteration < maxIterations; iteration++) {
-      const ok = await runAdapterTurn(currentAssistantId, queryText)
-      if (!ok) return // error handler already set state to 'error'
-
       const assistant = state.messages.find(message => message.id === currentAssistantId)
       const calls = assistant?.toolCalls ?? []
       const hasPending = calls.some(call => isCallPending(call.status))
       const settled = calls.filter(call => isCallSettled(call.status))
 
-      // No calls, or something still awaiting confirmation — stop here and
-      // let the caller (e.g. approve/deny) drive the next step if needed.
+      // Nothing to feed back, or something still awaiting confirmation —
+      // stop here; the caller drives the next step.
       if (settled.length === 0 || hasPending) {
         finalizeAssistant(currentAssistantId)
         return
       }
 
       currentAssistantId = appendToolResultsAndContinue(currentAssistantId, settled)
-      queryText = '' // skip retrieval on follow-up turns; user query already consumed
+      const ok = await runAdapterTurn(currentAssistantId, '')
+      if (!ok) return
     }
 
-    // Iteration cap reached — finalize whatever the last assistant turn produced.
     finalizeAssistant(currentAssistantId)
+  }
+
+  /**
+   * Runs one `send` — an LLM turn, plus any follow-up turns needed to feed
+   * completed tool results back to the model.
+   */
+  const startStream = async (assistantId: string, text: string) => {
+    const ok = await runAdapterTurn(assistantId, text)
+    if (!ok) return
+    await resumeAgentLoop(assistantId)
   }
 
   return {
@@ -499,6 +522,7 @@ export function createChatController(initialConfig: ChatConfig): ChatController 
         messages: [],
         status: 'idle',
         error: null,
+        usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
       }))
       await config.memory?.clear?.()
     },
@@ -548,6 +572,8 @@ export function createChatController(initialConfig: ChatConfig): ChatController 
             : call
         ),
       }))
+
+      await resumeAgentLoop(msg.id)
     },
     async deny(toolCallId, reason) {
       const msg = state.messages.find(m =>
@@ -566,6 +592,8 @@ export function createChatController(initialConfig: ChatConfig): ChatController 
             : call
         ),
       }))
+
+      await resumeAgentLoop(msg.id)
     },
     updateConfig(nextConfig) {
       void lifecycle.disposeAll()

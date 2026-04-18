@@ -67,3 +67,5 @@ export type {
   TokenCounterOptions,
   TokenCountResult,
 } from './types'
+
+export type { TokenUsage } from './types/stream'

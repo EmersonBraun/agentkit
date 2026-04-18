@@ -1,6 +1,7 @@
 import type { ToolDefinition } from '@agentskit/core'
 import type { JSONSchema7 } from 'json-schema'
 import { webSearch } from './web-search'
+import { fetchUrl } from './fetch-url'
 import { filesystem } from './filesystem'
 import { shell } from './shell'
 import { tmpdir } from 'node:os'
@@ -27,6 +28,7 @@ export function listTools(): ToolMetadata[] {
   // Instantiate tools with safe defaults to extract their metadata
   const tools: ToolDefinition[] = [
     webSearch(),
+    fetchUrl(),
     ...filesystem({ basePath: tmpdir() }),
     shell(),
   ]

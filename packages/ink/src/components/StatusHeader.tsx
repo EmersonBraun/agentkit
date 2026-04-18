@@ -8,6 +8,7 @@ export interface StatusHeaderProps {
   tools?: string[]
   mode?: 'demo' | 'live'
   messageCount?: number
+  sessionId?: string
 }
 
 export function StatusHeader({
@@ -17,6 +18,7 @@ export function StatusHeader({
   tools,
   mode,
   messageCount,
+  sessionId,
 }: StatusHeaderProps) {
   const segments: Array<{ label: string; value: string; color?: string }> = []
 
@@ -29,6 +31,9 @@ export function StatusHeader({
   if (typeof messageCount === 'number') {
     segments.push({ label: 'msgs', value: String(messageCount), color: 'gray' })
   }
+  if (sessionId) {
+    segments.push({ label: 'session', value: sessionId.slice(0, 12), color: 'gray' })
+  }
 
   return (
     <Box flexDirection="column" borderStyle="round" borderColor="cyan" paddingX={1}>
@@ -36,15 +41,15 @@ export function StatusHeader({
         ✦ {title}
       </Text>
       {segments.length > 0 ? (
-        <Box>
+        <Text wrap="truncate-end">
           {segments.map((seg, i) => (
-            <Box key={seg.label}>
+            <React.Fragment key={seg.label}>
               {i > 0 ? <Text dimColor>  ·  </Text> : null}
               <Text dimColor>{seg.label}=</Text>
               <Text color={seg.color ?? 'white'}>{seg.value}</Text>
-            </Box>
+            </React.Fragment>
           ))}
-        </Box>
+        </Text>
       ) : null}
     </Box>
   )
