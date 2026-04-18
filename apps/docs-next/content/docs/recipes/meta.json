@@ -24,6 +24,9 @@
     "speculative-execution",
     "progressive-tool-calls",
     "virtualized-memory",
-    "multi-modal"
+    "multi-modal",
+    "schema-first-agent",
+    "agentskit-ai",
+    "adapter-router"
   ]
 }
