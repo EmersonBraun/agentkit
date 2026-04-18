@@ -24,6 +24,9 @@ export type { VercelAIConfig } from './vercel-ai'
 export { fetchWithRetry, simulateStream, chunkText } from './utils'
 export type { RetryOptions } from './utils'
 
+export { createRouter } from './router'
+export type { RouterCandidate, RouterOptions, RouterPolicy } from './router'
+
 export { mockAdapter, recordingAdapter, replayAdapter, inMemorySink } from './mock'
 export type {
   MockAdapterOptions,

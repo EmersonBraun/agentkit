@@ -7,6 +7,7 @@ import { registerDevCommand } from './dev'
 import { registerConfigCommand } from './config'
 import { registerTunnelCommand } from './tunnel'
 import { registerRagCommand } from './rag'
+import { registerAiCommand } from './ai'
 
 export function createCli(): Command {
   const program = new Command()
@@ -22,6 +23,7 @@ export function createCli(): Command {
   registerConfigCommand(program)
   registerTunnelCommand(program)
   registerRagCommand(program)
+  registerAiCommand(program)
 
   return program
 }

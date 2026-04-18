@@ -29,6 +29,18 @@ export { createProgressiveArgParser, executeToolProgressively } from './progress
 export { createVirtualizedMemory } from './virtualized-memory'
 export type { VirtualizedMemoryOptions } from './virtualized-memory'
 export {
+  parseAgentSchema,
+  validateAgentSchema,
+  renderAgentSchemaModule,
+} from './agent-schema'
+export type {
+  AgentSchema,
+  AgentSchemaModel,
+  AgentSchemaTool,
+  AgentSchemaMemory,
+  ParseAgentSchemaOptions,
+} from './agent-schema'
+export {
   textPart,
   imagePart,
   audioPart,
