@@ -1,0 +1,58 @@
+{
+  "name": "@agentskit/vue",
+  "version": "0.1.0",
+  "description": "Vue 3 composable + components for AgentsKit.",
+  "keywords": [
+    "agentskit",
+    "ai",
+    "agents",
+    "llm",
+    "chat",
+    "typescript",
+    "vue",
+    "vue3",
+    "composable",
+    "headless"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "tsc --noEmit",
+    "dev": "tsup --watch"
+  },
+  "dependencies": {
+    "@agentskit/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "vue": "^3.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "tsup": "^8.5.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.4",
+    "vue": "^3.4.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "agentskit": {
+    "stability": "alpha",
+    "stabilityNote": "Vue 3 binding — same contract as @agentskit/react."
+  }
+}
