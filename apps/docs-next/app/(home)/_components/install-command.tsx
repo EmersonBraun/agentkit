@@ -7,7 +7,7 @@ const ADD = 'npm install @agentskit/core @agentskit/adapters'
 
 export function InstallCommand() {
   return (
-    <div className="grid w-full gap-3 sm:grid-cols-2">
+    <div className="grid w-full min-w-0 gap-3 md:grid-cols-2">
       <Card
         label="Start fresh"
         command={SCAFFOLD}
@@ -43,7 +43,7 @@ function Card({
 
   return (
     <div
-      className={`flex flex-col gap-2 rounded-md border p-3 text-left transition ${
+      className={`flex w-full min-w-0 flex-col gap-2 rounded-md border p-3 text-left transition ${
         primary
           ? 'border-ak-blue/40 bg-ak-surface'
           : 'border-ak-border bg-ak-surface/60'
@@ -62,7 +62,7 @@ function Card({
       <button
         type="button"
         onClick={copy}
-        className="group flex w-full items-center gap-2 rounded-md border border-ak-border bg-ak-midnight px-3 py-2 text-left font-mono text-[13px] text-ak-foam transition hover:border-ak-blue sm:gap-3 sm:text-sm"
+        className="group flex w-full min-w-0 items-center gap-2 rounded-md border border-ak-border bg-ak-midnight px-2.5 py-2 text-left font-mono text-[11px] text-ak-foam transition hover:border-ak-blue sm:gap-3 sm:px-3 sm:text-[13px] md:text-sm"
       >
         <span className="shrink-0 text-ak-green">$</span>
         <span className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

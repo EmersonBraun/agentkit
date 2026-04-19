@@ -112,14 +112,40 @@ const greet = defineTool({
 
 Use `InferSchemaType<typeof schema>` to reference the inferred type elsewhere in your codebase.
 
+## Subpath exports (tree-shaken, zero main-bundle weight)
+
+| Subpath | Purpose |
+|---------|---------|
+| `@agentskit/core/agent-schema` | Declarative YAML/JSON agent definitions + validator |
+| `@agentskit/core/prompt-experiments` | A/B prompts with PostHog / GrowthBook / custom flag providers |
+| `@agentskit/core/auto-summarize` | `ChatMemory` wrapper that folds old turns into a summary |
+| `@agentskit/core/hitl` | Approval gates + `ApprovalStore` |
+| `@agentskit/core/security` | PII redactor + injection detector + rate limiter |
+| `@agentskit/core/compose-tool` | Chain N tools into one macro tool |
+| `@agentskit/core/self-debug` | Retry failing tools with LLM-corrected arguments |
+| `@agentskit/core/generative-ui` | Typed UI element tree + code / markdown / html / chart artifacts |
+| `@agentskit/core/a2a` | Agent-to-Agent protocol spec (JSON-RPC over any transport) |
+| `@agentskit/core/manifest` | Skill + tool manifest format (MCP-compatible) |
+| `@agentskit/core/eval-format` | Portable eval dataset + run-result JSON |
+
+See each page under [docs.agentskit.io / for-agents](https://www.agentskit.io/docs/for-agents/core) for the full contract.
+
 ## Ecosystem
 
 | Package | Role |
 |---------|------|
-| [@agentskit/adapters](https://www.npmjs.com/package/@agentskit/adapters) | LLM chat + embedding providers |
-| [@agentskit/runtime](https://www.npmjs.com/package/@agentskit/runtime) | `createRuntime` — agents without UI |
+| [@agentskit/adapters](https://www.npmjs.com/package/@agentskit/adapters) | LLM chat + embedding providers, router, ensemble, fallback |
+| [@agentskit/runtime](https://www.npmjs.com/package/@agentskit/runtime) | `createRuntime`, `speculate`, topologies, durable execution, background agents |
 | [@agentskit/react](https://www.npmjs.com/package/@agentskit/react) | `useChat`, headless chat components |
-| [@agentskit/tools](https://www.npmjs.com/package/@agentskit/tools) | Executable tools |
+| [@agentskit/vue](https://www.npmjs.com/package/@agentskit/vue) · [svelte](https://www.npmjs.com/package/@agentskit/svelte) · [solid](https://www.npmjs.com/package/@agentskit/solid) · [react-native](https://www.npmjs.com/package/@agentskit/react-native) · [angular](https://www.npmjs.com/package/@agentskit/angular) | Same `ChatReturn` contract, one package per framework |
+| [@agentskit/tools](https://www.npmjs.com/package/@agentskit/tools) | Built-in tools, 20+ integrations, MCP bridge |
+| [@agentskit/memory](https://www.npmjs.com/package/@agentskit/memory) | Chat + vector + hierarchical + encrypted + graph stores |
+| [@agentskit/rag](https://www.npmjs.com/package/@agentskit/rag) | Plug-and-play RAG + reranker + loaders |
+| [@agentskit/skills](https://www.npmjs.com/package/@agentskit/skills) | Ready-made personas + marketplace |
+| [@agentskit/observability](https://www.npmjs.com/package/@agentskit/observability) | Traces, audit log, cost guard, devtools |
+| [@agentskit/sandbox](https://www.npmjs.com/package/@agentskit/sandbox) | Secure code execution + mandatory sandbox policy |
+| [@agentskit/eval](https://www.npmjs.com/package/@agentskit/eval) | Eval suites, deterministic replay, snapshots, CI reporter |
+| [@agentskit/cli](https://www.npmjs.com/package/@agentskit/cli) | `agentskit init / chat / run / ai / dev / doctor` |
 
 ## Contributors
 
