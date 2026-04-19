@@ -5,6 +5,10 @@ export const ISSUES_URL = `${REPO_URL}/issues`
 export const GOOD_FIRST_URL = `${ISSUES_URL}?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22`
 export const HELP_WANTED_URL = `${ISSUES_URL}?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22`
 export const DISCUSSIONS_URL = `${REPO_URL}/discussions`
+export const HACKATHONS_URL = `${REPO_URL}/discussions/categories/hackathons`
+export const BOUNTY_PROGRAM_URL = `${REPO_URL}/discussions/categories/bounties`
+export const AWESOME_AGENTS_URL = `${REPO_URL}/discussions/categories/awesome`
+export const UNIVERSITY_URL = `${REPO_URL}/discussions/categories/university`
 
 export function packageIssuesUrl(pkg: string) {
   return `${ISSUES_URL}?q=is%3Aissue+is%3Aopen+label%3A%22pkg%3A${pkg}%22`
@@ -22,6 +26,8 @@ type Counts = {
   openIssues: number
   goodFirst: number
   helpWanted: number
+  hackathons: number
+  bounties: number
 }
 
 export async function fetchContributors(): Promise<Contributor[]> {
@@ -46,11 +52,13 @@ async function fetchSearchCount(q: string): Promise<number> {
 }
 
 export async function fetchCounts(): Promise<Counts> {
-  const [openIssues, goodFirst, helpWanted, contribRes] = await Promise.all([
+  const [openIssues, goodFirst, helpWanted, contribRes, hackathonsRes, bountiesRes] = await Promise.all([
     fetchSearchCount(`repo:${REPO} is:issue is:open`),
     fetchSearchCount(`repo:${REPO} is:issue is:open label:"good first issue"`),
     fetchSearchCount(`repo:${REPO} is:issue is:open label:"help wanted"`),
     fetch(`https://api.github.com/repos/${REPO}/contributors?per_page=1&anon=1`),
+    fetchSearchCount(`repo:${REPO} is:discussion is:open category:hackathons`),
+    fetchSearchCount(`repo:${REPO} is:discussion is:open category:bounties`),
   ])
   let contributors = 0
   if (contribRes.ok) {
@@ -62,5 +70,5 @@ export async function fetchCounts(): Promise<Counts> {
       contributors = Array.isArray(list) ? list.length : 0
     }
   }
-  return { openIssues, goodFirst, helpWanted, contributors }
+  return { openIssues, goodFirst, helpWanted, contributors, hackathons: hackathonsRes, bounties: bountiesRes }
 }
