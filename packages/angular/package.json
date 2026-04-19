@@ -1,0 +1,60 @@
+{
+  "name": "@agentskit/angular",
+  "version": "0.1.0",
+  "description": "Angular service + components for AgentsKit.",
+  "keywords": [
+    "agentskit",
+    "ai",
+    "agents",
+    "llm",
+    "chat",
+    "typescript",
+    "angular",
+    "signals",
+    "headless"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "tsc --noEmit",
+    "dev": "tsup --watch"
+  },
+  "dependencies": {
+    "@agentskit/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "@angular/core": "^18.0.0 || ^19.0.0 || ^20.0.0",
+    "rxjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@angular/core": "^19.0.0",
+    "@types/node": "^25.6.0",
+    "rxjs": "^7.8.0",
+    "tsup": "^8.5.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.4",
+    "zone.js": "^0.15.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "agentskit": {
+    "stability": "alpha",
+    "stabilityNote": "Angular binding — same contract as @agentskit/react via Signals + BehaviorSubject."
+  }
+}

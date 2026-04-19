@@ -1,108 +1,76 @@
 ---
-title: Vue / Svelte / Solid / React Native bindings
-description: useChat composable / store / hook for AgentsKit, plus a shadcn/ui registry manifest.
+title: Vue / Svelte / Solid / React Native / Angular
+description: One package per framework. Same ChatReturn contract as @agentskit/react — pick the binding that matches your stack.
 ---
 
-The chat controller is framework-agnostic — it's just a subscribable
-state machine. `@agentskit/framework-adapters` ships the small
-reactivity bridge for each major framework + a shadcn/ui registry
-manifest so a React component is one CLI command away.
+Every framework binding ships as its own package and mirrors the
+`@agentskit/react` contract: same action methods (`send`, `stop`,
+`retry`, `edit`, `regenerate`, `setInput`, `clear`, `approve`,
+`deny`), same headless `data-ak-*` attributes on components, same
+`ChatReturn` shape for state.
 
-## Install
+## Packages
 
-```bash
-npm install @agentskit/framework-adapters
+| Package | Surface | Peer dep |
+|---|---|---|
+| `@agentskit/react` | `useChat` hook + components | `react ^18|^19` |
+| `@agentskit/vue` | `useChat` composable + `ChatContainer` | `vue ^3.4` |
+| `@agentskit/svelte` | `createChatStore` | `svelte ^5` |
+| `@agentskit/solid` | `useChat` hook | `solid-js ^1.8` |
+| `@agentskit/react-native` | `useChat` hook (Metro-safe) | `react ^18|^19`, `react-native *` |
+| `@agentskit/angular` | `AgentskitChat` service (Signal + RxJS) | `@angular/core ^18|^19|^20`, `rxjs ^7` |
+
+## Vue
+
+```ts
+import { useChat } from '@agentskit/vue'
+
+const chat = useChat({ adapter })
+// chat.messages, chat.input reactive; chat.send, chat.setInput, ...
 ```
 
-Peer deps are optional — pull in only the framework you're using.
-
-## Vue 3 (composable)
-
-```ts title="chat.ts"
-import { useChat } from '@agentskit/framework-adapters/vue'
-import { anthropic } from '@agentskit/adapters'
-
-const chat = useChat({
-  adapter: anthropic({ apiKey: import.meta.env.VITE_ANTHROPIC_KEY, model: 'claude-sonnet-4-6' }),
-})
-
-// chat.messages, chat.status, chat.input are reactive.
-// chat.send, chat.setInput, chat.stop, chat.clear, etc. drive the controller.
-```
-
-## Svelte 5 (store)
+## Svelte
 
 ```svelte
 <script lang="ts">
-import { createChatStore } from '@agentskit/framework-adapters/svelte'
-import { openai } from '@agentskit/adapters'
-
-const chat = createChatStore({ adapter: openai({ ... }) })
+import { createChatStore } from '@agentskit/svelte'
+const chat = createChatStore({ adapter })
 </script>
 
 {#each $chat.messages as m (m.id)}
-  <div class="msg" data-role={m.role}>{m.content}</div>
+  <p>{m.content}</p>
 {/each}
-<form on:submit|preventDefault={() => chat.send($chat.input)}>
-  <input bind:value={$chat.input} />
-</form>
 ```
 
 ## Solid
 
 ```tsx
-import { useChat } from '@agentskit/framework-adapters/solid'
-
+import { useChat } from '@agentskit/solid'
 const chat = useChat({ adapter })
-
-return (
-  <>
-    <For each={chat.messages}>{(m) => <div>{m.content}</div>}</For>
-    <form onSubmit={(e) => { e.preventDefault(); chat.send(chat.input) }}>
-      <input value={chat.input} onInput={(e) => chat.setInput(e.currentTarget.value)} />
-    </form>
-  </>
-)
 ```
 
-## React Native + Expo
+## React Native / Expo
 
 ```tsx
-import { useChat } from '@agentskit/framework-adapters/rn'
-import { View, TextInput, FlatList, Pressable, Text } from 'react-native'
+import { useChat } from '@agentskit/react-native'
+```
 
-export function ChatScreen({ adapter }) {
-  const chat = useChat({ adapter })
-  return (
-    <View style={{ flex: 1 }}>
-      <FlatList
-        data={chat.messages}
-        keyExtractor={(m) => m.id}
-        renderItem={({ item }) => <Text>{item.content}</Text>}
-      />
-      <TextInput value={chat.input} onChangeText={chat.setInput} />
-      <Pressable onPress={() => chat.send(chat.input)}><Text>Send</Text></Pressable>
-    </View>
-  )
+## Angular
+
+```ts
+import { Component, inject } from '@angular/core'
+import { AgentskitChat } from '@agentskit/angular'
+
+@Component({ selector: 'ak-chat', template: '...' })
+export class ChatPage {
+  chat = inject(AgentskitChat)
+  constructor() {
+    this.chat.init({ adapter })
+  }
 }
 ```
 
-Same API shape as `@agentskit/react`; imported from a React-only
-module so Metro / Hermes can bundle it without DOM shims.
-
-## shadcn/ui registry
-
-A `registry.json` manifest ships at
-`@agentskit/framework-adapters/shadcn/registry.json`. Host it (or
-pull it directly from your node_modules / CDN) and install the
-component with:
-
-```bash
-npx shadcn add https://example.com/agentskit-chat.json
-```
-
-The bundled component is a headless React chat container driving
-`useChat` — style it with your own Tailwind / shadcn primitives.
+Use `chat.state()` inside templates or subscribe to `chat.stream$`.
 
 ## See also
 

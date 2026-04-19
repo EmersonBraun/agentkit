@@ -1,26 +1,24 @@
 ---
-'@agentskit/framework-adapters': minor
+'@agentskit/vue': minor
+'@agentskit/svelte': minor
+'@agentskit/solid': minor
+'@agentskit/react-native': minor
+'@agentskit/angular': minor
 ---
 
 Phase 3 sprint S25 — issues #184, #185, #186.
 
-New package `@agentskit/framework-adapters` with per-framework
-reactivity bindings for the shared `ChatController` plus a
-shadcn/ui registry manifest.
+Five new packages, one per framework, each mirroring the
+`@agentskit/react` contract (same `ChatReturn` surface, same
+action methods, same headless `data-ak-*` attributes):
 
-- `@agentskit/framework-adapters/vue` — Vue 3 `useChat` composable
-  (peer `vue ^3.4`).
-- `@agentskit/framework-adapters/svelte` — Svelte 5 `createChatStore`
-  (peer `svelte ^5`).
-- `@agentskit/framework-adapters/solid` — Solid `useChat` hook
-  (peer `solid-js ^1.8`).
-- `@agentskit/framework-adapters/rn` — React Native / Expo `useChat`
-  (peer `react ^18 || ^19`, `react-native *`). Mirrors the React
-  hook without DOM-specific imports so Metro / Hermes can bundle it.
-- `@agentskit/framework-adapters/shadcn/registry.json` — shadcn/ui
-  v0.3 registry manifest exposing `agentskit-chat` as an installable
-  component. Build step copies the JSON into `dist/shadcn/` so it's
-  reachable via the package export.
-
-All peers are optional — consumers install only the framework they
-use.
+- `@agentskit/vue` — Vue 3 `useChat` composable + `ChatContainer`
+  component (peer `vue ^3.4`).
+- `@agentskit/svelte` — Svelte 5 `createChatStore` (peer `svelte ^5`).
+- `@agentskit/solid` — Solid `useChat` hook (peer `solid-js ^1.8`).
+- `@agentskit/react-native` — React Native / Expo `useChat` hook
+  (peers `react ^18|^19`, `react-native *`). Pure React, Metro /
+  Hermes safe.
+- `@agentskit/angular` — `AgentskitChat` service exposing state as a
+  Signal + RxJS Observable (peers `@angular/core ^18|^19|^20`,
+  `rxjs ^7`).
