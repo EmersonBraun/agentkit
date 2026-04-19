@@ -1,0 +1,19 @@
+{
+  "name": "agentskit",
+  "homepage": "https://agentskit.io",
+  "items": [
+    {
+      "name": "agentskit-chat",
+      "type": "registry:component",
+      "description": "Headless, streaming-aware chat container that drives an AgentsKit adapter via the `useChat` hook.",
+      "dependencies": ["@agentskit/core", "@agentskit/react"],
+      "files": [
+        {
+          "path": "components/agentskit-chat.tsx",
+          "type": "registry:component",
+          "content": "import { useChat } from '@agentskit/react'\nimport type { ChatConfig } from '@agentskit/core'\n\nexport function AgentsKitChat(props: { config: ChatConfig }) {\n  const chat = useChat(props.config)\n  return (\n    <div data-ak-chat>\n      <div data-ak-messages>\n        {chat.messages.map(m => (\n          <div key={m.id} data-ak-message data-ak-role={m.role}>\n            {m.content}\n          </div>\n        ))}\n      </div>\n      <form\n        data-ak-form\n        onSubmit={e => {\n          e.preventDefault()\n          chat.send(chat.input)\n        }}\n      >\n        <input\n          data-ak-input\n          value={chat.input}\n          onChange={e => chat.setInput(e.currentTarget.value)}\n          placeholder='Type a message...'\n        />\n        <button data-ak-submit type='submit' disabled={chat.status === 'streaming'}>\n          Send\n        </button>\n      </form>\n    </div>\n  )\n}\n"
+        }
+      ]
+    }
+  ]
+}

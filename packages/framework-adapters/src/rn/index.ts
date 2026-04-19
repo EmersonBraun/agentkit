@@ -1,0 +1,41 @@
+import { useEffect, useRef, useSyncExternalStore } from 'react'
+import { createChatController } from '@agentskit/core'
+import type { ChatConfig, ChatController, ChatReturn } from '@agentskit/core'
+
+/**
+ * React Native / Expo `useChat` — identical shape to
+ * `@agentskit/react`, but imported from a pure-React module so it
+ * stays safe to bundle into Metro / Hermes (no DOM, no browser
+ * globals).
+ *
+ * Peer deps: `react ^18 || ^19`, `react-native *`.
+ */
+export function useChat(config: ChatConfig): ChatReturn {
+  const controllerRef = useRef<ChatController | null>(null)
+  if (!controllerRef.current) {
+    controllerRef.current = createChatController(config)
+  }
+
+  useEffect(() => {
+    controllerRef.current?.updateConfig(config)
+  }, [config])
+
+  const state = useSyncExternalStore(
+    controllerRef.current.subscribe,
+    controllerRef.current.getState,
+    controllerRef.current.getState,
+  )
+
+  return {
+    ...state,
+    send: controllerRef.current.send,
+    stop: controllerRef.current.stop,
+    retry: controllerRef.current.retry,
+    edit: controllerRef.current.edit,
+    regenerate: controllerRef.current.regenerate,
+    setInput: controllerRef.current.setInput,
+    clear: controllerRef.current.clear,
+    approve: controllerRef.current.approve,
+    deny: controllerRef.current.deny,
+  }
+}
