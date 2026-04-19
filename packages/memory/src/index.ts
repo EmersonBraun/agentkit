@@ -26,6 +26,18 @@ export type {
 
 export { createInMemoryGraph } from './graph'
 export type { GraphMemory, GraphNode, GraphEdge, GraphQuery } from './graph'
+export { pgvector, pinecone, qdrant, chroma, upstashVector } from './vector'
+export type {
+  PgVectorConfig,
+  PgVectorRunner,
+  PineconeConfig,
+  QdrantConfig,
+  ChromaConfig,
+  UpstashVectorConfig,
+} from './vector'
+
+export { createEncryptedMemory } from './encrypted'
+export type { EncryptedMemoryOptions, EncryptedEnvelope } from './encrypted'
 
 export { createHierarchicalMemory } from './hierarchical'
 export type {

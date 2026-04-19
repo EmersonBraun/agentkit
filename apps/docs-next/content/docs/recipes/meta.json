@@ -54,5 +54,8 @@
     "personalization",
     "doc-loaders",
     "skill-marketplace"
+    "self-debug",
+    "vector-adapters",
+    "encrypted-memory"
   ]
 }
