@@ -52,6 +52,19 @@ function Chat() {
 - Theme via `@agentskit/react/theme` — opt-in CSS variables, override per component
 - Works with React 18 and 19
 
+## Other framework bindings (same contract)
+
+Every binding exposes the same `ChatReturn` surface. Pick the one for your stack:
+
+| Package | API |
+|---------|-----|
+| [@agentskit/vue](https://www.npmjs.com/package/@agentskit/vue) | `useChat` composable + `ChatContainer` component |
+| [@agentskit/svelte](https://www.npmjs.com/package/@agentskit/svelte) | `createChatStore` — Svelte 5 store |
+| [@agentskit/solid](https://www.npmjs.com/package/@agentskit/solid) | `useChat` hook (Solid `createStore`) |
+| [@agentskit/react-native](https://www.npmjs.com/package/@agentskit/react-native) | `useChat` (Metro / Hermes safe) |
+| [@agentskit/angular](https://www.npmjs.com/package/@agentskit/angular) | `AgentskitChat` service (Signal + RxJS) |
+| [@agentskit/ink](https://www.npmjs.com/package/@agentskit/ink) | Terminal `useChat` + components |
+
 ## Ecosystem
 
 | Package | Role |

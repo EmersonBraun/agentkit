@@ -88,12 +88,20 @@ For tools without Zod, use `defineTool` from `@agentskit/core` with a JSON Schem
 
 ## Features
 
-- `webSearch()` — live web search for agents
-- `filesystem({ basePath })` — sandboxed read, write, list, delete
-- `shell({ allowed })` — shell execution with command allowlist
-- `defineZodTool` — Zod-based tool factory with runtime validation and type inference
-- All tools follow `ToolDefinition` contract (ADR 0002) — parallel tool calling supported
-- Works in `@agentskit/runtime`, `useChat`, or any custom loop
+- `webSearch()` — live web search for agents.
+- `fetchUrl()` — safe HTTP GET with JSON / text handling.
+- `filesystem({ basePath })` — sandboxed read, write, list, delete.
+- `shell({ allowed })` — shell execution with command allow-list.
+- `defineZodTool` — Zod-based tool factory with runtime validation and type inference.
+- All tools follow `ToolDefinition` contract (ADR 0002) — parallel tool calling supported.
+- Works in `@agentskit/runtime`, `useChat`, or any custom loop.
+
+## Subpaths
+
+| Subpath | Contents |
+|---------|----------|
+| `@agentskit/tools/mcp` | `createMcpClient`, `createMcpServer`, `toolsFromMcpClient`, stdio + in-memory transports. [MCP bridge recipe](https://www.agentskit.io/docs/recipes/mcp-bridge). |
+| `@agentskit/tools/integrations` | `github`, `linear`, `slack`, `notion`, `discord`, `gmail`, `googleCalendar`, `stripe`, `postgres`, `s3`, `firecrawl`, `reader`, `documentParsers`, `openaiImages`, `elevenlabs`, `whisper`, `deepgram`, `maps`, `weather`, `coingecko`, `browserAgent`. [Integrations recipe](https://www.agentskit.io/docs/recipes/integrations) + [More integrations](https://www.agentskit.io/docs/recipes/more-integrations). |
 
 ## Ecosystem
 

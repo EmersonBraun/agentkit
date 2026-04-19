@@ -59,13 +59,22 @@ console.log(result.content)
 
 ## Features
 
-- `createRuntime` — single entry point for headless agent execution
-- ReAct loop: observe → think → act → repeat until done
-- Returns `{ content, steps, toolCalls, durationMs }` — fully inspectable
-- `AbortSignal` cancellation support
-- Tool `init` / `dispose` lifecycle hooks
-- `AgentEvent` emissions for observability integrations
-- `retriever` option for RAG context injection
+- `createRuntime` — single entry point for headless agent execution.
+- ReAct loop: observe → think → act → repeat until done.
+- Returns `{ content, steps, toolCalls, durationMs }` — fully inspectable.
+- `AbortSignal` cancellation support.
+- Tool `init` / `dispose` lifecycle hooks.
+- `AgentEvent` emissions for observability integrations.
+- `retriever` option for RAG context injection.
+
+## Advanced primitives
+
+| Primitive | Purpose | Docs |
+|-----------|---------|------|
+| `createDurableRunner` + `createFileStepLog` | Temporal-style step log; resume on crash | [Durable execution](https://www.agentskit.io/docs/recipes/durable-execution) |
+| `supervisor` / `swarm` / `hierarchical` / `blackboard` | Ready-made multi-agent topologies | [Topologies](https://www.agentskit.io/docs/recipes/multi-agent-topologies) |
+| `speculate` | Fan-out N adapters, race + abort losers | [Speculative execution](https://www.agentskit.io/docs/recipes/speculative-execution) |
+| `createCronScheduler` + `createWebhookHandler` | Background agents, cron + webhooks | [Background agents](https://www.agentskit.io/docs/recipes/background-agents) |
 
 ## Ecosystem
 
