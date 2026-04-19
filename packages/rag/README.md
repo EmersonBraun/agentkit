@@ -64,12 +64,14 @@ You can also call `rag.retrieve({ query, messages })` to satisfy the core `Retri
 
 ## Features
 
-- `createRAG({ embed, store })` — single entry point for ingest + retrieve
-- `rag.ingest(docs)` — chunk, embed, and store documents
-- `rag.search(query, { topK })` — semantic similarity search
-- `rag.retrieve({ query, messages })` — `Retriever` contract v1 for runtime/controller injection
-- Configurable chunking: `chunkSize`, `chunkOverlap`, custom `split`
-- Works with any `EmbedFn` and any `VectorMemory`
+- `createRAG({ embed, store })` — single entry point for ingest + retrieve.
+- `rag.ingest(docs)` — chunk, embed, and store documents.
+- `rag.search(query, { topK })` — semantic similarity search.
+- `rag.retrieve({ query, messages })` — `Retriever` contract v1 for runtime/controller injection.
+- Configurable chunking: `chunkSize`, `chunkOverlap`, custom `split`.
+- Works with any `EmbedFn` and any `VectorMemory`.
+- **Rerankers:** `createRerankedRetriever` (Cohere Rerank, BGE, BM25 default), `createHybridRetriever` (vector + BM25 blend), standalone `bm25Score`. [Recipe](https://www.agentskit.io/docs/recipes/rag-reranking).
+- **Document loaders:** `loadUrl`, `loadGitHubFile`, `loadGitHubTree`, `loadNotionPage`, `loadConfluencePage`, `loadGoogleDriveFile`, `loadPdf` (BYO parser). [Recipe](https://www.agentskit.io/docs/recipes/doc-loaders).
 
 ## Ecosystem
 

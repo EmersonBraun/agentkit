@@ -14,7 +14,7 @@ Connect to any LLM provider — and swap between them — without touching your 
 ## Why adapters
 
 - **Vendor independence** — switch from OpenAI to Anthropic to a local Ollama model by changing one line; your hooks, runtime, and tools stay untouched
-- **10+ providers included** — Anthropic, OpenAI, Gemini, Ollama, DeepSeek, Grok, Kimi, LangChain, Vercel AI SDK, and any raw `ReadableStream`
+- **20+ providers included** — Anthropic, OpenAI, Gemini, Ollama, DeepSeek, Grok, Kimi, Mistral, Cohere, Together, Groq, Fireworks, OpenRouter, Hugging Face, LM Studio, vLLM, llama.cpp, LangChain, Vercel AI SDK, and any raw `ReadableStream`
 - **Embedder functions built in** — the same adapter pattern covers text embeddings, so you can reuse provider config for both chat and RAG
 - **One-line local AI** — `ollama({ model: 'llama3.1' })` for fully offline agents with no API key required
 
@@ -57,10 +57,28 @@ const rag = createRAG({
 
 ## Features
 
-- Providers: Anthropic, OpenAI, Gemini, Ollama, DeepSeek, Grok, Kimi, LangChain, LangGraph, Vercel AI SDK, generic `ReadableStream`
-- Embedders: `openaiEmbedder`, `geminiEmbedder`, `ollamaEmbedder`
+- Providers: Anthropic, OpenAI, Gemini, Ollama, DeepSeek, Grok, Kimi, Mistral, Cohere, Together, Groq, Fireworks, OpenRouter, Hugging Face, LM Studio, vLLM, llama.cpp, LangChain, LangGraph, Vercel AI SDK, generic `ReadableStream`
+- Embedders: `openaiEmbedder`, `geminiEmbedder`, `ollamaEmbedder`, `deepseekEmbedder`, `grokEmbedder`, `kimiEmbedder`, `createOpenAICompatibleEmbedder`
 - All adapters satisfy `Adapter` contract v1 (ADR 0001) — substitutable anywhere in the ecosystem
 - Custom adapter authoring via `createAdapter()`
+- Higher-order adapters: `createRouter` (cost/latency/classifier), `createEnsembleAdapter` (fan-out + merge), `createFallbackAdapter` (ordered try-next)
+
+## Higher-order adapters
+
+```ts
+import { createRouter, anthropic, openai } from '@agentskit/adapters'
+
+// Auto-pick cheapest capable candidate per request.
+const router = createRouter({
+  candidates: [
+    { id: 'haiku', adapter: anthropic({ model: 'claude-haiku-4-5' }), cost: 0.25 },
+    { id: 'sonnet', adapter: anthropic({ model: 'claude-sonnet-4-6' }), cost: 3 },
+    { id: 'gpt-mini', adapter: openai({ model: 'gpt-4o-mini' }), cost: 0.15 },
+  ],
+})
+```
+
+See [Adapter router](https://www.agentskit.io/docs/recipes/adapter-router), [Ensemble](https://www.agentskit.io/docs/recipes/adapter-ensemble), and [Fallback chain](https://www.agentskit.io/docs/recipes/fallback-chain).
 
 ## Ecosystem
 
