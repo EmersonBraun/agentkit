@@ -1,0 +1,25 @@
+{
+  "title": "For agents",
+  "description": "LLM-friendly reference: dense package summaries with cross-links, designed to fit in a single context window.",
+  "pages": [
+    "index",
+    "core",
+    "adapters",
+    "runtime",
+    "react",
+    "ink",
+    "vue",
+    "svelte",
+    "solid",
+    "react-native",
+    "angular",
+    "tools",
+    "memory",
+    "rag",
+    "skills",
+    "observability",
+    "sandbox",
+    "eval",
+    "cli"
+  ]
+}
