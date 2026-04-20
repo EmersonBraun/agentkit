@@ -1,37 +1,76 @@
 ---
 title: Packages overview
-description: "Fourteen focused packages under @agentskit/*. Install what you need; UI and runtime layers share @agentskit/core (no third-party deps in core)."
+description: Every AgentsKit package at a glance — what it does, when to reach for it, where to read the deep dive.
 ---
+
 import { ContributeCallout } from '@/components/contribute/contribute-callout'
 
-
-Fourteen focused packages under `@agentskit/*`. Install what you need; UI and runtime layers share **`@agentskit/core`** (no third-party deps in core).
+Twenty-one focused packages under `@agentskit/*`. Install what you need; every UI and runtime layer composes against the zero-dep **[@agentskit/core](./core)**.
 
 :::tip API reference
-
 Full signatures: **[TypeDoc HTML](pathname:///agentskit/api-reference/)** (generated on `pnpm --filter @agentskit/docs build`; for local dev run `pnpm --filter @agentskit/docs docs:api` once).
-
 :::
 
-## Package index
+## Foundation
 
-| Package | Role | Guide |
-|---------|------|--------|
-| [`@agentskit/core`](./core) | Types, chat controller, primitives, agent loop | [Core](./core) |
-| [`@agentskit/react`](../chat-uis/react) | React hooks + headless UI | [React](../chat-uis/react) |
-| [`@agentskit/ink`](../chat-uis/ink) | Terminal UI (Ink) | [Ink](../chat-uis/ink) |
-| [`@agentskit/adapters`](../data-layer/adapters) | LLM adapters + embedders | [Adapters](../data-layer/adapters) |
-| [`@agentskit/memory`](../data-layer/memory) | Chat + vector backends | [Memory](../data-layer/memory) |
-| [`@agentskit/rag`](../data-layer/rag) | Chunk, embed, retrieve | [RAG](../data-layer/rag) |
-| [`@agentskit/runtime`](../agents/runtime) | Headless ReAct runtime | [Runtime](../agents/runtime) |
-| [`@agentskit/tools`](../agents/tools) | Search, filesystem, shell tools | [Tools](../agents/tools) |
-| [`@agentskit/skills`](../agents/skills) | Built-in skill definitions | [Skills](../agents/skills) |
-| [`@agentskit/observability`](../infrastructure/observability) | Logging + tracing observers | [Observability](../infrastructure/observability) |
-| [`@agentskit/sandbox`](../infrastructure/sandbox) | Sandboxed code execution | [Sandbox](../infrastructure/sandbox) |
-| [`@agentskit/eval`](../infrastructure/eval) | Eval suites + CI metrics | [Eval](../infrastructure/eval) |
-| [`@agentskit/cli`](../infrastructure/cli) | `agentskit` CLI | [CLI](../infrastructure/cli) |
-| [`@agentskit/templates`](./templates) | Scaffold tools, skills, adapters | [Templates](./templates) |
+| Package | One-liner |
+|---|---|
+| [@agentskit/core](./core) | Contracts + chat controller + primitives. Under 10 KB gzipped, zero deps. |
 
-Maintainers: **[documentation checklist](../contributing/package-docs)**.
+## Model providers
 
-<ContributeCallout  />
+| Package | One-liner |
+|---|---|
+| [@agentskit/adapters](./adapters) | 20+ LLM chat + embedder adapters, plus router / ensemble / fallback. |
+
+## UI bindings (same contract)
+
+| Package | One-liner |
+|---|---|
+| [@agentskit/react](./react) | `useChat` hook + headless components. |
+| [@agentskit/ink](./ink) | Terminal chat UI on Ink. |
+| [@agentskit/vue](./vue) | Vue 3 composable + `ChatContainer`. |
+| [@agentskit/svelte](./svelte) | Svelte 5 store. |
+| [@agentskit/solid](./solid) | Solid hook. |
+| [@agentskit/react-native](./react-native) | React Native / Expo hook. |
+| [@agentskit/angular](./angular) | Angular service (Signal + RxJS). |
+
+## Agent runtime
+
+| Package | One-liner |
+|---|---|
+| [@agentskit/runtime](./runtime) | Standalone agent runtime + durable + topologies + speculate + background. |
+
+## Capabilities
+
+| Package | One-liner |
+|---|---|
+| [@agentskit/tools](./tools) | Built-in tools + 20 integrations + MCP bridge. |
+| [@agentskit/memory](./memory) | Chat + vector + hierarchical + encrypted + graph memory. |
+| [@agentskit/rag](./rag) | Chunk + retrieve + rerank + hybrid + six loaders. |
+| [@agentskit/skills](./skills) | Ready-made personas + marketplace. |
+
+## Observability + evaluation
+
+| Package | One-liner |
+|---|---|
+| [@agentskit/observability](./observability) | Trace viewer, audit log, cost guard, devtools. |
+| [@agentskit/eval](./eval) | Suites + replay + snapshots + diff + CI reporter. |
+
+## Infrastructure
+
+| Package | One-liner |
+|---|---|
+| [@agentskit/sandbox](./sandbox) | Secure code execution + mandatory-sandbox policy. |
+| [@agentskit/cli](./cli) | `agentskit init / chat / run / ai / dev / doctor`. |
+| [@agentskit/templates](./templates) | Starter templates used by `agentskit init`. |
+
+## See also
+
+- [For agents](/docs/for-agents) — dense LLM-friendly reference per package.
+- [Concepts](/docs/concepts) — the six contracts every package builds on.
+- [Comparison](/docs/comparison) — AgentsKit vs. LangChain / Vercel AI / Mastra / LlamaIndex.
+
+Maintainers: **[documentation checklist](/docs/contribute/package-docs)**.
+
+<ContributeCallout />
