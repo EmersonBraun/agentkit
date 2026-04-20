@@ -1,0 +1,66 @@
+---
+title: Roadmap
+description: Per-package stability status, current version, and what each package needs to reach v1.0.
+---
+
+AgentsKit follows a **package-level semver** model. Each package declares its
+own stability tier and ships independently. The core is already v1;
+everything else is tracked below on its path to v1.
+
+## Stability tiers
+
+| Tier | Meaning | Breaking changes |
+|---|---|---|
+| **stable** | v1.0 or later. Contract frozen per ADRs. | Only via major bump, with deprecation + codemod. |
+| **beta** | v0.x, surface settled, tests + docs complete. | Possible, but announced in [#beta-log](/docs/get-started/announcements) one release in advance. |
+| **alpha** | v0.x, API still evolving. | Expected. Follow the changelog. |
+
+## Package status
+
+| Package | Version | Stability | Contract | Path to v1.0 |
+|---|---|---|---|---|
+| [`@agentskit/core`](./core) | 1.6.x | **stable** | frozen (ADRs 0001–0006) | Shipped. Contract frozen. |
+| [`@agentskit/adapters`](./adapters) | 0.9.x | **beta** | evolving | Finalize tool-call delta shape across providers; add Bedrock + Cohere + Vertex; adapter contract tests; publish 1.0 |
+| [`@agentskit/runtime`](./runtime) | 0.6.x | **beta** | evolving | Speculate API finalization; topology API finalization; durable step-log format frozen; publish 1.0 |
+| [`@agentskit/tools`](./tools) | 0.7.x | **beta** | evolving | Stabilize `composeTool` + `wrapToolWithSelfDebug` APIs; grow integrations to 35+; finalize MCP bridge shape; publish 1.0 |
+| [`@agentskit/memory`](./memory) | 0.6.x | **beta** | evolving | Stabilize `VectorStore` v1 (metadata filters); add Weaviate + Milvus + Turso + Supabase; publish 1.0 |
+| [`@agentskit/rag`](./rag) | 0.2.x | **alpha** | evolving | Finalize chunking strategies; reranker contract v1; add 3 more loaders; ship hybrid scorer defaults |
+| [`@agentskit/skills`](./skills) | 0.5.x | **beta** | evolving | `SkillDefinition` v1; marketplace resolver frozen; grow personas to 15; publish 1.0 |
+| [`@agentskit/observability`](./observability) | 0.5.x | **beta** | evolving | Trace event schema v1; audit-log format frozen; cost counter parity per adapter; publish 1.0 |
+| [`@agentskit/eval`](./eval) | 0.4.x | **alpha** | evolving | Suite format v1; replay cassette v1; CI reporter contract v1; snapshots stabilized |
+| [`@agentskit/sandbox`](./sandbox) | 0.3.x | **alpha** | evolving | E2B backend GA; WebContainer fallback feature parity; policy API v1 |
+| [`@agentskit/react`](./react) | 0.5.x | **beta** | evolving | `ChatReturn` shape frozen (shared across bindings); theme contract v1; a11y audit pass |
+| [`@agentskit/vue`](./vue) | 0.2.x | **alpha** | evolving | Parity with React surface; Vue 3 SSR tests; theme contract v1 |
+| [`@agentskit/svelte`](./svelte) | 0.2.x | **alpha** | evolving | Parity with React surface; Svelte 5 runes API; theme contract v1 |
+| [`@agentskit/solid`](./solid) | 0.2.x | **alpha** | evolving | Parity with React surface; Solid accessors; theme contract v1 |
+| [`@agentskit/react-native`](./react-native) | 0.2.x | **alpha** | evolving | Parity with React surface; Expo template; Android+iOS test matrix |
+| [`@agentskit/angular`](./angular) | 0.2.x | **alpha** | evolving | Parity with React surface; standalone-component template; Signal + RxJS contract v1 |
+| [`@agentskit/ink`](./ink) | 0.7.x | **beta** | evolving | Parity with React surface; keyboard UX pass; theme contract v1 |
+| [`@agentskit/cli`](./cli) | 0.8.x | **beta** | evolving | `agentskit init` template gallery; `agentskit ai` prompt hardening; `agentskit doctor` auto-fixes |
+| [`@agentskit/templates`](./templates) | 0.1.x | **alpha** | evolving | Grow to 8 framework starters; Stackblitz + CodeSandbox links per template |
+
+## Release cadence
+
+- **core:** patches only unless an ADR ratifies a major change (rare, deprecation window).
+- **beta packages:** minor releases every 2–3 weeks; patches as needed.
+- **alpha packages:** ship when ready; may include breaking changes in minors.
+- **changesets:** every PR adds a changeset; CI blocks merges without one.
+
+## How to follow
+
+- [Announcements](/docs/get-started/announcements) — narrative release notes.
+- [GitHub Releases](https://github.com/AgentsKit-io/agentskit/releases) — per-tag notes.
+- [Changesets](https://github.com/AgentsKit-io/agentskit/tree/main/.changeset) — in-flight bumps.
+- [Project board](https://github.com/orgs/AgentsKit-io/projects/1) — open issues grouped by phase.
+
+## Want to help a package reach v1?
+
+Every package lists "path to v1.0" items above as GitHub issues with
+`type-*` + `package-*` labels. Pick one, open a PR, we ship together.
+
+Start with [good first issues](https://github.com/AgentsKit-io/agentskit/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+
+## Related
+
+- [Packages overview](./overview) · [Core](./core)
+- [Contribute](/docs/reference/contribute) · [RFC process](/docs/reference/contribute/rfc-process)
