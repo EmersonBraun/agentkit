@@ -1,0 +1,78 @@
+---
+title: Docs MDX components
+description: Embeddable components available inside every .mdx file — Stackblitz, CodeSandbox, GIFs, Mermaid.
+---
+
+Every MDX page under `/docs` has access to these components. No import required.
+
+## `<StackblitzEmbed />`
+
+Live editable sandbox for any GitHub path.
+
+```mdx
+<StackblitzEmbed
+  project="AgentsKit-io/agentskit/tree/main/apps/example-react"
+  file="src/App.tsx"
+  height={520}
+/>
+```
+
+| Prop | Type | Default |
+|---|---|---|
+| `project` | `string` | required — `owner/repo/tree/branch/path` or Stackblitz id |
+| `file` | `string` | — |
+| `height` | `number` | 520 |
+| `title` | `string` | auto |
+| `lazy` | `boolean` | `true` (click-to-load, keeps LCP fast) |
+
+## `<CodeSandboxEmbed />`
+
+Mirror shape for CodeSandbox-hosted examples.
+
+```mdx
+<CodeSandboxEmbed sandbox="abcd123" file="/src/App.tsx" height={520} />
+```
+
+## `<GifEmbed />`
+
+A11y-aware GIF with reduced-motion fallback.
+
+```mdx
+<GifEmbed
+  src="/demos/streaming-chat.gif"
+  poster="/demos/streaming-chat.png"
+  alt="Streaming chat response with tool calls"
+  caption="RAG chat responding with sources"
+/>
+```
+
+Respects `prefers-reduced-motion` — shows the PNG poster + a link to the animation for users with motion sensitivity.
+
+## `<Mermaid />`
+
+Inline diagrams. See [`components/mermaid.tsx`](https://github.com/AgentsKit-io/agentskit/blob/main/apps/docs-next/components/mermaid.tsx).
+
+## Using all together
+
+A typical recipe page mixes code blocks, a GIF showing the outcome, and a live Stackblitz:
+
+```mdx
+## What you'll build
+
+<GifEmbed src="/demos/rag-chat.gif" alt="RAG chat UI streaming" />
+
+## Live sandbox
+
+<StackblitzEmbed project="AgentsKit-io/agentskit/tree/main/apps/example-react" file="src/App.tsx" />
+
+## Copy-paste
+
+\`\`\`ts
+// ...
+\`\`\`
+```
+
+## Related
+
+- [Contribute → package docs](./package-docs)
+- Issue #481/#482/#483/#484 — future MDX components (LivePlayground, better GIF helpers).
