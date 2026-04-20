@@ -3,6 +3,7 @@
   "description": "One page per package — what it does, when to reach for it, deep-dive links.",
   "pages": [
     "overview",
+    "roadmap",
     "core",
     "adapters",
     "runtime",
