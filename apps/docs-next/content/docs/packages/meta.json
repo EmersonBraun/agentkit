@@ -1,8 +1,26 @@
 {
   "title": "Packages",
+  "description": "One page per package — what it does, when to reach for it, deep-dive links.",
   "pages": [
     "overview",
     "core",
+    "adapters",
+    "runtime",
+    "react",
+    "vue",
+    "svelte",
+    "solid",
+    "react-native",
+    "angular",
+    "ink",
+    "tools",
+    "memory",
+    "rag",
+    "skills",
+    "observability",
+    "eval",
+    "sandbox",
+    "cli",
     "templates"
   ]
 }
