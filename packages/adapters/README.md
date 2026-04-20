@@ -4,8 +4,8 @@ Connect to any LLM provider — and swap between them — without touching your 
 
 [![npm version](https://img.shields.io/npm/v/@agentskit/adapters?color=blue)](https://www.npmjs.com/package/@agentskit/adapters)
 [![npm downloads](https://img.shields.io/npm/dm/@agentskit/adapters)](https://www.npmjs.com/package/@agentskit/adapters)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@agentskit/adapters)](https://bundlephobia.com/package/@agentskit/adapters)
-[![license](https://img.shields.io/npm/l/@agentskit/adapters)](../../LICENSE)
+[![bundle size](https://img.shields.io/bundlejs/size/@agentskit/adapters?label=bundle)](https://bundlejs.com/?q=@agentskit/adapters)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)
 [![stability](https://img.shields.io/badge/stability-stable-brightgreen)](../../docs/STABILITY.md)
 [![GitHub stars](https://img.shields.io/github/stars/AgentsKit-io/agentskit?style=social)](https://github.com/AgentsKit-io/agentskit)
 

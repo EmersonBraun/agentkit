@@ -4,8 +4,8 @@ Add streaming AI chat to any React app in 10 lines of code.
 
 [![npm version](https://img.shields.io/npm/v/@agentskit/react?color=blue)](https://www.npmjs.com/package/@agentskit/react)
 [![npm downloads](https://img.shields.io/npm/dm/@agentskit/react)](https://www.npmjs.com/package/@agentskit/react)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@agentskit/react)](https://bundlephobia.com/package/@agentskit/react)
-[![license](https://img.shields.io/npm/l/@agentskit/react)](../../LICENSE)
+[![bundle size](https://img.shields.io/bundlejs/size/@agentskit/react?label=bundle)](https://bundlejs.com/?q=@agentskit/react)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)
 [![stability](https://img.shields.io/badge/stability-stable-brightgreen)](../../docs/STABILITY.md)
 [![GitHub stars](https://img.shields.io/github/stars/AgentsKit-io/agentskit?style=social)](https://github.com/AgentsKit-io/agentskit)
 

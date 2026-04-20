@@ -4,8 +4,8 @@ Pre-tuned agent personas that work out of the box — skills are what your agent
 
 [![npm version](https://img.shields.io/npm/v/@agentskit/skills?color=blue)](https://www.npmjs.com/package/@agentskit/skills)
 [![npm downloads](https://img.shields.io/npm/dm/@agentskit/skills)](https://www.npmjs.com/package/@agentskit/skills)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@agentskit/skills)](https://bundlephobia.com/package/@agentskit/skills)
-[![license](https://img.shields.io/npm/l/@agentskit/skills)](../../LICENSE)
+[![bundle size](https://img.shields.io/bundlejs/size/@agentskit/skills?label=bundle)](https://bundlejs.com/?q=@agentskit/skills)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)
 [![stability](https://img.shields.io/badge/stability-stable-brightgreen)](../../docs/STABILITY.md)
 [![GitHub stars](https://img.shields.io/github/stars/AgentsKit-io/agentskit?style=social)](https://github.com/AgentsKit-io/agentskit)
 

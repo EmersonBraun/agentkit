@@ -4,8 +4,8 @@ Persist conversations and add vector search to your agents — swap backends wit
 
 [![npm version](https://img.shields.io/npm/v/@agentskit/memory?color=blue)](https://www.npmjs.com/package/@agentskit/memory)
 [![npm downloads](https://img.shields.io/npm/dm/@agentskit/memory)](https://www.npmjs.com/package/@agentskit/memory)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@agentskit/memory)](https://bundlephobia.com/package/@agentskit/memory)
-[![license](https://img.shields.io/npm/l/@agentskit/memory)](../../LICENSE)
+[![bundle size](https://img.shields.io/bundlejs/size/@agentskit/memory?label=bundle)](https://bundlejs.com/?q=@agentskit/memory)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)
 [![stability](https://img.shields.io/badge/stability-stable-brightgreen)](../../docs/STABILITY.md)
 [![GitHub stars](https://img.shields.io/github/stars/AgentsKit-io/agentskit?style=social)](https://github.com/AgentsKit-io/agentskit)
 
@@ -49,14 +49,38 @@ Use a **vector** backend with [`@agentskit/rag`](https://www.npmjs.com/package/@
 
 ## Features
 
-- **Chat memory:** `fileChatMemory`, `sqliteChatMemory`, `redisChatMemory` (on top of `createInMemoryMemory` / `createLocalStorageMemory` from core).
-- **Vector memory:** `fileVectorMemory`, `redisVectorMemory` + `pgvector`, `pinecone`, `qdrant`, `chroma`, `upstashVector` — same 3-method `VectorMemory` contract.
-- **Higher-order wrappers:**
-  - `createHierarchicalMemory` — MemGPT-style tiers (working / recall / archival). [Recipe](https://www.agentskit.io/docs/recipes/hierarchical-memory).
-  - `createEncryptedMemory` — AES-GCM over any `ChatMemory`; keys never leave the caller. [Recipe](https://www.agentskit.io/docs/recipes/encrypted-memory).
-  - `createInMemoryGraph` — knowledge graph (nodes + edges + BFS). [Recipe](https://www.agentskit.io/docs/recipes/graph-memory).
-  - `createInMemoryPersonalization` — per-user trait profile. [Recipe](https://www.agentskit.io/docs/recipes/personalization).
-- Memory contract v1 (ADR 0003) — substitutable across `runtime`, `useChat`, and every framework binding.
+### Chat memory (3)
+
+- `fileChatMemory({ path })` — JSON on disk; zero infra.
+- `sqliteChatMemory({ path })` — WAL-mode SQLite; indexed by session.
+- `redisChatMemory({ client, keyPrefix })` — distributed, serverless-friendly.
+
+All on top of `createInMemoryMemory` / `createLocalStorageMemory` from
+`@agentskit/core`.
+
+### Vector memory (7)
+
+- `fileVectorMemory` — pure-JS, file-persisted (good to ~10k vectors).
+- `redisVectorMemory` — Redis Stack / Redis 8+ HNSW.
+- `pgvector` — BYO SQL runner (`postgres.js`, `pg`, Drizzle, Prisma, Neon).
+- `pinecone` — managed; namespaces + metadata filters.
+- `qdrant` — self-hosted or cloud via HTTP.
+- `chroma` — HTTP collection client.
+- `upstashVector` — serverless HTTP.
+
+Same 3-method `VectorStore` contract — swap without touching agent code.
+
+### Higher-order wrappers (6)
+
+- `createHierarchicalMemory` — MemGPT-style tiers: working / recall / archival. [Recipe](https://www.agentskit.io/docs/recipes/hierarchical-memory).
+- `createVirtualizedMemory` — hot window + cold retriever for long sessions. [Recipe](https://www.agentskit.io/docs/recipes/virtualized-memory).
+- `createAutoSummarizingMemory` *(via `@agentskit/core/auto-summarize`)* — fold oldest turns into a running summary. [Recipe](https://www.agentskit.io/docs/recipes/auto-summarize).
+- `createEncryptedMemory` — AES-GCM-256 envelope over any `ChatMemory`; keys never leave the caller. [Recipe](https://www.agentskit.io/docs/recipes/encrypted-memory).
+- `createInMemoryGraph` — knowledge graph (nodes + edges + BFS). [Recipe](https://www.agentskit.io/docs/recipes/graph-memory).
+- `createInMemoryPersonalization` + `renderProfileContext` — per-user trait profile. [Recipe](https://www.agentskit.io/docs/recipes/personalization).
+
+Memory contract v1 (ADR 0003) — substitutable across `runtime`,
+`useChat`, and every framework binding.
 
 ## Ecosystem
 

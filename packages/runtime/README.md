@@ -4,8 +4,8 @@ Run autonomous agents in 5 lines — no UI, no boilerplate, just results.
 
 [![npm version](https://img.shields.io/npm/v/@agentskit/runtime?color=blue)](https://www.npmjs.com/package/@agentskit/runtime)
 [![npm downloads](https://img.shields.io/npm/dm/@agentskit/runtime)](https://www.npmjs.com/package/@agentskit/runtime)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@agentskit/runtime)](https://bundlephobia.com/package/@agentskit/runtime)
-[![license](https://img.shields.io/npm/l/@agentskit/runtime)](../../LICENSE)
+[![bundle size](https://img.shields.io/bundlejs/size/@agentskit/runtime?label=bundle)](https://bundlejs.com/?q=@agentskit/runtime)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)
 [![stability](https://img.shields.io/badge/stability-stable-brightgreen)](../../docs/STABILITY.md)
 [![GitHub stars](https://img.shields.io/github/stars/AgentsKit-io/agentskit?style=social)](https://github.com/AgentsKit-io/agentskit)
 

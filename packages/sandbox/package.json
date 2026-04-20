@@ -59,5 +59,16 @@
   "agentskit": {
     "stability": "beta",
     "stabilityNote": "E2B integration works; WebContainer fallback experimental."
-  }
+  },
+  "license": "MIT",
+  "homepage": "https://www.agentskit.io/docs/packages/sandbox",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AgentsKit-io/agentskit.git",
+    "directory": "packages/sandbox"
+  },
+  "bugs": {
+    "url": "https://github.com/AgentsKit-io/agentskit/issues"
+  },
+  "author": "AgentsKit Contributors"
 }
