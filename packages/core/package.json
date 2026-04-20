@@ -111,5 +111,16 @@
   "agentskit": {
     "stability": "stable",
     "stabilityNote": "Sacred package. Contract-stable per ADRs 0001-0006."
-  }
+  },
+  "license": "MIT",
+  "homepage": "https://www.agentskit.io/docs/packages/core",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AgentsKit-io/agentskit.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/AgentsKit-io/agentskit/issues"
+  },
+  "author": "AgentsKit Contributors"
 }

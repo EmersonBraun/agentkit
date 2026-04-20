@@ -4,8 +4,8 @@ See exactly what your agent does — every LLM call, tool execution, and reasoni
 
 [![npm version](https://img.shields.io/npm/v/@agentskit/observability?color=blue)](https://www.npmjs.com/package/@agentskit/observability)
 [![npm downloads](https://img.shields.io/npm/dm/@agentskit/observability)](https://www.npmjs.com/package/@agentskit/observability)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@agentskit/observability)](https://bundlephobia.com/package/@agentskit/observability)
-[![license](https://img.shields.io/npm/l/@agentskit/observability)](../../LICENSE)
+[![bundle size](https://img.shields.io/bundlejs/size/@agentskit/observability?label=bundle)](https://bundlejs.com/?q=@agentskit/observability)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)
 [![stability](https://img.shields.io/badge/stability-beta-yellow)](../../docs/STABILITY.md)
 [![GitHub stars](https://img.shields.io/github/stars/AgentsKit-io/agentskit?style=social)](https://github.com/AgentsKit-io/agentskit)
 

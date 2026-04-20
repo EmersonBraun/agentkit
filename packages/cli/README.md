@@ -4,8 +4,8 @@ Chat with any LLM, scaffold projects, and run agents — all from your terminal.
 
 [![npm version](https://img.shields.io/npm/v/@agentskit/cli?color=blue)](https://www.npmjs.com/package/@agentskit/cli)
 [![npm downloads](https://img.shields.io/npm/dm/@agentskit/cli)](https://www.npmjs.com/package/@agentskit/cli)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@agentskit/cli)](https://bundlephobia.com/package/@agentskit/cli)
-[![license](https://img.shields.io/npm/l/@agentskit/cli)](../../LICENSE)
+[![bundle size](https://img.shields.io/bundlejs/size/@agentskit/cli?label=bundle)](https://bundlejs.com/?q=@agentskit/cli)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)
 [![stability](https://img.shields.io/badge/stability-stable-brightgreen)](../../docs/STABILITY.md)
 [![GitHub stars](https://img.shields.io/github/stars/AgentsKit-io/agentskit?style=social)](https://github.com/AgentsKit-io/agentskit)
 

@@ -4,8 +4,8 @@ Let agents write and run code safely — in isolated cloud VMs, not on your mach
 
 [![npm version](https://img.shields.io/npm/v/@agentskit/sandbox?color=blue)](https://www.npmjs.com/package/@agentskit/sandbox)
 [![npm downloads](https://img.shields.io/npm/dm/@agentskit/sandbox)](https://www.npmjs.com/package/@agentskit/sandbox)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@agentskit/sandbox)](https://bundlephobia.com/package/@agentskit/sandbox)
-[![license](https://img.shields.io/npm/l/@agentskit/sandbox)](../../LICENSE)
+[![bundle size](https://img.shields.io/bundlejs/size/@agentskit/sandbox?label=bundle)](https://bundlejs.com/?q=@agentskit/sandbox)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)
 [![stability](https://img.shields.io/badge/stability-beta-yellow)](../../docs/STABILITY.md)
 [![GitHub stars](https://img.shields.io/github/stars/AgentsKit-io/agentskit?style=social)](https://github.com/AgentsKit-io/agentskit)
 

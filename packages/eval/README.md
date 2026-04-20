@@ -4,8 +4,8 @@ Measure agent quality with numbers, not vibes — ship with confidence.
 
 [![npm version](https://img.shields.io/npm/v/@agentskit/eval?color=blue)](https://www.npmjs.com/package/@agentskit/eval)
 [![npm downloads](https://img.shields.io/npm/dm/@agentskit/eval)](https://www.npmjs.com/package/@agentskit/eval)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@agentskit/eval)](https://bundlephobia.com/package/@agentskit/eval)
-[![license](https://img.shields.io/npm/l/@agentskit/eval)](../../LICENSE)
+[![bundle size](https://img.shields.io/bundlejs/size/@agentskit/eval?label=bundle)](https://bundlejs.com/?q=@agentskit/eval)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)
 [![stability](https://img.shields.io/badge/stability-beta-yellow)](../../docs/STABILITY.md)
 [![GitHub stars](https://img.shields.io/github/stars/AgentsKit-io/agentskit?style=social)](https://github.com/AgentsKit-io/agentskit)
 

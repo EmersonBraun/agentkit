@@ -4,8 +4,8 @@ The zero-dependency foundation that every AgentsKit package builds on — 5 KB g
 
 [![npm version](https://img.shields.io/npm/v/@agentskit/core?color=blue)](https://www.npmjs.com/package/@agentskit/core)
 [![npm downloads](https://img.shields.io/npm/dm/@agentskit/core)](https://www.npmjs.com/package/@agentskit/core)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@agentskit/core)](https://bundlephobia.com/package/@agentskit/core)
-[![license](https://img.shields.io/npm/l/@agentskit/core)](../../LICENSE)
+[![bundle size](https://img.shields.io/bundlejs/size/@agentskit/core?label=bundle)](https://bundlejs.com/?q=@agentskit/core)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)
 [![stability](https://img.shields.io/badge/stability-stable-brightgreen)](../../docs/STABILITY.md)
 [![GitHub stars](https://img.shields.io/github/stars/AgentsKit-io/agentskit?style=social)](https://github.com/AgentsKit-io/agentskit)
 

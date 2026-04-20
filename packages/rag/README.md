@@ -4,8 +4,8 @@ Plug-and-play retrieval-augmented generation: chunk documents, embed them, and r
 
 [![npm version](https://img.shields.io/npm/v/@agentskit/rag?color=blue)](https://www.npmjs.com/package/@agentskit/rag)
 [![npm downloads](https://img.shields.io/npm/dm/@agentskit/rag)](https://www.npmjs.com/package/@agentskit/rag)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@agentskit/rag)](https://bundlephobia.com/package/@agentskit/rag)
-[![license](https://img.shields.io/npm/l/@agentskit/rag)](../../LICENSE)
+[![bundle size](https://img.shields.io/bundlejs/size/@agentskit/rag?label=bundle)](https://bundlejs.com/?q=@agentskit/rag)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)
 [![stability](https://img.shields.io/badge/stability-stable-brightgreen)](../../docs/STABILITY.md)
 [![GitHub stars](https://img.shields.io/github/stars/AgentsKit-io/agentskit?style=social)](https://github.com/AgentsKit-io/agentskit)
 

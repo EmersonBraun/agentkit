@@ -4,8 +4,8 @@ Build terminal AI chat interfaces with the exact same API as `@agentskit/react`.
 
 [![npm version](https://img.shields.io/npm/v/@agentskit/ink?color=blue)](https://www.npmjs.com/package/@agentskit/ink)
 [![npm downloads](https://img.shields.io/npm/dm/@agentskit/ink)](https://www.npmjs.com/package/@agentskit/ink)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@agentskit/ink)](https://bundlephobia.com/package/@agentskit/ink)
-[![license](https://img.shields.io/npm/l/@agentskit/ink)](../../LICENSE)
+[![bundle size](https://img.shields.io/bundlejs/size/@agentskit/ink?label=bundle)](https://bundlejs.com/?q=@agentskit/ink)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)
 [![stability](https://img.shields.io/badge/stability-stable-brightgreen)](../../docs/STABILITY.md)
 [![GitHub stars](https://img.shields.io/github/stars/AgentsKit-io/agentskit?style=social)](https://github.com/AgentsKit-io/agentskit)
 

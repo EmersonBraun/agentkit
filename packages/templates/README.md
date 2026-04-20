@@ -4,8 +4,8 @@ Create, validate, and scaffold custom AgentsKit extensions — tools, skills, an
 
 [![npm version](https://img.shields.io/npm/v/@agentskit/templates?color=blue)](https://www.npmjs.com/package/@agentskit/templates)
 [![npm downloads](https://img.shields.io/npm/dm/@agentskit/templates)](https://www.npmjs.com/package/@agentskit/templates)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@agentskit/templates)](https://bundlephobia.com/package/@agentskit/templates)
-[![license](https://img.shields.io/npm/l/@agentskit/templates)](../../LICENSE)
+[![bundle size](https://img.shields.io/bundlejs/size/@agentskit/templates?label=bundle)](https://bundlejs.com/?q=@agentskit/templates)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)
 [![stability](https://img.shields.io/badge/stability-stable-brightgreen)](../../docs/STABILITY.md)
 [![GitHub stars](https://img.shields.io/github/stars/AgentsKit-io/agentskit?style=social)](https://github.com/AgentsKit-io/agentskit)
 
