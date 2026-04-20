@@ -1,0 +1,34 @@
+---
+title: Data attributes
+description: AgentsKit UI components are headless. Every stylable hook is a data-ak-* attribute so your CSS (or your LLM) can target them reliably.
+---
+
+Components emit zero styles. They emit **data attributes**. Style with
+your favorite CSS stack; generate UI with an LLM and the attributes
+tell it exactly where to hook.
+
+## Reference
+
+| Attribute | Where | Values |
+|---|---|---|
+| `data-ak-chat-container` | root of [ChatContainer](./chat-container) | — |
+| `data-ak-message` | root of [Message](./message) | — |
+| `data-ak-role` | on `Message` root | `user` · `assistant` · `tool` · `system` |
+| `data-ak-streaming` | on `Message` root | `true` · `false` |
+| `data-ak-part` | every message part | `text` · `tool-call` · `tool-result` · `image` · `file` |
+| `data-ak-tool-call` | root of [ToolCallView](./tool-call-view) | — |
+| `data-ak-status` | on `ToolCallView` | `pending` · `running` · `done` · `error` · `awaiting-approval` |
+| `data-ak-input-bar` | root of [InputBar](./input-bar) | — |
+| `data-ak-thinking` | root of [ThinkingIndicator](./thinking-indicator) | — |
+| `data-ak-markdown` | root of `Markdown` | — |
+| `data-ak-code-block` | root of `CodeBlock` | — |
+
+## Generative UI
+
+Because selectors are stable and framework-agnostic, LLMs can generate
+CSS / className overrides that work cross-framework. See
+[Generative UI recipe](/docs/recipes/generative-ui).
+
+## Related
+
+- [Theming](./theming) — CSS variables + preset themes

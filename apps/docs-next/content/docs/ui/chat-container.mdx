@@ -1,0 +1,49 @@
+---
+title: ChatContainer
+description: Headless scrollable transcript container. Auto-scroll on new messages, virtualized-ready.
+---
+
+Top-level wrapper for a chat transcript. Renders `data-ak-chat-container`
+with auto-scroll anchor. No hardcoded styles — theme via
+[data attributes](./data-attributes) and [CSS variables](./theming).
+
+## Props
+
+| Prop | Type | Default |
+|---|---|---|
+| `children` | `ReactNode` | — |
+| `autoScroll` | `boolean` | `true` |
+| `className` | `string` | — |
+
+## Per-framework
+
+| Framework | Import |
+|---|---|
+| React | `import { ChatContainer } from '@agentskit/react'` |
+| Vue | `import { ChatContainer } from '@agentskit/vue'` |
+| Svelte | `import ChatContainer from '@agentskit/svelte/ChatContainer.svelte'` |
+| Solid | `import { ChatContainer } from '@agentskit/solid'` |
+| React Native | `import { ChatContainer } from '@agentskit/react-native'` — `ScrollView`-backed |
+| Angular | `<ak-chat-container>` — from `AgentskitUiModule` |
+| Ink | `import { ChatContainer } from '@agentskit/ink'` — Ink `<Box>` |
+
+## Example
+
+```tsx
+import { ChatContainer, Message, InputBar, useChat } from '@agentskit/react'
+
+export function App() {
+  const chat = useChat({ adapter: openai(...) })
+  return (
+    <ChatContainer>
+      {chat.messages.map((m) => <Message key={m.id} message={m} />)}
+      <InputBar chat={chat} />
+    </ChatContainer>
+  )
+}
+```
+
+## Related
+
+- [Message](./message) · [InputBar](./input-bar)
+- [Theming](./theming) · [Data attributes](./data-attributes)

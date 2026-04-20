@@ -1,0 +1,62 @@
+---
+title: Theming
+description: CSS variables + optional preset themes. One source of truth across every framework binding.
+---
+
+AgentsKit ships headless components — theming is your call. Defaults
+come from a lightweight stylesheet at
+`@agentskit/react/theme` (equivalent for Vue / Svelte / Solid / RN).
+
+## Import a preset
+
+```ts
+import '@agentskit/react/theme'
+```
+
+## CSS variables
+
+```css
+:root {
+  --ak-bg: #0b0f17;
+  --ak-surface: #111827;
+  --ak-border: #1f2937;
+  --ak-text: #e5e7eb;
+  --ak-muted: #9ca3af;
+  --ak-accent: #6366f1;
+  --ak-danger: #ef4444;
+  --ak-radius: 12px;
+  --ak-font: ui-sans-serif, system-ui, sans-serif;
+  --ak-mono: ui-monospace, SFMono-Regular, monospace;
+}
+```
+
+## Dark / light
+
+Variables flip on `[data-theme="light"]` / `[data-theme="dark"]`.
+
+## Tailwind
+
+Wire Tailwind to the CSS variables:
+
+```js
+theme: {
+  extend: {
+    colors: {
+      ak: {
+        bg: 'var(--ak-bg)',
+        accent: 'var(--ak-accent)',
+      },
+    },
+  },
+}
+```
+
+## Native + terminal
+
+- **React Native:** theme via `ThemeProvider` prop (JS object, same keys).
+- **Ink:** ANSI palette from the same keys (`ak.accent` → chalk hex).
+
+## Related
+
+- [Data attributes](./data-attributes)
+- [Legacy theming reference](/docs/theming/overview)

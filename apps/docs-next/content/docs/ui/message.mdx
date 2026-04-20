@@ -1,0 +1,46 @@
+---
+title: Message
+description: Renders one message — user, assistant, tool, or system. Streaming-aware, role-aware.
+---
+
+Headless single-message renderer. Role in `data-ak-role`. Streaming
+state in `data-ak-streaming`. Content chunks (text, tool-call,
+tool-result, image, file) each emit a `data-ak-part` wrapper.
+
+## Props
+
+| Prop | Type | Default |
+|---|---|---|
+| `message` | `Message` | — |
+| `avatar` | `ReactNode` | — |
+| `actions` | `ReactNode` | — |
+| `renderPart` | `(part) => ReactNode` | built-in |
+
+## Message shape
+
+```ts
+type Message = {
+  id: string
+  role: 'user' | 'assistant' | 'tool' | 'system'
+  parts: MessagePart[]
+  createdAt: number
+  streaming?: boolean
+}
+```
+
+## Per-framework
+
+| Framework | Import |
+|---|---|
+| React | `import { Message } from '@agentskit/react'` |
+| Vue | `import { Message } from '@agentskit/vue'` |
+| Svelte | `import Message from '@agentskit/svelte/Message.svelte'` |
+| Solid | `import { Message } from '@agentskit/solid'` |
+| React Native | `import { Message } from '@agentskit/react-native'` |
+| Angular | `<ak-message [message]="msg">` |
+| Ink | `import { Message } from '@agentskit/ink'` |
+
+## Related
+
+- [ChatContainer](./chat-container) · [ToolCallView](./tool-call-view)
+- [Theming](./theming)

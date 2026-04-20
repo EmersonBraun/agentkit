@@ -1,5 +1,16 @@
 {
   "title": "UI + hooks",
   "description": "Framework bindings (React, Vue, Svelte, Solid, RN, Angular, Ink) share the same contract — useChat + headless components.",
-  "pages": ["index"]
+  "pages": [
+    "index",
+    "use-chat",
+    "chat-container",
+    "message",
+    "input-bar",
+    "tool-call-view",
+    "tool-confirmation",
+    "thinking-indicator",
+    "data-attributes",
+    "theming"
+  ]
 }

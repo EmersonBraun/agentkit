@@ -1,0 +1,46 @@
+---
+title: ToolCallView
+description: Render a tool invocation — name, args, result, status. Works for all tools.
+---
+
+Shows one tool call's lifecycle: `pending` → `running` → `done` |
+`error`. Emits `data-ak-tool-call` with `data-ak-status`.
+
+## Props
+
+| Prop | Type | Default |
+|---|---|---|
+| `toolCall` | `ToolCall` | — |
+| `collapsed` | `boolean` | `false` |
+| `renderArgs` | `(args) => ReactNode` | JSON view |
+| `renderResult` | `(result) => ReactNode` | JSON view |
+
+## ToolCall shape
+
+```ts
+type ToolCall = {
+  id: string
+  name: string
+  args: unknown
+  status: 'pending' | 'running' | 'done' | 'error'
+  result?: unknown
+  error?: string
+}
+```
+
+## Per-framework
+
+| Framework | Import |
+|---|---|
+| React | `import { ToolCallView } from '@agentskit/react'` |
+| Vue | `import { ToolCallView } from '@agentskit/vue'` |
+| Svelte | `import ToolCallView from '@agentskit/svelte/ToolCallView.svelte'` |
+| Solid | `import { ToolCallView } from '@agentskit/solid'` |
+| React Native | `import { ToolCallView } from '@agentskit/react-native'` |
+| Angular | `<ak-tool-call-view [toolCall]="tc">` |
+| Ink | `import { ToolCallView } from '@agentskit/ink'` |
+
+## Related
+
+- [ToolConfirmation](./tool-confirmation) — human-in-the-loop approval gate
+- [Tools package](/docs/packages/tools)

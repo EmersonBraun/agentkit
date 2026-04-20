@@ -1,0 +1,66 @@
+---
+title: useChat
+description: The one hook every framework binding exposes. Same input, same return, same events.
+---
+
+`useChat` is the contract every AgentsKit UI binding mirrors. It wraps
+`createChatController` from `@agentskit/core` with the idioms of your
+host framework (React hook, Vue composable, Svelte store, Solid
+signal, Angular service, React Native hook, Ink hook).
+
+## Contract
+
+```ts
+type ChatReturn = {
+  messages: Message[]
+  status: 'idle' | 'streaming' | 'error' | 'awaiting-tool'
+  error: Error | null
+  send: (text: string, opts?: SendOptions) => Promise<void>
+  retry: () => Promise<void>
+  stop: () => void
+  clear: () => void
+  approve: (toolCallId: string, result?: unknown) => void
+  deny: (toolCallId: string, reason?: string) => void
+  edit: (messageId: string, text: string) => Promise<void>
+}
+```
+
+## Inputs
+
+```ts
+type ChatConfig = {
+  adapter: Adapter
+  tools?: Tool[]
+  skills?: Skill[]
+  memory?: Memory
+  rag?: Retriever
+  system?: string
+  onEvent?: (e: ChatEvent) => void
+  onError?: (e: Error) => void
+}
+```
+
+## Per-framework usage
+
+| Framework | Import | Shape |
+|---|---|---|
+| React | `import { useChat } from '@agentskit/react'` | `const chat = useChat(config)` |
+| Vue | `import { useChat } from '@agentskit/vue'` | `const chat = useChat(config)` — values are `ref`s |
+| Svelte | `import { createChatStore } from '@agentskit/svelte'` | `const chat = createChatStore(config)` — Svelte 5 runes |
+| Solid | `import { useChat } from '@agentskit/solid'` | `const chat = useChat(config)` — accessors |
+| React Native | `import { useChat } from '@agentskit/react-native'` | Metro-safe, no DOM |
+| Angular | `import { AgentskitChat } from '@agentskit/angular'` | `constructor(private chat: AgentskitChat)` — `Signal` + `RxJS` |
+| Ink | `import { useChat } from '@agentskit/ink'` | Terminal-safe |
+
+## Events (`onEvent`)
+
+`chat.start` · `message.append` · `message.update` · `tool.call` ·
+`tool.result` · `error` · `status.change` · `chat.end`.
+
+Full schema: [Concepts → Events](/docs/concepts/events).
+
+## Related
+
+- Components: [ChatContainer](./chat-container) · [Message](./message) · [InputBar](./input-bar) · [ToolCallView](./tool-call-view) · [ThinkingIndicator](./thinking-indicator)
+- [Data attributes](./data-attributes) · [Theming](./theming)
+- [For agents → Contract](/docs/for-agents/contract)
