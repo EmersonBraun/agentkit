@@ -1,0 +1,42 @@
+---
+title: ToolConfirmation
+description: Human-in-the-loop approval UI for guarded tool calls.
+---
+
+Shown when a tool's `requiresConfirmation` is set. Approve or deny
+forwards to `chat.approve` / `chat.deny`. Blocks the run until
+resolved.
+
+## Props
+
+| Prop | Type |
+|---|---|
+| `toolCall` | `ToolCall` |
+| `onApprove` | `() => void` |
+| `onDeny` | `(reason?: string) => void` |
+
+## Example
+
+```tsx
+{chat.messages
+  .flatMap((m) => m.parts)
+  .filter((p) => p.type === 'tool-call' && p.status === 'awaiting-approval')
+  .map((tc) => (
+    <ToolConfirmation
+      key={tc.id}
+      toolCall={tc}
+      onApprove={() => chat.approve(tc.id)}
+      onDeny={(reason) => chat.deny(tc.id, reason)}
+    />
+  ))}
+```
+
+## Per-framework
+
+Surface is identical to [ToolCallView](./tool-call-view). Angular:
+`<ak-tool-confirmation>`.
+
+## Related
+
+- [HITL approvals recipe](/docs/recipes/hitl-approvals)
+- [Security → mandatory sandbox](/docs/security/mandatory-sandbox)
