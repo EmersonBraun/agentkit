@@ -11,6 +11,8 @@
     "docs": "next dev --turbo",
     "start": "next start",
     "lint": "tsc --noEmit",
+    "lint:mdx": "node scripts/lint-mdx.mjs",
+    "check:links": "node scripts/check-links.mjs",
     "gen:api": "node scripts/gen-api.mjs",
     "postinstall": "fumadocs-mdx"
   },
