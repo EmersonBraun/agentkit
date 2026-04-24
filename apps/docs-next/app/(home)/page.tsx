@@ -77,7 +77,7 @@ const JSON_LD = {
       license: 'https://github.com/AgentsKit-io/agentskit/blob/main/LICENSE',
       author: { '@id': 'https://www.agentskit.io/#org' },
       programmingLanguage: 'TypeScript',
-      keywords: 'AI agents, JavaScript, TypeScript, LLM, streaming chat, RAG, tools, React',
+      keywords: 'AI agents, autonomous agent, multi-agent, JavaScript, TypeScript, LLM, streaming chat, RAG, tools, memory, observability, React, Vue, Svelte, Next.js, OpenAI, Anthropic Claude, Gemini, Ollama, LangChain',
     },
     {
       '@type': 'WebSite',
