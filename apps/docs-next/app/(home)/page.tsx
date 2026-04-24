@@ -100,9 +100,9 @@ export default function HomePage() {
       <JsonLd data={JSON_LD} />
       <Hero />
       <SocialProofBar />
-      <EcosystemStats />
       <ProblemSection />
       <SolutionSection />
+      <EcosystemStats />
       <BenefitsSection />
       <UseCasesSection />
       <ProofSection />
@@ -329,10 +329,7 @@ function SolutionSection() {
                 @agentskit/core · 10KB · zero deps
               </Link>
             </div>
-            <div className="mx-auto mb-4 h-8 w-px bg-ak-border" />
-            <p className="mb-4 text-center font-mono text-[11px] uppercase tracking-[0.2em] text-ak-graphite">
-              ↓ click any package to open its docs
-            </p>
+            <div className="mx-auto mb-6 h-8 w-px bg-ak-border" />
             <Stagger className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4" stagger={0.04}>
               {PACKAGE_CARDS.map(pkg => (
                 <StaggerItem key={pkg.name}>
@@ -402,7 +399,7 @@ function BenefitsSection() {
           Why teams ship with it
         </p>
         <h2 className="mb-10 max-w-2xl text-[1.75rem] font-bold leading-[1.15] text-ak-foam sm:mb-14 sm:text-3xl md:text-4xl lg:text-5xl">
-          Built for the code you&apos;ll still want to own in 12 months.
+          Code you&apos;ll still want to own in 12 months.
         </h2>
         <div className="grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
           {benefits.map(b => (
@@ -459,9 +456,8 @@ function UseCasesSection() {
           Start from the outcome, not the taxonomy.
         </h2>
         <p className="mb-8 max-w-2xl text-base text-ak-graphite sm:mb-12 sm:text-lg">
-          The package graph matters, but most teams think in products. These
-          guides show how AgentsKit composes into real builds, not just API
-          surfaces.
+          Four end-to-end builds showing how the packages compose into real
+          products, not just API surfaces.
         </p>
         <div className="grid gap-4 sm:gap-5 md:grid-cols-2">
           {useCases.map((item) => (
@@ -521,9 +517,8 @@ function ProofSection() {
           Start from a template, a demo, or a runnable recipe.
         </h2>
         <p className="mb-8 max-w-2xl text-base text-ak-graphite sm:mb-12 sm:text-lg">
-          AgentsKit is easier to evaluate when you can touch the stack from
-          multiple angles. Scaffold a project, inspect a live example, or copy
-          a recipe and run it locally.
+          Scaffold a project, inspect a live demo, or copy a recipe and run it
+          locally. Pick the angle you trust.
         </p>
         <div className="grid gap-4 sm:gap-5 lg:grid-cols-3">
           {starters.map((item) => (
