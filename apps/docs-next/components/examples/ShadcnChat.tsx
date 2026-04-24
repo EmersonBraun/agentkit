@@ -1,227 +1,146 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
+import { useMemo, type FormEvent, type KeyboardEvent } from 'react'
+import { useChat } from '@agentskit/react'
+import { createMockAdapter, initialAssistant } from './_shared/mock-adapter'
 
-interface Message {
-  id: number
-  role: 'user' | 'assistant'
-  content: string
-}
-
-const INITIAL_MESSAGES: Message[] = [
-  { id: 1, role: 'assistant', content: 'Hello! How can I help you today?' },
-  { id: 2, role: 'user', content: 'Can you help me build a chat UI?' },
-  { id: 3, role: 'assistant', content: 'Of course! I can help you build a chat UI. What framework or library are you using?' },
-]
-
-const fontFamily =
-  '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-
+/**
+ * shadcn/ui styled chat. AgentsKit ships the hook (useChat) and the tokens
+ * via `data-ak-*` selectors — the UI here is fully custom, written in the
+ * shadcn idiom: zinc palette, 0.5rem radii, subtle borders, Lucide-style
+ * icons, and shadcn's Button + Textarea look-and-feel.
+ */
 export function ShadcnChat() {
-  const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES)
-  const [input, setInput] = useState('')
-  const [focused, setFocused] = useState(false)
-  const [hovered, setHovered] = useState(false)
-  const bottomRef = useRef<HTMLDivElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const nextId = useRef(INITIAL_MESSAGES.length + 1)
+  const adapter = useMemo(
+    () =>
+      createMockAdapter([
+        {
+          text: "Swapping the skin — the same `useChat` hook drives this conversation. Every surface is just `data-ak-*` + your design system's tokens.",
+        },
+        {
+          text: "Try it: paste the shadcn/ui theme into `globals.css`, drop `useChat` in, and you get a streaming chat that feels native.",
+        },
+      ]),
+    [],
+  )
+  const chat = useChat({
+    adapter,
+    initialMessages: [initialAssistant('Ask anything — styled with shadcn/ui tokens.')],
+  })
 
-  useEffect(() => {
-    requestAnimationFrame(() => { if (containerRef.current) containerRef.current.scrollTop = containerRef.current.scrollHeight })
-  }, [messages])
-
-  const sendMessage = () => {
-    const text = input.trim()
-    if (!text) return
-
-    const userMsg: Message = { id: nextId.current++, role: 'user', content: text }
-    setMessages(prev => [...prev, userMsg])
-    setInput('')
-
-    setTimeout(() => {
-      const assistantMsg: Message = {
-        id: nextId.current++,
-        role: 'assistant',
-        content: 'This is a simulated shadcn response',
-      }
-      setMessages(prev => [...prev, assistantMsg])
-    }, 600)
+  const submit = (e: FormEvent) => {
+    e.preventDefault()
+    const value = chat.input.trim()
+    if (!value || chat.status === 'streaming') return
+    void chat.send(value)
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') sendMessage()
+  const keyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      submit(e as unknown as FormEvent)
+    }
   }
+
+  const visible = chat.messages.filter((m) => m.role !== 'tool')
 
   return (
     <div
-      style={{
-        fontFamily,
-        maxWidth: 560,
-        margin: '0 auto',
-        borderRadius: 16,
-        border: '1px solid #e4e4e7',
-        boxShadow: '0 1px 3px 0 rgba(0,0,0,0.07), 0 1px 2px -1px rgba(0,0,0,0.07)',
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        height: 'min(480px, 80vh)',
-        width: '100%',
-        background: '#ffffff',
-      }}
+      data-ak-example
+      className="flex h-[520px] flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white text-zinc-900 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
     >
-      {/* Header */}
-      <div
-        style={{
-          padding: '14px 18px',
-          borderBottom: '1px solid #e4e4e7',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-        }}
-      >
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: '50%',
-            background: '#18181b',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontSize: 13,
-            fontWeight: 600,
-            flexShrink: 0,
-          }}
-        >
-          A
-        </div>
+      <header className="flex items-center gap-2 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
+        <Avatar initials="AK" />
         <div>
-          <div style={{ fontSize: 14, fontWeight: 600, color: '#18181b', lineHeight: 1.3 }}>
-            Assistant
+          <div className="text-sm font-semibold">AgentsKit assistant</div>
+          <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            online
           </div>
-          <div style={{ fontSize: 12, color: '#71717a', lineHeight: 1.3 }}>Online</div>
         </div>
-      </div>
+      </header>
 
-      {/* Messages */}
-      <div
-        ref={containerRef}
-        style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: '16px 18px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 12,
-        }}
-      >
-        {messages.map(msg => (
-          <div
-            key={msg.id}
-            style={{
-              display: 'flex',
-              flexDirection: msg.role === 'user' ? 'row-reverse' : 'row',
-              alignItems: 'flex-end',
-              gap: 8,
-            }}
-          >
-            {/* Avatar */}
-            <div
-              style={{
-                width: 28,
-                height: 28,
-                borderRadius: '50%',
-                background: msg.role === 'user' ? '#18181b' : '#f4f4f5',
-                border: msg.role === 'assistant' ? '1px solid #e4e4e7' : 'none',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: msg.role === 'user' ? '#fff' : '#71717a',
-                fontSize: 11,
-                fontWeight: 600,
-                flexShrink: 0,
-              }}
-            >
-              {msg.role === 'user' ? 'U' : 'A'}
-            </div>
-
-            {/* Bubble */}
-            <div
-              style={{
-                maxWidth: '70%',
-                padding: '8px 12px',
-                borderRadius: msg.role === 'user' ? '12px 12px 4px 12px' : '12px 12px 12px 4px',
-                background: msg.role === 'user' ? '#18181b' : '#f4f4f5',
-                color: msg.role === 'user' ? '#fafafa' : '#18181b',
-                fontSize: 14,
-                lineHeight: 1.5,
-                wordBreak: 'break-word',
-              }}
-            >
-              {msg.content}
-            </div>
-          </div>
+      <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+        {visible.map((m) => (
+          <MessageBubble key={m.id} role={m.role} content={m.content} />
         ))}
-        <div ref={bottomRef} />
+        {chat.status === 'streaming' ? <TypingIndicator /> : null}
       </div>
 
-      {/* Input area */}
-      <div
-        style={{
-          padding: '12px 18px',
-          borderTop: '1px solid #e4e4e7',
-          display: 'flex',
-          gap: 8,
-          alignItems: 'center',
-          background: '#fff',
-        }}
+      <form
+        onSubmit={submit}
+        className="flex items-end gap-2 border-t border-zinc-200 bg-zinc-50/50 p-3 dark:border-zinc-800 dark:bg-zinc-900/40"
       >
-        <input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          placeholder="Message..."
-          style={{
-            flex: 1,
-            height: 36,
-            padding: '0 12px',
-            fontSize: 14,
-            fontFamily,
-            border: '1px solid #e4e4e7',
-            borderRadius: 8,
-            outline: 'none',
-            boxShadow: focused ? '0 0 0 2px #18181b' : 'none',
-            transition: 'box-shadow 0.15s',
-            color: '#18181b',
-            background: '#fff',
-          }}
+        <textarea
+          value={chat.input}
+          onChange={(e) => chat.setInput(e.target.value)}
+          onKeyDown={keyDown}
+          rows={1}
+          placeholder="Type a message…"
+          className="flex-1 resize-none rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm outline-none transition placeholder:text-zinc-400 focus-visible:border-zinc-400 focus-visible:ring-2 focus-visible:ring-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:placeholder:text-zinc-500 dark:focus-visible:border-zinc-600 dark:focus-visible:ring-zinc-700"
         />
         <button
-          onClick={sendMessage}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-          style={{
-            height: 36,
-            padding: '0 14px',
-            fontSize: 14,
-            fontFamily,
-            fontWeight: 500,
-            background: '#18181b',
-            color: '#fafafa',
-            border: 'none',
-            borderRadius: 8,
-            cursor: 'pointer',
-            opacity: hovered ? 0.85 : 1,
-            transition: 'opacity 0.15s',
-            flexShrink: 0,
-          }}
+          type="submit"
+          disabled={!chat.input.trim() || chat.status === 'streaming'}
+          className="inline-flex h-9 items-center justify-center gap-1 rounded-md bg-zinc-900 px-3 text-sm font-medium text-zinc-50 transition hover:bg-zinc-800 disabled:pointer-events-none disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
         >
+          <SendIcon />
           Send
         </button>
+      </form>
+    </div>
+  )
+}
+
+function MessageBubble({ role, content }: { role: string; content: string }) {
+  const user = role === 'user'
+  return (
+    <div className={`flex items-end gap-2 ${user ? 'justify-end' : 'justify-start'}`}>
+      {!user ? <Avatar initials="AK" small /> : null}
+      <div
+        className={`max-w-[78%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed ${
+          user
+            ? 'rounded-br-md bg-zinc-900 text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900'
+            : 'rounded-bl-md border border-zinc-200 bg-white text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100'
+        }`}
+      >
+        {content}
+      </div>
+      {user ? <Avatar initials="You" small /> : null}
+    </div>
+  )
+}
+
+function Avatar({ initials, small = false }: { initials: string; small?: boolean }) {
+  return (
+    <span
+      className={`inline-flex shrink-0 items-center justify-center rounded-full bg-zinc-900 text-[10px] font-semibold text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900 ${
+        small ? 'h-7 w-7' : 'h-9 w-9'
+      }`}
+    >
+      {initials}
+    </span>
+  )
+}
+
+function TypingIndicator() {
+  return (
+    <div className="flex items-center gap-2">
+      <Avatar initials="AK" small />
+      <div className="flex items-center gap-1 rounded-2xl rounded-bl-md border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
+        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-zinc-400 [animation-delay:-.3s] dark:bg-zinc-500" />
+        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-zinc-400 [animation-delay:-.15s] dark:bg-zinc-500" />
+        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-zinc-400 dark:bg-zinc-500" />
       </div>
     </div>
+  )
+}
+
+function SendIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+      <path d="m22 2-7 20-4-9-9-4Z" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M22 2 11 13" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   )
 }

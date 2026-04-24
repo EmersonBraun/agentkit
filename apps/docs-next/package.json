@@ -20,6 +20,9 @@
     "postinstall": "fumadocs-mdx"
   },
   "dependencies": {
+    "@agentskit/core": "workspace:*",
+    "@agentskit/react": "workspace:*",
+    "@agentskit/tools": "workspace:*",
     "@codesandbox/sandpack-react": "^2.20.0",
     "@tailwindcss/postcss": "^4.2.4",
     "@vercel/analytics": "^2.0.1",
@@ -33,6 +36,8 @@
     "postcss": "^8.5.10",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-markdown": "^9.0.1",
+    "remark-gfm": "^4.0.0",
     "tailwindcss": "^4.2.4",
     "zod": "^4.3.6"
   },

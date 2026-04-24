@@ -1,817 +1,421 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { MdRenderer } from './_shared/md-renderer'
 
-// ─── Shared task state ────────────────────────────────────────────────────────
+/**
+ * A fancy "agent pipeline" visualiser. Pick a scenario; each step animates
+ * from pending → running → complete with icon, duration, and a result preview.
+ * A final streamed markdown report lands at the bottom. No network — everything
+ * is scripted so the demo stays snappy and deterministic.
+ */
 
-interface Task {
-  id: number
+type StepStatus = 'pending' | 'running' | 'complete' | 'error'
+
+type StepDef = {
+  name: string
+  icon: string
+  summary: string
+  ms: number
+  preview: string
+}
+
+type Scenario = {
+  id: string
   label: string
-  done: boolean
+  tagline: string
+  goal: string
+  steps: StepDef[]
+  report: string
 }
 
-const INITIAL_TASKS: Task[] = [
-  { id: 1, label: 'Design mockup', done: true },
-  { id: 2, label: 'Build API', done: false },
-  { id: 3, label: 'Write tests', done: false },
-]
-
-const DAILY_ACTIVITY = [3, 7, 5, 9] // bar heights (arbitrary units)
-
-// ─── Task Tracker Widget ──────────────────────────────────────────────────────
-
-function TaskTrackerWidget({
-  tasks,
-  onToggle,
-  onAdd,
-}: {
-  tasks: Task[]
-  onToggle: (id: number) => void
-  onAdd: (label: string) => void
-}) {
-  const [newTask, setNewTask] = useState('')
-  const completed = tasks.filter(t => t.done).length
-  const total = tasks.length
-  const pct = total === 0 ? 0 : Math.round((completed / total) * 100)
-
-  const handleAdd = () => {
-    const label = newTask.trim()
-    if (!label) return
-    onAdd(label)
-    setNewTask('')
-  }
-
-  return (
-    <div
-      style={{
-        background: '#0f172a',
-        border: '1px solid rgba(99,102,241,0.35)',
-        borderRadius: 10,
-        padding: '14px 16px',
-        marginTop: 8,
-        minWidth: 0,
-      }}
-    >
-      <div
-        style={{
-          fontSize: 12,
-          fontWeight: 700,
-          color: '#818cf8',
-          letterSpacing: 0.8,
-          textTransform: 'uppercase',
-          marginBottom: 10,
-        }}
-      >
-        Task Tracker
-      </div>
-
-      {/* Task list */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
-        {tasks.map(task => (
-          <div
-            key={task.id}
-            onClick={() => onToggle(task.id)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              cursor: 'pointer',
-              padding: '6px 8px',
-              borderRadius: 6,
-              background: task.done ? 'rgba(99,102,241,0.08)' : 'rgba(255,255,255,0.03)',
-              transition: 'background 0.15s',
-              userSelect: 'none',
-            }}
-            onMouseEnter={e =>
-              (e.currentTarget.style.background = task.done
-                ? 'rgba(99,102,241,0.14)'
-                : 'rgba(255,255,255,0.07)')
-            }
-            onMouseLeave={e =>
-              (e.currentTarget.style.background = task.done
-                ? 'rgba(99,102,241,0.08)'
-                : 'rgba(255,255,255,0.03)')
-            }
-          >
-            {/* Checkbox */}
-            <div
-              style={{
-                width: 16,
-                height: 16,
-                borderRadius: 4,
-                border: task.done ? 'none' : '2px solid #475569',
-                background: task.done ? '#6366f1' : 'transparent',
-                flexShrink: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.15s',
-              }}
-            >
-              {task.done && (
-                <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                  <path
-                    d="M1 4L3.5 6.5L9 1"
-                    stroke="white"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              )}
-            </div>
-            <span
-              style={{
-                fontSize: 13,
-                color: task.done ? '#475569' : '#cbd5e1',
-                textDecoration: task.done ? 'line-through' : 'none',
-                transition: 'color 0.15s, text-decoration 0.15s',
-              }}
-            >
-              {task.label}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* Progress bar */}
-      <div style={{ marginBottom: 12 }}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            fontSize: 11,
-            color: '#475569',
-            marginBottom: 4,
-          }}
-        >
-          <span>Progress</span>
-          <span style={{ color: '#818cf8', fontWeight: 600 }}>
-            {completed}/{total} complete
-          </span>
-        </div>
-        <div
-          style={{
-            height: 5,
-            background: 'rgba(255,255,255,0.07)',
-            borderRadius: 99,
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            style={{
-              height: '100%',
-              width: `${pct}%`,
-              background: 'linear-gradient(90deg, #6366f1, #818cf8)',
-              borderRadius: 99,
-              transition: 'width 0.4s ease',
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Add task */}
-      <div style={{ display: 'flex', gap: 6 }}>
-        <input
-          value={newTask}
-          onChange={e => setNewTask(e.target.value)}
-          onKeyDown={e => {
-            if (e.key === 'Enter') handleAdd()
-          }}
-          placeholder="Add a task..."
-          style={{
-            flex: 1,
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: 6,
-            padding: '6px 10px',
-            color: '#e2e8f0',
-            fontSize: 12,
-            outline: 'none',
-            minWidth: 0,
-          }}
-          onFocus={e => (e.currentTarget.style.borderColor = 'rgba(99,102,241,0.6)')}
-          onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')}
-        />
-        <button
-          onClick={handleAdd}
-          disabled={!newTask.trim()}
-          style={{
-            background: newTask.trim() ? '#6366f1' : '#1e293b',
-            color: newTask.trim() ? '#fff' : '#475569',
-            border: 'none',
-            borderRadius: 6,
-            padding: '6px 12px',
-            fontSize: 12,
-            fontWeight: 600,
-            cursor: newTask.trim() ? 'pointer' : 'default',
-            whiteSpace: 'nowrap',
-            transition: 'background 0.15s',
-          }}
-        >
-          Add
-        </button>
-      </div>
-    </div>
-  )
-}
-
-// ─── Dashboard Widget ─────────────────────────────────────────────────────────
-
-function DashboardWidget({ tasks }: { tasks: Task[] }) {
-  const completed = tasks.filter(t => t.done).length
-  const total = tasks.length
-  const pct = total === 0 ? 0 : Math.round((completed / total) * 100)
-
-  const metrics = [
-    { label: 'Tasks', value: `${completed}/${total}`, color: '#6366f1' },
-    { label: 'Completion', value: `${pct}%`, color: '#22d3ee' },
-    { label: 'Streak', value: '3 days', color: '#34d399' },
-  ]
-
-  const maxBar = Math.max(...DAILY_ACTIVITY)
-
-  return (
-    <div
-      style={{
-        background: '#0f172a',
-        border: '1px solid rgba(34,211,238,0.3)',
-        borderRadius: 10,
-        padding: '14px 16px',
-        marginTop: 8,
-        minWidth: 0,
-      }}
-    >
-      <div
-        style={{
-          fontSize: 12,
-          fontWeight: 700,
-          color: '#22d3ee',
-          letterSpacing: 0.8,
-          textTransform: 'uppercase',
-          marginBottom: 12,
-        }}
-      >
-        Progress Dashboard
-      </div>
-
-      {/* Metric cards */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-        {metrics.map(m => (
-          <div
-            key={m.label}
-            style={{
-              flex: 1,
-              background: 'rgba(255,255,255,0.03)',
-              border: `1px solid rgba(255,255,255,0.07)`,
-              borderRadius: 8,
-              padding: '10px 8px',
-              textAlign: 'center',
-              minWidth: 0,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 700,
-                color: m.color,
-                lineHeight: 1.2,
-                transition: 'color 0.3s',
-              }}
-            >
-              {m.value}
-            </div>
-            <div style={{ fontSize: 10, color: '#475569', marginTop: 2, fontWeight: 500 }}>
-              {m.label}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Mini bar chart */}
-      <div>
-        <div style={{ fontSize: 10, color: '#475569', fontWeight: 500, marginBottom: 6 }}>
-          Daily Activity
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'flex-end',
-            gap: 6,
-            height: 48,
-          }}
-        >
-          {DAILY_ACTIVITY.map((val, i) => (
-            <div
-              key={i}
-              style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 3,
-                height: '100%',
-                justifyContent: 'flex-end',
-              }}
-            >
-              <div
-                style={{
-                  width: '100%',
-                  height: `${(val / maxBar) * 100}%`,
-                  background:
-                    i === DAILY_ACTIVITY.length - 1
-                      ? 'linear-gradient(180deg, #22d3ee, #0891b2)'
-                      : 'rgba(34,211,238,0.25)',
-                  borderRadius: '3px 3px 0 0',
-                  transition: 'height 0.4s ease',
-                }}
-              />
-            </div>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
-          {['Mon', 'Tue', 'Wed', 'Thu'].map(day => (
-            <div
-              key={day}
-              style={{
-                flex: 1,
-                textAlign: 'center',
-                fontSize: 9,
-                color: '#334155',
-                fontWeight: 500,
-              }}
-            >
-              {day}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ─── Message types ─────────────────────────────────────────────────────────────
-
-type WidgetType = 'task-tracker' | 'dashboard'
-
-interface ChatMessage {
-  id: number
-  role: 'user' | 'assistant'
-  content: string
-  streaming?: boolean
-  widget?: WidgetType
-}
-
-// ─── Demo script ───────────────────────────────────────────────────────────────
-
-const DEMO_STEPS: Array<{
-  delay: number
-  role: 'user' | 'assistant'
-  text: string
-  streamDelay?: number
-  widget?: WidgetType
-}> = [
+const SCENARIOS: Scenario[] = [
   {
-    delay: 900,
-    role: 'user',
-    text: 'Create a task tracker',
+    id: 'launch',
+    label: 'Plan a launch',
+    tagline: 'Research → positioning → draft',
+    goal: 'Plan the AgentsKit 2.0 launch',
+    steps: [
+      {
+        name: 'market.research',
+        icon: '🔭',
+        summary: 'Scanned competitors and baseline demand',
+        ms: 620,
+        preview: '8 competitors · 3 price tiers · 2 market gaps',
+      },
+      {
+        name: 'audience.segment',
+        icon: '🎯',
+        summary: 'Identified 3 launch audiences',
+        ms: 480,
+        preview: 'indie-hackers · platform-teams · AI-first-startups',
+      },
+      {
+        name: 'positioning.write',
+        icon: '✍️',
+        summary: 'Produced a 1-sentence positioning',
+        ms: 540,
+        preview: '"The agent toolkit JavaScript deserves."',
+      },
+      {
+        name: 'assets.generate',
+        icon: '🖼️',
+        summary: 'Drafted hero + 3 bullets + OG image copy',
+        ms: 720,
+        preview: 'hero.md · bullets.md · og.txt',
+      },
+    ],
+    report: `### Launch plan — AgentsKit 2.0
+
+**Positioning.** *The agent toolkit JavaScript deserves.*
+
+**Audiences.**
+- Indie hackers shipping fast
+- Platform teams standardising internal AI UX
+- AI-first startups swapping providers weekly
+
+**Top assets.**
+1. Hero paragraph (142 words, confident tone)
+2. Three killer bullets — shared stack, tool-first streaming, 19 providers
+3. OG image copy ready for /api/og
+
+\`\`\`ts
+await publish('blog/agentskit-2-0.mdx', { status: 'scheduled' })
+\`\`\``,
   },
   {
-    delay: 600,
-    role: 'assistant',
-    text: "Here's your task tracker:",
-    streamDelay: 28,
-    widget: 'task-tracker',
+    id: 'triage',
+    label: 'Ship a fix',
+    tagline: 'Diff → patch → PR',
+    goal: 'Fix the reported streaming race condition',
+    steps: [
+      {
+        name: 'logs.search',
+        icon: '🪵',
+        summary: 'Correlated 3 error events in Sentry',
+        ms: 420,
+        preview: 'issue #AK-204 · 18 users · last 2h',
+      },
+      {
+        name: 'code.locate',
+        icon: '🔍',
+        summary: 'Traced the offending read path',
+        ms: 540,
+        preview: 'packages/core/src/controller.ts:412',
+      },
+      {
+        name: 'patch.write',
+        icon: '🧰',
+        summary: 'Proposed a minimal diff',
+        ms: 620,
+        preview: '-3 / +6 lines',
+      },
+      {
+        name: 'tests.run',
+        icon: '✅',
+        summary: 'Unit + integration suites green',
+        ms: 880,
+        preview: '412 tests · 0 failed · 1.2s',
+      },
+      {
+        name: 'pr.open',
+        icon: '🚀',
+        summary: 'Opened draft PR #512',
+        ms: 360,
+        preview: 'fix(core): guard abort during flush',
+      },
+    ],
+    report: `### PR ready
+
+**Branch.** \`fix/stream-abort-guard\` · **Draft PR #512**
+
+**Diff summary.**
+
+\`\`\`diff
+- if (abortController.signal.aborted) return
++ if (abortController.signal.aborted) {
++   emitter.emit({ type: 'done' })
++   return
++ }
+\`\`\`
+
+- All 412 tests green in 1.2s
+- No public API change
+- Ships behind the existing \`streaming\` capability flag
+
+Ready for a human review.`,
   },
   {
-    delay: 3200,
-    role: 'user',
-    text: 'Add a progress dashboard',
-  },
-  {
-    delay: 600,
-    role: 'assistant',
-    text: 'Added a dashboard with live metrics:',
-    streamDelay: 28,
-    widget: 'dashboard',
+    id: 'research',
+    label: 'Research a topic',
+    tagline: 'Search → read → synthesise',
+    goal: 'Compare TypeScript runtime type systems',
+    steps: [
+      {
+        name: 'web.search',
+        icon: '🌐',
+        summary: 'Pulled 12 high-signal sources',
+        ms: 560,
+        preview: 'zod · valibot · arktype · typebox · effect-schema',
+      },
+      {
+        name: 'pages.read',
+        icon: '📚',
+        summary: 'Ingested 48k tokens of docs',
+        ms: 780,
+        preview: '12 pages · 48,214 tokens',
+      },
+      {
+        name: 'facts.extract',
+        icon: '🧠',
+        summary: 'Structured 37 comparable data points',
+        ms: 640,
+        preview: 'bundle size · perf · ecosystem',
+      },
+      {
+        name: 'report.compose',
+        icon: '📝',
+        summary: 'Drafted a side-by-side summary',
+        ms: 580,
+        preview: '720 words · 1 table · 3 recommendations',
+      },
+    ],
+    report: `### TS runtime schemas — quick compare
+
+| Lib | Bundle (min) | Inference quality | Ecosystem |
+| --- | --- | --- | --- |
+| zod | ~12kb | great | massive |
+| valibot | ~2kb | great | growing |
+| arktype | ~5kb | excellent | small |
+| typebox | ~3kb | good | tight |
+| effect-schema | ~30kb | excellent | effect-world |
+
+**Recommendation.**
+
+1. **Default to zod** when you want breadth + docs
+2. **Reach for valibot** for bundle-sensitive apps (landing pages, edge functions)
+3. **Prototype with arktype** when you need Typescript-flavoured DSL ergonomics
+
+> For AgentsKit's docs we keep using *zod* — the breadth wins over 8 extra kb.`,
   },
 ]
-
-// ─── Main component ────────────────────────────────────────────────────────────
 
 export function AgentActions() {
-  const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS)
-  const [input, setInput] = useState('')
-  const [isStreaming, setIsStreaming] = useState(false)
-  const [demoComplete, setDemoComplete] = useState(false)
-
-  const nextIdRef = useRef(0)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([])
-
-  const scrollToBottom = useCallback(() => {
-    requestAnimationFrame(() => { if (containerRef.current) containerRef.current.scrollTop = containerRef.current.scrollHeight })
-  }, [])
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages, scrollToBottom])
-
-  const addId = () => {
-    const id = nextIdRef.current
-    nextIdRef.current += 1
-    return id
-  }
-
-  const streamText = useCallback(
-    (msgId: number, text: string, speed: number, onDone?: () => void) => {
-      let i = 0
-      setIsStreaming(true)
-
-      intervalRef.current = setInterval(() => {
-        i++
-        const chunk = text.slice(0, i)
-        const done = i >= text.length
-
-        setMessages(prev =>
-          prev.map(m =>
-            m.id === msgId ? { ...m, content: chunk, streaming: !done } : m
-          )
-        )
-
-        if (done) {
-          clearInterval(intervalRef.current!)
-          intervalRef.current = null
-          setIsStreaming(false)
-          onDone?.()
-        }
-      }, speed)
-    },
-    []
+  const [scenarioId, setScenarioId] = useState<string>(SCENARIOS[0].id)
+  const scenario = SCENARIOS.find((s) => s.id === scenarioId) ?? SCENARIOS[0]
+  const [statuses, setStatuses] = useState<StepStatus[]>(() =>
+    scenario.steps.map(() => 'pending'),
   )
+  const [durations, setDurations] = useState<(number | null)[]>(() =>
+    scenario.steps.map(() => null),
+  )
+  const [report, setReport] = useState('')
+  const [running, setRunning] = useState(false)
+  const cancelRef = useRef(false)
 
-  // Run demo
+  const reset = useCallback(() => {
+    cancelRef.current = true
+    setStatuses(scenario.steps.map(() => 'pending'))
+    setDurations(scenario.steps.map(() => null))
+    setReport('')
+    setRunning(false)
+  }, [scenario])
+
+  // Reset when scenario changes.
   useEffect(() => {
-    let cumulativeDelay = 0
+    reset()
+  }, [scenarioId, reset])
 
-    DEMO_STEPS.forEach((step, stepIndex) => {
-      cumulativeDelay += step.delay
+  const run = useCallback(async () => {
+    if (running) return
+    cancelRef.current = false
+    setRunning(true)
+    setReport('')
+    setStatuses(scenario.steps.map(() => 'pending'))
+    setDurations(scenario.steps.map(() => null))
 
-      const t1 = setTimeout(() => {
-        const msgId = addId()
-
-        if (step.role === 'user') {
-          setMessages(prev => [...prev, { id: msgId, role: 'user', content: step.text }])
-        } else {
-          // Add streaming assistant message (no widget yet)
-          setMessages(prev => [
-            ...prev,
-            { id: msgId, role: 'assistant', content: '', streaming: true },
-          ])
-
-          const speed = step.streamDelay ?? 24
-          streamText(msgId, step.text, speed, () => {
-            // After streaming text, attach widget
-            if (step.widget) {
-              setMessages(prev =>
-                prev.map(m => (m.id === msgId ? { ...m, widget: step.widget } : m))
-              )
-            }
-            if (stepIndex === DEMO_STEPS.length - 1) {
-              setDemoComplete(true)
-            }
-          })
-        }
-      }, cumulativeDelay)
-
-      timeoutsRef.current.push(t1)
-    })
-
-    return () => {
-      timeoutsRef.current.forEach(clearTimeout)
-      if (intervalRef.current) clearInterval(intervalRef.current)
+    for (let i = 0; i < scenario.steps.length; i++) {
+      if (cancelRef.current) break
+      setStatuses((prev) => prev.map((s, j) => (j === i ? 'running' : s)))
+      const startedAt = performance.now()
+      await sleep(scenario.steps[i].ms)
+      if (cancelRef.current) break
+      setDurations((prev) => prev.map((d, j) => (j === i ? Math.round(performance.now() - startedAt) : d)))
+      setStatuses((prev) => prev.map((s, j) => (j === i ? 'complete' : s)))
+      await sleep(150)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
-  const handleToggle = useCallback((id: number) => {
-    setTasks(prev => prev.map(t => (t.id === id ? { ...t, done: !t.done } : t)))
-  }, [])
-
-  const handleAddTask = useCallback((label: string) => {
-    setTasks(prev => [
-      ...prev,
-      { id: Date.now(), label, done: false },
-    ])
-  }, [])
-
-  const sendMessage = useCallback(() => {
-    const text = input.trim()
-    if (!text || isStreaming) return
-
-    const userId = addId()
-    const assistantId = addId()
-
-    setMessages(prev => [
-      ...prev,
-      { id: userId, role: 'user', content: text },
-      { id: assistantId, role: 'assistant', content: '', streaming: true },
-    ])
-    setInput('')
-
-    const reply = "I've updated the interface based on your request. You can keep interacting with the widgets above!"
-    const t = setTimeout(() => streamText(assistantId, reply, 22), 500)
-    timeoutsRef.current.push(t)
-  }, [input, isStreaming, streamText])
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault()
-        sendMessage()
+    if (!cancelRef.current) {
+      const text = scenario.report
+      for (let i = 1; i <= text.length; i++) {
+        if (cancelRef.current) break
+        setReport(text.slice(0, i))
+        await sleep(6)
       }
-    },
-    [sendMessage]
-  )
+    }
+    setRunning(false)
+  }, [scenario, running])
 
-  // Cleanup on unmount
-  useEffect(
-    () => () => {
-      timeoutsRef.current.forEach(clearTimeout)
-      if (intervalRef.current) clearInterval(intervalRef.current)
-    },
-    []
-  )
+  const stop = useCallback(() => {
+    cancelRef.current = true
+    setRunning(false)
+  }, [])
+
+  const progress = useMemo(() => {
+    const done = statuses.filter((s) => s === 'complete').length
+    return (done / scenario.steps.length) * 100
+  }, [statuses, scenario])
 
   return (
     <div
-      style={{
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-        background: '#0f172a',
-        borderRadius: 14,
-        overflow: 'hidden',
-        boxShadow: '0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06)',
-        maxWidth: 680,
-        width: '100%',
-        margin: '0 auto',
-        display: 'flex',
-        flexDirection: 'column',
-        height: 'min(580px, 80vh)',
-      }}
+      data-ak-example
+      className="flex h-[620px] flex-col overflow-hidden rounded-xl border border-ak-border bg-ak-surface"
     >
-      {/* Titlebar */}
-      <div
-        style={{
-          background: '#1e293b',
-          padding: '12px 16px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-          flexShrink: 0,
-        }}
-      >
-        <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
-          <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#ff5f57' }} />
-          <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#febc2e' }} />
-          <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#28c840' }} />
-        </div>
-        <div
-          style={{
-            flex: 1,
-            textAlign: 'center',
-            fontSize: 13,
-            color: '#64748b',
-            fontWeight: 500,
-            letterSpacing: 0.2,
-            marginLeft: -55,
-          }}
-        >
-          AI Agent
-        </div>
-        {isStreaming && (
-          <div
-            style={{
-              fontSize: 11,
-              color: '#818cf8',
-              fontWeight: 600,
-              letterSpacing: 0.5,
-              textTransform: 'uppercase',
-              animation: 'aaAgentPulse 1.4s ease-in-out infinite',
-            }}
-          >
-            Generating...
+      <header className="border-b border-ak-border px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="font-mono text-[10px] uppercase tracking-widest text-ak-graphite">
+              Agent pipeline
+            </div>
+            <div className="mt-0.5 font-display text-sm font-semibold text-ak-foam">
+              {scenario.goal}
+            </div>
           </div>
-        )}
-      </div>
-
-      {/* Messages */}
-      <div
-        ref={containerRef}
-        style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: '20px 16px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 14,
-          scrollbarWidth: 'thin',
-          scrollbarColor: '#334155 transparent',
-        }}
-      >
-        {messages.length === 0 && (
-          <div
-            style={{
-              textAlign: 'center',
-              color: '#334155',
-              fontSize: 13,
-              marginTop: 40,
-              fontStyle: 'italic',
-            }}
-          >
-            Demo starting...
+          <div className="flex flex-wrap gap-1">
+            {SCENARIOS.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => setScenarioId(s.id)}
+                className={`rounded-full border px-3 py-1 font-mono text-xs transition ${
+                  s.id === scenario.id
+                    ? 'border-ak-foam bg-ak-foam/15 text-ak-foam'
+                    : 'border-ak-border text-ak-graphite hover:text-ak-foam'
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
           </div>
-        )}
-        {messages.map(msg => (
-          <AgentMessageBubble
-            key={msg.id}
-            message={msg}
-            tasks={tasks}
-            onToggle={handleToggle}
-            onAdd={handleAddTask}
-          />
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
+        </div>
+        <div className="mt-3 flex items-center gap-3">
+          <div className="relative h-1 flex-1 overflow-hidden rounded-full bg-ak-midnight/40">
+            <div
+              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-ak-blue via-ak-foam to-ak-green transition-[width] duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <span className="font-mono text-[10px] uppercase tracking-widest text-ak-graphite">
+            {scenario.tagline}
+          </span>
+          {running ? (
+            <button
+              type="button"
+              onClick={stop}
+              className="rounded border border-ak-red/40 px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-ak-red hover:bg-ak-red/10"
+            >
+              Stop
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={run}
+              className="rounded bg-ak-foam px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-ak-midnight hover:bg-ak-foam/90"
+            >
+              {progress >= 100 ? 'Re-run' : 'Run'}
+            </button>
+          )}
+        </div>
+      </header>
 
-      {/* Input bar */}
-      <div
-        style={{
-          padding: '12px 16px',
-          background: '#1e293b',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
-          display: 'flex',
-          gap: 10,
-          alignItems: 'center',
-          flexShrink: 0,
-        }}
-      >
-        <input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={
-            !demoComplete
-              ? 'Demo in progress...'
-              : isStreaming
-              ? 'Waiting for response...'
-              : 'Ask the agent to build something...'
-          }
-          disabled={!demoComplete || isStreaming}
-          style={{
-            flex: 1,
-            background: '#0f172a',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: 8,
-            padding: '10px 14px',
-            color: '#e2e8f0',
-            fontSize: 14,
-            outline: 'none',
-            transition: 'border-color 0.15s',
-            opacity: !demoComplete || isStreaming ? 0.4 : 1,
-          }}
-          onFocus={e => (e.currentTarget.style.borderColor = 'rgba(99,102,241,0.5)')}
-          onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')}
-        />
-        <button
-          onClick={sendMessage}
-          disabled={!demoComplete || !input.trim() || isStreaming}
-          style={{
-            background: demoComplete && input.trim() && !isStreaming ? '#6366f1' : '#1e293b',
-            color: demoComplete && input.trim() && !isStreaming ? '#fff' : '#475569',
-            border: 'none',
-            borderRadius: 8,
-            padding: '10px 16px',
-            fontSize: 13,
-            fontWeight: 600,
-            cursor: demoComplete && input.trim() && !isStreaming ? 'pointer' : 'default',
-            transition: 'background 0.15s',
-            whiteSpace: 'nowrap',
-          }}
-          onMouseEnter={e => {
-            if (demoComplete && input.trim() && !isStreaming)
-              e.currentTarget.style.background = '#4f46e5'
-          }}
-          onMouseLeave={e => {
-            if (demoComplete && input.trim() && !isStreaming)
-              e.currentTarget.style.background = '#6366f1'
-          }}
-        >
-          Send
-        </button>
-      </div>
+      <div className="grid flex-1 grid-cols-1 gap-4 overflow-auto p-4 md:grid-cols-[1.1fr_1fr]">
+        <ol className="flex flex-col gap-2">
+          {scenario.steps.map((step, i) => (
+            <StepCard
+              key={step.name}
+              step={step}
+              status={statuses[i]}
+              durationMs={durations[i]}
+            />
+          ))}
+        </ol>
 
-      <style>{`
-        @keyframes aaAgentBlink {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0; }
-        }
-        @keyframes aaAgentPulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.4; }
-        }
-      `}</style>
+        <div className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-ak-border bg-ak-midnight/40">
+          <div className="flex items-center justify-between border-b border-ak-border px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-ak-graphite">
+            <span>Report</span>
+            <span>{report.length}c</span>
+          </div>
+          <div className="flex-1 overflow-auto p-3 text-sm">
+            {report ? (
+              <MdRenderer content={report} />
+            ) : (
+              <div className="flex h-full items-center justify-center text-center font-mono text-[11px] text-ak-graphite">
+                Report streams here once the pipeline finishes.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
 
-// ─── Message bubble with optional widget ─────────────────────────────────────
-
-function AgentMessageBubble({
-  message,
-  tasks,
-  onToggle,
-  onAdd,
+function StepCard({
+  step,
+  status,
+  durationMs,
 }: {
-  message: ChatMessage
-  tasks: Task[]
-  onToggle: (id: number) => void
-  onAdd: (label: string) => void
+  step: StepDef
+  status: StepStatus
+  durationMs: number | null
 }) {
-  const isUser = message.role === 'user'
-
+  const running = status === 'running'
+  const done = status === 'complete'
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: isUser ? 'flex-end' : 'flex-start',
-        gap: 4,
-      }}
+    <li
+      className={`flex items-start gap-3 rounded-lg border p-3 transition ${
+        running
+          ? 'border-ak-blue/40 bg-ak-blue/5'
+          : done
+          ? 'border-ak-green/30 bg-ak-green/5'
+          : 'border-ak-border bg-ak-midnight/20'
+      }`}
     >
       <div
-        style={{
-          fontSize: 11,
-          color: '#475569',
-          fontWeight: 500,
-          letterSpacing: 0.3,
-          textTransform: 'uppercase',
-          paddingLeft: isUser ? 0 : 4,
-          paddingRight: isUser ? 4 : 0,
-        }}
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-lg ${
+          running
+            ? 'bg-ak-blue/15'
+            : done
+            ? 'bg-ak-green/15'
+            : 'bg-ak-midnight/40'
+        }`}
       >
-        {isUser ? 'You' : 'AI Agent'}
+        {running ? <Spinner /> : done ? '✓' : step.icon}
       </div>
-      <div style={{ maxWidth: isUser ? '70%' : '92%', width: isUser ? undefined : '92%' }}>
-        {/* Text bubble */}
-        {(message.content.length > 0 || message.streaming) && (
-          <div
-            style={{
-              background: isUser ? '#2563eb' : '#1e293b',
-              color: isUser ? '#fff' : '#cbd5e1',
-              borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-              padding: '10px 14px',
-              fontSize: 14,
-              lineHeight: 1.6,
-              boxShadow: isUser
-                ? '0 2px 12px rgba(37,99,235,0.3)'
-                : '0 2px 8px rgba(0,0,0,0.3)',
-              border: isUser ? 'none' : '1px solid rgba(255,255,255,0.06)',
-              wordBreak: 'break-word',
-            }}
-          >
-            {message.content}
-            {message.streaming && message.content.length > 0 && (
-              <span
-                style={{
-                  display: 'inline-block',
-                  width: 2,
-                  height: '1em',
-                  background: '#818cf8',
-                  marginLeft: 2,
-                  verticalAlign: 'text-bottom',
-                  animation: 'aaAgentBlink 0.8s step-end infinite',
-                  borderRadius: 1,
-                }}
-              />
-            )}
-            {message.streaming && message.content.length === 0 && (
-              <span style={{ color: '#475569', fontStyle: 'italic', fontSize: 13 }}>
-                Thinking...
-              </span>
-            )}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center justify-between gap-2">
+          <span className="font-mono text-[12px] text-ak-foam">{step.name}</span>
+          <span className="font-mono text-[10px] text-ak-graphite">
+            {durationMs != null ? `${durationMs}ms` : running ? '…' : ''}
+          </span>
+        </div>
+        <div className="mt-0.5 text-xs text-ak-graphite">{step.summary}</div>
+        {done || running ? (
+          <div className="mt-1.5 rounded border border-ak-border/80 bg-ak-midnight/60 px-2 py-1 font-mono text-[10px] text-ak-foam">
+            {step.preview}
           </div>
-        )}
-
-        {/* Inline widget */}
-        {message.widget === 'task-tracker' && (
-          <TaskTrackerWidget tasks={tasks} onToggle={onToggle} onAdd={onAdd} />
-        )}
-        {message.widget === 'dashboard' && <DashboardWidget tasks={tasks} />}
+        ) : null}
       </div>
-    </div>
+    </li>
   )
+}
+
+function Spinner() {
+  return (
+    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-ak-blue border-t-transparent" />
+  )
+}
+
+function sleep(ms: number) {
+  return new Promise<void>((r) => setTimeout(r, ms))
 }

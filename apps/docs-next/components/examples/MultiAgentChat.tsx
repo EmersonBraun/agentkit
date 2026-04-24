@@ -1,149 +1,208 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { useMemo } from 'react'
+import type { AdapterFactory, StreamChunk, ToolDefinition } from '@agentskit/core'
+import { useChat, ChatContainer, InputBar } from '@agentskit/react'
+import '@/styles/agentskit-theme.css'
+import { initialAssistant } from './_shared/mock-adapter'
+import { ToolBadge } from './_shared/tool-badge'
+import { MdRenderer } from './_shared/md-renderer'
 
-interface Message {
-  id: number
-  role: 'user' | 'assistant'
-  content: string
-  streaming?: boolean
+/**
+ * Narrative demo of a planner → researcher → drafter → reviewer topology.
+ * One send cycles through four agent tools (each executed by the runtime)
+ * then streams a composed markdown report showing every agent's contribution.
+ */
+
+type AgentTool = {
+  name: string
+  args: Record<string, unknown>
+  result: unknown
+  durationMs: number
 }
 
-const PLAN_RESPONSE = `## Plan
-
-1. **Research** (→ researcher): Investigate best practices and patterns
-2. **Implement** (→ coder): Write the code following identified patterns
-3. **Review**: Verify output quality
-
----
-
-### Step 1: Research (delegated to researcher)
-Analyzed 3 relevant sources. Key findings:
-- Use modular architecture with clear separation of concerns
-- Follow established naming conventions and patterns
-- Include comprehensive error handling
-
-### Step 2: Implementation (delegated to coder)
-Code written following the research findings:
-- Created main module with clean interfaces
-- Added input validation and error handling
-- Wrote unit tests for critical paths
-
-### Summary
-Task completed successfully. The researcher identified best practices and the coder implemented them with full test coverage.`
-
-const FOLLOWUP_RESPONSES = [
-  "I'll break this down into manageable steps.\n\n1. **Analysis** (→ researcher): Understanding requirements\n2. **Design** (→ coder): Architecture decisions\n3. **Execution** (→ coder): Implementation\n\nAll steps completed. The team worked efficiently on this task.",
-  "Here's my plan for this:\n\n### Research Phase\nThe researcher agent gathered context and identified key constraints.\n\n### Implementation Phase\nThe coder agent built the solution following the research findings.\n\nDelivery complete with all quality checks passed.",
+const PLAN_TOOLS: AgentTool[] = [
+  {
+    name: 'planner.decompose',
+    args: { goal: 'Launch announcement for AgentsKit 2.0' },
+    result: {
+      subtasks: [
+        'Gather shipped features since 1.8',
+        'Draft a punchy hero paragraph',
+        'Bullet the top three developer wins',
+        'Review tone + compliance',
+      ],
+    },
+    durationMs: 420,
+  },
+  {
+    name: 'researcher.search',
+    args: { query: 'AgentsKit 2.0 changelog highlights' },
+    result: {
+      hits: 8,
+      highlights: [
+        'New shared-state hooks (useFramework / useProvider / useMemory)',
+        '19 provider adapters, 10 memory backends',
+        'First-class tool_call streaming + confirmation gates',
+      ],
+    },
+    durationMs: 560,
+  },
+  {
+    name: 'drafter.compose',
+    args: { tone: 'confident-but-chill' },
+    result: { words: 142, sections: 3 },
+    durationMs: 640,
+  },
+  {
+    name: 'reviewer.critique',
+    args: { target: 'draft-v1' },
+    result: { verdict: 'approved', edits: ['tighten the CTA line', 'drop the "very"'] },
+    durationMs: 380,
+  },
 ]
 
-let followupIndex = 0
+const FINAL_REPORT = `### Draft ready
+
+> Shipped by the planner → researcher → drafter → reviewer topology.
+
+**Title.** AgentsKit 2.0 — the agent toolkit JavaScript actually deserves.
+
+**Hero.** AgentsKit 2.0 is the biggest release since launch. One mental model, 19 providers, 10 memory backends, and a shared-state layer so your stack selector, docs, and IDE agree on what you picked.
+
+**Top wins**
+
+1. **Shared stack hooks** — \`useFramework\`, \`useProvider\`, \`useMemory\`, \`usePackageManager\` sync across every surface.
+2. **Tool-first streaming** — \`tool_call\` chunks, confirmation gates, and live \`ToolBadge\` UI out of the box.
+3. **Bring your own provider** — openai, anthropic, gemini, grok, groq, mistral, together, cohere, deepseek, fireworks, huggingface, kimi, llamacpp, lm-studio, vllm, langchain, vercel-ai.
+
+**Reviewer notes.** Approved. Minor edits: tighten the CTA line, drop the \\"very\\". Shipping to the blog queue.
+
+\`\`\`ts
+// ship it
+await publish('blog/agentskit-2-0.mdx', { status: 'scheduled' })
+\`\`\``
+
+const PLANNER_REASONING = `[planner] decompose the launch brief into research → draft → review.
+[planner] hand research off to researcher with search scope "changelog since 1.8".
+[planner] drafter gets the highlights + tone brief.
+[planner] reviewer has final sign-off before queue.`
+
+function createMultiAgentAdapter(): AdapterFactory {
+  let phase: 'tools' | 'final' = 'tools'
+  return {
+    createSource: () => ({
+      stream: async function* (): AsyncIterableIterator<StreamChunk> {
+        if (phase === 'tools') {
+          for (const ch of PLANNER_REASONING) {
+            await sleep(10)
+            yield { type: 'reasoning', content: ch }
+          }
+          for (const tool of PLAN_TOOLS) {
+            yield {
+              type: 'tool_call',
+              toolCall: {
+                id: `call-${tool.name}`,
+                name: tool.name,
+                args: JSON.stringify(tool.args),
+              },
+            }
+          }
+          phase = 'final'
+          yield { type: 'done' }
+          return
+        }
+        phase = 'tools'
+        for (const ch of FINAL_REPORT) {
+          await sleep(8)
+          yield { type: 'text', content: ch }
+        }
+        yield { type: 'done' }
+      },
+      abort() {},
+    }),
+    capabilities: { streaming: true, tools: true, reasoning: true },
+  }
+}
+
+function buildTools(): ToolDefinition[] {
+  return PLAN_TOOLS.map<ToolDefinition>((t) => ({
+    name: t.name,
+    description: `Mock ${t.name}`,
+    schema: {},
+    async execute() {
+      await sleep(t.durationMs)
+      return JSON.stringify(t.result)
+    },
+  }))
+}
+
+function sleep(ms: number) {
+  return new Promise<void>((r) => setTimeout(r, ms))
+}
 
 export function MultiAgentChat() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 0,
-      role: 'assistant',
-      content: "I'm the **Planner** agent. Give me a complex task and I'll break it down, delegating to **researcher** and **coder** specialists.",
-    },
-  ])
-  const [input, setInput] = useState('')
-  const [isStreaming, setIsStreaming] = useState(false)
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const nextIdRef = useRef(1)
-  const isFirstResponse = useRef(true)
-
-  const scrollToBottom = useCallback(() => {
-    requestAnimationFrame(() => { if (containerRef.current) containerRef.current.scrollTop = containerRef.current.scrollHeight })
-  }, [])
-
-  useEffect(() => { scrollToBottom() }, [messages, scrollToBottom])
-
-  const stopStreaming = useCallback(() => {
-    if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null }
-    setIsStreaming(false)
-    setMessages(prev => prev.map(m => m.streaming ? { ...m, streaming: false } : m))
-  }, [])
-
-  const streamResponse = useCallback((assistantId: number, text: string) => {
-    let charIndex = 0
-    setIsStreaming(true)
-    intervalRef.current = setInterval(() => {
-      const chunkSize = Math.floor(Math.random() * 4) + 2
-      charIndex = Math.min(charIndex + chunkSize, text.length)
-      setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: text.slice(0, charIndex) } : m))
-      if (charIndex >= text.length) {
-        if (intervalRef.current) clearInterval(intervalRef.current)
-        intervalRef.current = null
-        setIsStreaming(false)
-        setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, streaming: false } : m))
-        inputRef.current?.focus()
-      }
-    }, 15)
-  }, [])
-
-  const send = useCallback(() => {
-    if (!input.trim() || isStreaming) return
-    const userId = nextIdRef.current++
-    const assistantId = nextIdRef.current++
-    setMessages(prev => [...prev, { id: userId, role: 'user', content: input.trim() }, { id: assistantId, role: 'assistant', content: '', streaming: true }])
-    setInput('')
-
-    const response = isFirstResponse.current
-      ? PLAN_RESPONSE
-      : FOLLOWUP_RESPONSES[followupIndex++ % FOLLOWUP_RESPONSES.length]
-    isFirstResponse.current = false
-
-    setTimeout(() => streamResponse(assistantId, response), 300)
-  }, [input, isStreaming, streamResponse])
+  const adapter = useMemo(() => createMultiAgentAdapter(), [])
+  const tools = useMemo(() => buildTools(), [])
+  const chat = useChat({
+    adapter,
+    tools,
+    // Two passes: first streams reasoning + tool_calls, runtime executes the
+    // four agent tools, then the adapter's second pass streams the final
+    // composed markdown report.
+    maxToolIterations: 2,
+    initialMessages: [
+      initialAssistant(
+        'Planner → Researcher → Drafter → Reviewer. Ask me to draft something — you will see every hand-off live.',
+      ),
+    ],
+  })
 
   return (
-    <div style={{ border: '1px solid var(--color-ak-border)', borderRadius: '12px', overflow: 'hidden', marginBottom: '2rem' }}>
-      <div style={{ padding: '0.75rem 1.25rem', borderBottom: '1px solid var(--color-ak-border)', background: 'var(--color-ak-surface)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <span style={{ fontSize: '1rem' }}>🤖</span>
-        <strong style={{ fontSize: '0.9rem' }}>Multi-Agent Planner</strong>
-        <span style={{ fontSize: '0.8rem', color: 'var(--color-ak-graphite)' }}>planner → researcher + coder</span>
-      </div>
-      <div ref={containerRef} style={{ height: '400px', overflow: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        {messages.map(m => (
-          <div key={m.id} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
-            <div style={{
-              maxWidth: '85%',
-              padding: '0.6rem 1rem',
-              borderRadius: '12px',
-              background: m.role === 'user' ? 'var(--color-ak-blue)' : 'var(--color-ak-surface)',
-              color: m.role === 'user' ? '#fff' : 'inherit',
-              fontSize: '0.9rem',
-              lineHeight: 1.5,
-              whiteSpace: 'pre-wrap',
-            }}>
-              {m.content || (m.streaming ? '●●●' : '')}
-            </div>
+    <div
+      data-ak-example
+      className="flex h-[640px] flex-col overflow-hidden rounded-lg border border-ak-border bg-ak-surface"
+    >
+      <ChatContainer className="flex-1 space-y-3 p-4">
+        {chat.messages
+          .filter((m) => m.role !== 'tool')
+          .map((m) => {
+            const reasoning = (m.metadata?.reasoning as string | undefined) ?? null
+            return (
+              <div key={m.id} className="flex flex-col gap-2">
+                {reasoning ? <ReasoningTrace text={reasoning} /> : null}
+                {m.toolCalls?.map((t) => (
+                  <ToolBadge key={t.id} call={t} />
+                ))}
+                {m.content ? (
+                  <div
+                    data-ak-message
+                    data-ak-role={m.role}
+                    className="rounded-lg bg-ak-midnight/40 p-3"
+                  >
+                    <MdRenderer content={m.content} />
+                  </div>
+                ) : null}
+              </div>
+            )
+          })}
+        {chat.status === 'streaming' ? (
+          <div className="inline-flex items-center gap-2 font-mono text-[11px] text-ak-graphite">
+            <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-ak-blue" />
+            agents coordinating…
           </div>
-        ))}
-        <div ref={containerRef} />
-      </div>
-      <div style={{ padding: '0.75rem', borderTop: '1px solid var(--color-ak-border)', display: 'flex', gap: '0.5rem' }}>
-        <input
-          ref={inputRef}
-          type="text"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') send() }}
-          placeholder="Give me a complex task to plan..."
-          disabled={isStreaming}
-          style={{ flex: 1, padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1px solid var(--color-ak-border)', fontSize: '0.9rem', outline: 'none' }}
-        />
-        <button onClick={isStreaming ? stopStreaming : send} disabled={!isStreaming && !input.trim()} style={{
-          padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '0.85rem',
-          background: isStreaming ? '#e74c3c' : 'var(--color-ak-blue)', color: '#fff',
-          opacity: !isStreaming && !input.trim() ? 0.5 : 1,
-        }}>
-          {isStreaming ? 'Stop' : 'Send'}
-        </button>
-      </div>
+        ) : null}
+      </ChatContainer>
+      <InputBar chat={chat} />
     </div>
+  )
+}
+
+function ReasoningTrace({ text }: { text: string }) {
+  return (
+    <details className="rounded border border-ak-border bg-ak-midnight/40 p-2 font-mono text-[11px] text-ak-graphite">
+      <summary className="cursor-pointer uppercase tracking-widest">Planner reasoning</summary>
+      <pre className="mt-2 whitespace-pre-wrap">{text}</pre>
+    </details>
   )
 }
