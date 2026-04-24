@@ -6,6 +6,7 @@
     "local-setup",
     "commit-style",
     "package-docs",
+    "docs-components",
     "rfc-process",
     "roadmap"
   ]
