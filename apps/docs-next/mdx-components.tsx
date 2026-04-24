@@ -11,6 +11,7 @@ import { ArchDiagram } from '@/components/mdx/arch-diagram'
 import { Since } from '@/components/mdx/since'
 import { Tip, Warning, Pitfall, Performance, Security, Info, Success, Compare } from '@/components/mdx/callouts'
 import { HeadingAnchor } from '@/components/docs/heading-anchor'
+import { Verified } from '@/components/mdx/verified'
 
 type HeadingProps = React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLHeadingElement>,
@@ -53,6 +54,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Info,
     Success,
     Compare,
+    Verified,
     ...components,
   }
 }

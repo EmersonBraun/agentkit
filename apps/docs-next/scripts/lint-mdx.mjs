@@ -3,13 +3,14 @@
 // Checks: frontmatter has title+description, Playground/RunCode preset refs are valid,
 // warns on capitalized JSX tags not registered in mdx-components.tsx.
 // Exits 1 on any hard violation.
-import { readFileSync, readdirSync } from 'node:fs'
+import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { dirname, join, resolve, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(__dirname, '..')
 const DOCS = resolve(ROOT, 'content/docs')
+const REPO_ROOT = resolve(ROOT, '../..')
 
 const SKIP_DIRS = new Set(['api'])
 const SKIP_FILES = new Set([
@@ -102,6 +103,16 @@ for (const file of files) {
       if (!VALID_PRESETS.has(m[1])) {
         report(file, `<${comp} preset="${m[1]}"> — unknown preset`)
       }
+    }
+  }
+
+  // <Verified test="..."> — test file must exist in the repo
+  const verifiedRe = /<Verified[^/>]*\stest=["']([^"']+)["']/g
+  let vm
+  while ((vm = verifiedRe.exec(body))) {
+    const testPath = resolve(REPO_ROOT, vm[1])
+    if (!existsSync(testPath)) {
+      report(file, `<Verified test="${vm[1]}"> — test file not found`)
     }
   }
 

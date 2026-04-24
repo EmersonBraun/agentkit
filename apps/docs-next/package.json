@@ -6,6 +6,8 @@
     "prebuild": "node scripts/gen-api.mjs && node scripts/gen-changelog.mjs && node scripts/gen-performance.mjs",
     "gen:changelog": "node scripts/gen-changelog.mjs",
     "gen:performance": "node scripts/gen-performance.mjs",
+    "measure:sizes": "node scripts/measure-sizes.mjs",
+    "docs:new": "node scripts/docs-new.mjs",
     "build": "next build",
     "dev": "next dev --turbo",
     "docs": "next dev --turbo",
