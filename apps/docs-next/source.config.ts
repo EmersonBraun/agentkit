@@ -1,7 +1,29 @@
-import { defineDocs, defineConfig } from 'fumadocs-mdx/config'
+import { defineDocs, defineCollections, defineConfig, frontmatterSchema } from 'fumadocs-mdx/config'
+import { z } from 'zod'
 
 export const docs = defineDocs({
   dir: 'content/docs',
 })
 
-export default defineConfig()
+export const blog = defineCollections({
+  type: 'doc',
+  dir: 'content/blog',
+  schema: frontmatterSchema.extend({
+    date: z.string(),
+    author: z.string().default('AgentsKit.js'),
+    tags: z.array(z.string()).default([]),
+  }),
+})
+
+export default defineConfig({
+  mdxOptions: {
+    rehypeCodeOptions: {
+      // Shiki dual themes; CSS in global.css swaps via `.dark` scope.
+      themes: {
+        light: 'github-light-default',
+        dark: 'github-dark-default',
+      },
+      inline: 'tailing-curly-colon',
+    },
+  },
+})
