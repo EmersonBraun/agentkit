@@ -39,7 +39,7 @@
     "react-markdown": "^9.0.1",
     "remark-gfm": "^4.0.0",
     "tailwindcss": "^4.2.4",
-    "zod": "^4.3.6"
+    "zod": "^4.4.1"
   },
   "devDependencies": {
     "@types/mdx": "^2.0.13",
