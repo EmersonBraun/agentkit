@@ -1,6 +1,6 @@
 ---
 title: agentskit init
-description: Scaffold a new project — react, ink, runtime, or multi-agent template.
+description: Scaffold a new project — 9 starter templates spanning React, SvelteKit, Nuxt, Ink, Vite+Ink, Cloudflare Workers, Bun, runtime, and multi-agent.
 ---
 
 `agentskit init` is the fastest way to get from blank folder to a working AgentsKit project. It is the best entry point when you want proof that the ecosystem already composes in practice.
@@ -17,17 +17,22 @@ Interactive. Picks template + provider + memory backend.
 
 | Flag | Purpose |
 |---|---|
-| `--template <name>` | `react` / `ink` / `runtime` / `multi-agent` |
+| `--template <name>` | `react` / `sveltekit` / `nuxt` / `ink` / `vite-ink` / `cloudflare-workers` / `bun` / `runtime` / `multi-agent` |
 | `--provider <name>` | `openai` / `anthropic` / `ollama` / ... |
 | `--name <dir>` | target directory |
 | `--no-install` | skip `pnpm install` |
 
 ## Templates
 
-- **react** — Vite + `@agentskit/react` + `useChat` + headless components
-- **ink** — terminal chat via `@agentskit/ink`
-- **runtime** — standalone `createRuntime` with ReAct loop
-- **multi-agent** — supervisor topology starter
+- **react** — Vite + `@agentskit/react` + `useChat` + headless components.
+- **sveltekit** — `@agentskit/svelte` + a `+server.ts` route streaming over fetch.
+- **nuxt** — `@agentskit/vue` + a Nitro `server/api/chat.post.ts` event handler.
+- **ink** — terminal chat via `@agentskit/ink`, run with `tsx`.
+- **vite-ink** — same Ink chat but with `vite-node --watch` for hot reload during dev.
+- **cloudflare-workers** — edge runtime + `itty-router` + `wrangler.toml` with `nodejs_compat`. Bind D1 / KV when wiring memory.
+- **bun** — `Bun.serve` with `--hot` reload; the fastest dev loop on the list.
+- **runtime** — standalone `createRuntime` with ReAct loop, no UI.
+- **multi-agent** — supervisor topology starter (planner + delegates).
 
 ## When to use it
 

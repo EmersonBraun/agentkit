@@ -107,4 +107,74 @@ describe('@agentskit/cli', () => {
     const pkg = JSON.parse(await readFile(path.join(tempDir, 'package.json'), 'utf8'))
     expect(pkg.dependencies['@agentskit/adapters']).toBeUndefined()
   })
+
+  it('writes a SvelteKit starter', async () => {
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), 'agentskit-cli-'))
+    await writeStarterProject({ targetDir: tempDir, template: 'sveltekit', provider: 'demo' })
+
+    const pkg = JSON.parse(await readFile(path.join(tempDir, 'package.json'), 'utf8'))
+    expect(pkg.dependencies['@sveltejs/kit']).toBeTruthy()
+    expect(pkg.dependencies['@agentskit/svelte']).toBeTruthy()
+
+    const route = await readFile(path.join(tempDir, 'src/routes/api/chat/+server.ts'), 'utf8')
+    expect(route).toContain('export const POST')
+    expect(route).toContain('demoAdapter')
+
+    const page = await readFile(path.join(tempDir, 'src/routes/+page.svelte'), 'utf8')
+    expect(page).toContain('useChat')
+  })
+
+  it('writes a Nuxt starter', async () => {
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), 'agentskit-cli-'))
+    await writeStarterProject({ targetDir: tempDir, template: 'nuxt', provider: 'openai' })
+
+    const pkg = JSON.parse(await readFile(path.join(tempDir, 'package.json'), 'utf8'))
+    expect(pkg.dependencies.nuxt).toBeTruthy()
+    expect(pkg.dependencies['@agentskit/vue']).toBeTruthy()
+
+    const handler = await readFile(path.join(tempDir, 'server/api/chat.post.ts'), 'utf8')
+    expect(handler).toContain("import { openai }")
+    expect(handler).toContain('defineEventHandler')
+
+    const env = await readFile(path.join(tempDir, '.env.example'), 'utf8')
+    expect(env).toContain('OPENAI_API_KEY=')
+  })
+
+  it('writes a Vite+Ink starter with hot reload', async () => {
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), 'agentskit-cli-'))
+    await writeStarterProject({ targetDir: tempDir, template: 'vite-ink', provider: 'demo' })
+
+    const pkg = JSON.parse(await readFile(path.join(tempDir, 'package.json'), 'utf8'))
+    expect(pkg.scripts.dev).toBe('vite-node --watch src/index.tsx')
+    expect(pkg.dependencies['@agentskit/ink']).toBeTruthy()
+  })
+
+  it('writes a Cloudflare Workers starter', async () => {
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), 'agentskit-cli-'))
+    await writeStarterProject({ targetDir: tempDir, template: 'cloudflare-workers', provider: 'anthropic' })
+
+    const pkg = JSON.parse(await readFile(path.join(tempDir, 'package.json'), 'utf8'))
+    expect(pkg.dependencies['itty-router']).toBeTruthy()
+    expect(pkg.devDependencies.wrangler).toBeTruthy()
+
+    const wrangler = await readFile(path.join(tempDir, 'wrangler.toml'), 'utf8')
+    expect(wrangler).toContain('main = "src/worker.ts"')
+    expect(wrangler).toContain('compatibility_date')
+
+    const worker = await readFile(path.join(tempDir, 'src/worker.ts'), 'utf8')
+    expect(worker).toContain('import { anthropic }')
+    expect(worker).toContain("env.ANTHROPIC_API_KEY")
+  })
+
+  it('writes a Bun server starter', async () => {
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), 'agentskit-cli-'))
+    await writeStarterProject({ targetDir: tempDir, template: 'bun', provider: 'demo' })
+
+    const pkg = JSON.parse(await readFile(path.join(tempDir, 'package.json'), 'utf8'))
+    expect(pkg.scripts.dev).toBe('bun --hot src/server.ts')
+
+    const server = await readFile(path.join(tempDir, 'src/server.ts'), 'utf8')
+    expect(server).toContain('Bun.serve')
+    expect(server).toContain('demoAdapter')
+  })
 })

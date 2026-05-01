@@ -44,7 +44,12 @@ export async function runInteractiveInit(
       default: defaults.template ?? 'react',
       choices: [
         { name: 'React chat (Vite + browser)', value: 'react', description: 'Streaming UI with @agentskit/react' },
+        { name: 'SvelteKit chat', value: 'sveltekit', description: '@agentskit/svelte client + server route streaming' },
+        { name: 'Nuxt chat', value: 'nuxt', description: '@agentskit/vue composable + Nitro server route streaming' },
         { name: 'Ink chat (terminal UI)', value: 'ink', description: 'Same chat but in your terminal' },
+        { name: 'Vite + Ink (terminal, hot-reload)', value: 'vite-ink', description: 'Ink chat with vite-node hot reload' },
+        { name: 'Cloudflare Workers (edge)', value: 'cloudflare-workers', description: 'Edge runtime with itty-router + streaming' },
+        { name: 'Bun server', value: 'bun', description: 'Bun.serve with hot reload' },
         { name: 'Runtime (headless agent, no UI)', value: 'runtime', description: 'Autonomous task → result' },
         { name: 'Multi-agent (planner + delegates)', value: 'multi-agent', description: 'Supervisor pattern, ready to extend' },
       ],

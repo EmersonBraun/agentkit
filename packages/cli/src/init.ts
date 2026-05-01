@@ -1,7 +1,16 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
-export type StarterKind = 'react' | 'ink' | 'runtime' | 'multi-agent'
+export type StarterKind =
+  | 'react'
+  | 'ink'
+  | 'runtime'
+  | 'multi-agent'
+  | 'sveltekit'
+  | 'nuxt'
+  | 'vite-ink'
+  | 'cloudflare-workers'
+  | 'bun'
 export type Provider = 'openai' | 'anthropic' | 'gemini' | 'ollama' | 'demo'
 export type ToolKind = 'web_search' | 'filesystem' | 'shell'
 export type MemoryKind = 'none' | 'file' | 'sqlite'
@@ -475,6 +484,496 @@ console.log(\`\\n— \${result.steps} steps · \${result.toolCalls.length} tool 
   }
 }
 
+// ============================================================================
+// Edge / framework-specific templates
+// ============================================================================
+
+function buildAdapterServerImport(provider: Provider): string {
+  if (provider === 'demo') return ''
+  return `import { ${PROVIDER_IMPORT[provider]} } from '@agentskit/adapters'\n`
+}
+
+function envExampleFor(provider: Provider): string {
+  const envKey = PROVIDER_ENV_KEY[provider]
+  return envKey ? `${envKey}=\n` : '# No API key required for the demo provider\n'
+}
+
+function sveltekitStarter(ctx: RenderContext): Record<string, string> {
+  const deps: Record<string, string> = {
+    '@agentskit/svelte': '^0.4.0',
+    '@sveltejs/kit': '^2.0.0',
+    svelte: '^5.0.0',
+  }
+  if (ctx.provider !== 'demo') deps['@agentskit/adapters'] = '^0.4.0'
+
+  const adapterCallStr = adapterCall(ctx.provider)
+  const adapterImport = buildAdapterServerImport(ctx.provider)
+  const demoSnippet = ctx.provider === 'demo' ? demoAdapterSnippet() : ''
+
+  return {
+    'package.json': JSON.stringify(
+      {
+        name: 'agentskit-sveltekit-app',
+        private: true,
+        type: 'module',
+        scripts: {
+          dev: 'vite dev',
+          build: 'vite build',
+          preview: 'vite preview',
+          check: 'svelte-check --tsconfig ./tsconfig.json',
+        },
+        dependencies: deps,
+        devDependencies: {
+          '@sveltejs/adapter-auto': '^4.0.0',
+          '@sveltejs/vite-plugin-svelte': '^6.0.0',
+          'svelte-check': '^4.0.0',
+          typescript: '^5.5.0',
+          vite: '^7.0.0',
+        },
+      },
+      null,
+      2,
+    ) + '\n',
+
+    'svelte.config.js': `import adapter from '@sveltejs/adapter-auto'
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte'
+
+export default {
+  preprocess: vitePreprocess(),
+  kit: { adapter: adapter() },
+}
+`,
+
+    'vite.config.ts': `import { sveltekit } from '@sveltejs/kit/vite'
+import { defineConfig } from 'vite'
+export default defineConfig({ plugins: [sveltekit()] })
+`,
+
+    'tsconfig.json': JSON.stringify(
+      {
+        extends: './.svelte-kit/tsconfig.json',
+        compilerOptions: {
+          allowJs: true, checkJs: true, esModuleInterop: true,
+          forceConsistentCasingInFileNames: true, resolveJsonModule: true,
+          skipLibCheck: true, sourceMap: true, strict: true, moduleResolution: 'bundler',
+        },
+      },
+      null,
+      2,
+    ) + '\n',
+
+    'src/app.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    %sveltekit.head%
+  </head>
+  <body>%sveltekit.body%</body>
+</html>
+`,
+
+    'src/routes/+page.svelte': `<script lang="ts">
+  import { useChat } from '@agentskit/svelte'
+  import '@agentskit/svelte/theme'
+
+  const chat = useChat({ endpoint: '/api/chat' })
+</script>
+
+<main>
+  {#each $chat.messages as message (message.id)}
+    <article data-ak-message data-role={message.role}>{message.content}</article>
+  {/each}
+  <form on:submit|preventDefault={() => chat.send($chat.input)}>
+    <input bind:value={$chat.input} />
+    <button>Send</button>
+  </form>
+</main>
+`,
+
+    'src/routes/api/chat/+server.ts': `import type { RequestHandler } from './$types'
+${adapterImport}${demoSnippet}export const POST: RequestHandler = async ({ request }) => {
+  const { messages } = await request.json()
+  const adapter = ${adapterCallStr}
+  const source = adapter.createSource({ messages: messages.map((m: { role: string; content: string }, i: number) => ({
+    id: String(i), role: m.role, content: m.content,
+    status: 'complete' as const, createdAt: new Date(0),
+  })) })
+
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      const encoder = new TextEncoder()
+      for await (const chunk of source.stream()) {
+        if (chunk.type === 'text') controller.enqueue(encoder.encode(chunk.content))
+      }
+      controller.close()
+    },
+  })
+  return new Response(stream, { headers: { 'content-type': 'text/plain; charset=utf-8' } })
+}
+`,
+
+    '.env.example': envExampleFor(ctx.provider),
+    '.gitignore': 'node_modules\n.svelte-kit\nbuild\n.env\n.env.local\n',
+    'README.md': readmeFor(ctx),
+  }
+}
+
+function nuxtStarter(ctx: RenderContext): Record<string, string> {
+  const deps: Record<string, string> = {
+    '@agentskit/vue': '^0.4.0',
+    nuxt: '^4.0.0',
+    vue: '^3.5.0',
+  }
+  if (ctx.provider !== 'demo') deps['@agentskit/adapters'] = '^0.4.0'
+
+  const adapterCallStr = adapterCall(ctx.provider)
+  const adapterImport = buildAdapterServerImport(ctx.provider)
+  const demoSnippet = ctx.provider === 'demo' ? demoAdapterSnippet() : ''
+
+  return {
+    'package.json': JSON.stringify(
+      {
+        name: 'agentskit-nuxt-app',
+        private: true,
+        type: 'module',
+        scripts: {
+          dev: 'nuxt dev',
+          build: 'nuxt build',
+          preview: 'nuxt preview',
+          generate: 'nuxt generate',
+        },
+        dependencies: deps,
+        devDependencies: { typescript: '^5.5.0' },
+      },
+      null,
+      2,
+    ) + '\n',
+
+    'nuxt.config.ts': `export default defineNuxtConfig({
+  compatibilityDate: '2026-04-01',
+  modules: [],
+  typescript: { strict: true },
+})
+`,
+
+    'tsconfig.json': JSON.stringify(
+      { extends: './.nuxt/tsconfig.json' },
+      null,
+      2,
+    ) + '\n',
+
+    'app.vue': `<script setup lang="ts">
+import { useChat } from '@agentskit/vue'
+import '@agentskit/vue/theme'
+
+const { messages, input, send } = useChat({ endpoint: '/api/chat' })
+</script>
+
+<template>
+  <main>
+    <article v-for="message in messages" :key="message.id" :data-role="message.role">
+      {{ message.content }}
+    </article>
+    <form @submit.prevent="send(input)">
+      <input v-model="input" />
+      <button>Send</button>
+    </form>
+  </main>
+</template>
+`,
+
+    'server/api/chat.post.ts': `${adapterImport}${demoSnippet}export default defineEventHandler(async (event) => {
+  const { messages } = await readBody<{ messages: Array<{ role: string; content: string }> }>(event)
+  const adapter = ${adapterCallStr}
+  const source = adapter.createSource({ messages: messages.map((m, i) => ({
+    id: String(i), role: m.role as 'user' | 'assistant' | 'system',
+    content: m.content, status: 'complete' as const, createdAt: new Date(0),
+  })) })
+
+  setHeader(event, 'content-type', 'text/plain; charset=utf-8')
+  return sendStream(event, new ReadableStream<Uint8Array>({
+    async start(controller) {
+      const encoder = new TextEncoder()
+      for await (const chunk of source.stream()) {
+        if (chunk.type === 'text') controller.enqueue(encoder.encode(chunk.content))
+      }
+      controller.close()
+    },
+  }))
+})
+`,
+
+    '.env.example': envExampleFor(ctx.provider),
+    '.gitignore': 'node_modules\n.nuxt\n.output\n.env\n.env.local\n',
+    'README.md': readmeFor(ctx),
+  }
+}
+
+function viteInkStarter(ctx: RenderContext): Record<string, string> {
+  const deps: Record<string, string> = {
+    '@agentskit/ink': '^0.4.0',
+    ink: '^7.0.0',
+    react: '^19.0.0',
+  }
+  if (ctx.provider !== 'demo') deps['@agentskit/adapters'] = '^0.4.0'
+  if (ctx.tools.length > 0) deps['@agentskit/tools'] = '^0.4.0'
+
+  return {
+    'package.json': JSON.stringify(
+      {
+        name: 'agentskit-vite-ink-app',
+        private: true,
+        type: 'module',
+        scripts: {
+          dev: 'vite-node --watch src/index.tsx',
+          start: 'vite-node src/index.tsx',
+          build: 'vite build',
+        },
+        dependencies: deps,
+        devDependencies: {
+          '@types/react': '^19.0.0',
+          'vite-node': '^4.0.0',
+          vite: '^7.0.0',
+          typescript: '^5.5.0',
+        },
+      },
+      null,
+      2,
+    ) + '\n',
+
+    'vite.config.ts': `import { defineConfig } from 'vite'
+export default defineConfig({
+  build: { ssr: true, target: 'node22', rollupOptions: { input: 'src/index.tsx' } },
+})
+`,
+
+    'tsconfig.json': JSON.stringify(
+      {
+        compilerOptions: {
+          target: 'ES2022', module: 'ESNext', moduleResolution: 'bundler',
+          jsx: 'react-jsx', strict: true, noEmit: true, skipLibCheck: true,
+        },
+        include: ['src'],
+      },
+      null,
+      2,
+    ) + '\n',
+
+    'src/index.tsx': `import React from 'react'
+import { render } from 'ink'
+import { ChatContainer, InputBar, Message, useChat } from '@agentskit/ink'
+${adapterImport(ctx.provider)}${toolImports(ctx.tools)}
+${ctx.provider === 'demo' ? demoAdapterSnippet() : ''}function App() {
+  const chat = useChat({
+    adapter: ${adapterCall(ctx.provider)},${ctx.tools.length > 0 ? `\n    tools: ${toolList(ctx.tools)},` : ''}
+  })
+
+  return (
+    <ChatContainer>
+      {chat.messages.map(message => (
+        <Message key={message.id} message={message} />
+      ))}
+      <InputBar chat={chat} />
+    </ChatContainer>
+  )
+}
+
+render(<App />)
+`,
+
+    '.env.example': envExampleFor(ctx.provider),
+    '.gitignore': 'node_modules\ndist\n.env\n.env.local\n.agentskit-history.*\n',
+    'README.md': readmeFor(ctx),
+  }
+}
+
+function cloudflareWorkersStarter(ctx: RenderContext): Record<string, string> {
+  const deps: Record<string, string> = {
+    'itty-router': '^5.0.0',
+  }
+  if (ctx.provider !== 'demo') deps['@agentskit/adapters'] = '^0.4.0'
+
+  const adapterCallEdge = ctx.provider === 'demo'
+    ? 'demoAdapter()'
+    : ctx.provider === 'ollama'
+      ? `ollama({ model: '${PROVIDER_DEFAULT_MODEL[ctx.provider]}' })`
+      : `${PROVIDER_IMPORT[ctx.provider]}({ apiKey: env.${PROVIDER_ENV_KEY[ctx.provider]!} ?? '', model: '${PROVIDER_DEFAULT_MODEL[ctx.provider]}' })`
+  const adapterImport = buildAdapterServerImport(ctx.provider)
+  const demoSnippet = ctx.provider === 'demo' ? demoAdapterSnippet() : ''
+  const envKey = PROVIDER_ENV_KEY[ctx.provider]
+
+  return {
+    'package.json': JSON.stringify(
+      {
+        name: 'agentskit-cf-worker',
+        private: true,
+        type: 'module',
+        scripts: {
+          dev: 'wrangler dev',
+          deploy: 'wrangler deploy',
+        },
+        dependencies: deps,
+        devDependencies: {
+          '@cloudflare/workers-types': '^4.0.0',
+          typescript: '^5.5.0',
+          wrangler: '^3.0.0',
+        },
+      },
+      null,
+      2,
+    ) + '\n',
+
+    'wrangler.toml': `name = "agentskit-cf-worker"
+main = "src/worker.ts"
+compatibility_date = "2026-04-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Bind D1 + KV when you wire memory:
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "agentskit"
+#
+# [[kv_namespaces]]
+# binding = "KV"
+# id = "..."
+
+[vars]
+${envKey ? `# Set ${envKey} via 'wrangler secret put ${envKey}'` : '# No API key required for the demo provider'}
+`,
+
+    'tsconfig.json': JSON.stringify(
+      {
+        compilerOptions: {
+          target: 'ES2022', module: 'ESNext', moduleResolution: 'bundler',
+          lib: ['ES2022'], types: ['@cloudflare/workers-types'],
+          strict: true, noEmit: true, skipLibCheck: true,
+        },
+        include: ['src'],
+      },
+      null,
+      2,
+    ) + '\n',
+
+    'src/worker.ts': `import { Router } from 'itty-router'
+${adapterImport}
+${demoSnippet}interface Env {
+  ${envKey ? `${envKey}: string` : '/* no env vars */'}
+}
+
+const router = Router()
+
+router.post('/chat', async (request: Request, env: Env) => {
+  const { messages } = await request.json() as { messages: Array<{ role: string; content: string }> }
+  const adapter = ${adapterCallEdge}
+  const source = adapter.createSource({ messages: messages.map((m, i) => ({
+    id: String(i), role: m.role as 'user' | 'assistant' | 'system',
+    content: m.content, status: 'complete' as const, createdAt: new Date(0),
+  })) })
+
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      const encoder = new TextEncoder()
+      for await (const chunk of source.stream()) {
+        if (chunk.type === 'text') controller.enqueue(encoder.encode(chunk.content))
+      }
+      controller.close()
+    },
+  })
+  return new Response(stream, { headers: { 'content-type': 'text/plain; charset=utf-8' } })
+})
+
+router.all('*', () => new Response('not found', { status: 404 }))
+
+export default {
+  fetch: (req: Request, env: Env, ctx: ExecutionContext) => router.handle(req, env, ctx),
+} satisfies ExportedHandler<Env>
+`,
+
+    '.env.example': envExampleFor(ctx.provider),
+    '.gitignore': 'node_modules\n.wrangler\n.dev.vars\n.env\n.env.local\n',
+    'README.md': readmeFor(ctx),
+  }
+}
+
+function bunStarter(ctx: RenderContext): Record<string, string> {
+  const deps: Record<string, string> = {}
+  if (ctx.provider !== 'demo') deps['@agentskit/adapters'] = '^0.4.0'
+  const adapterCallStr = adapterCall(ctx.provider)
+  const adapterImport = buildAdapterServerImport(ctx.provider)
+  const demoSnippet = ctx.provider === 'demo' ? demoAdapterSnippet() : ''
+
+  return {
+    'package.json': JSON.stringify(
+      {
+        name: 'agentskit-bun-server',
+        private: true,
+        type: 'module',
+        scripts: {
+          dev: 'bun --hot src/server.ts',
+          start: 'bun src/server.ts',
+        },
+        dependencies: deps,
+        devDependencies: { typescript: '^5.5.0' },
+      },
+      null,
+      2,
+    ) + '\n',
+
+    'tsconfig.json': JSON.stringify(
+      {
+        compilerOptions: {
+          target: 'ES2022', module: 'ESNext', moduleResolution: 'bundler',
+          types: ['bun-types'], strict: true, noEmit: true, skipLibCheck: true,
+        },
+        include: ['src'],
+      },
+      null,
+      2,
+    ) + '\n',
+
+    'src/server.ts': `${adapterImport}${demoSnippet}const adapter = ${adapterCallStr}
+
+const server = Bun.serve({
+  port: Number(process.env.PORT ?? 3000),
+  async fetch(request) {
+    const url = new URL(request.url)
+    if (request.method === 'POST' && url.pathname === '/chat') {
+      const { messages } = await request.json() as { messages: Array<{ role: string; content: string }> }
+      const source = adapter.createSource({ messages: messages.map((m, i) => ({
+        id: String(i), role: m.role as 'user' | 'assistant' | 'system',
+        content: m.content, status: 'complete' as const, createdAt: new Date(0),
+      })) })
+      const stream = new ReadableStream<Uint8Array>({
+        async start(controller) {
+          const encoder = new TextEncoder()
+          for await (const chunk of source.stream()) {
+            if (chunk.type === 'text') controller.enqueue(encoder.encode(chunk.content))
+          }
+          controller.close()
+        },
+      })
+      return new Response(stream, { headers: { 'content-type': 'text/plain; charset=utf-8' } })
+    }
+    if (url.pathname === '/') {
+      return new Response(\`<!doctype html><title>AgentsKit Bun starter</title>
+<body><pre>POST /chat with { messages: [...] }</pre></body>\`, {
+        headers: { 'content-type': 'text/html' },
+      })
+    }
+    return new Response('not found', { status: 404 })
+  },
+})
+
+console.log(\`Listening on http://localhost:\${server.port}\`)
+`,
+
+    '.env.example': envExampleFor(ctx.provider),
+    '.gitignore': 'node_modules\n.env\n.env.local\nbun.lockb\n',
+    'README.md': readmeFor(ctx),
+  }
+}
+
 function readmeFor(ctx: RenderContext): string {
   const installCmd = ctx.pm === 'npm' ? 'npm install' : `${ctx.pm} install`
   const runCmd = ctx.pm === 'npm' ? 'npm run dev' : `${ctx.pm} dev`
@@ -518,6 +1017,11 @@ const TEMPLATE_FN: Record<StarterKind, (ctx: RenderContext) => Record<string, st
   ink: inkStarter,
   runtime: runtimeStarter,
   'multi-agent': multiAgentStarter,
+  sveltekit: sveltekitStarter,
+  nuxt: nuxtStarter,
+  'vite-ink': viteInkStarter,
+  'cloudflare-workers': cloudflareWorkersStarter,
+  bun: bunStarter,
 }
 
 export async function writeStarterProject(options: InitCommandOptions): Promise<void> {
