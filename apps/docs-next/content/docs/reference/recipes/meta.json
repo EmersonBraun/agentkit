@@ -6,6 +6,7 @@
 
     "---Getting started---",
     "custom-adapter",
+    "adapter-contract-tests",
     "more-providers",
     "simulate-stream",
     "framework-adapters",
