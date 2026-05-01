@@ -27,9 +27,23 @@ await runtime.run('Translate this product page to pt-BR preserving markdown.')
 - Flags untranslatable idioms; proposes locale-aware alternatives.
 - Maintains tone (formal / friendly / technical) from source.
 
-## Glossary mode (v2 — issue #452)
+## Glossary mode
 
-Future version takes a glossary map to force specific term translations. Track: [skill: translatorSkill v2](https://github.com/AgentsKit-io/agentskit/issues/452).
+`translatorWithGlossary(entries)` builds a skill with forced term translations. Glossary entries take priority over the model's default phrasing — the contract that downstream consumers (UI strings, brand text, legal copy) rely on.
+
+```ts
+import { translatorWithGlossary } from '@agentskit/skills'
+
+const brandSkill = translatorWithGlossary([
+  { term: 'AgentsKit', translation: 'AgentsKit' },                    // never translate
+  { term: 'agent', translation: 'agente', context: 'product UI only' },
+  { term: 'workspace', translation: 'espacio de trabajo' },
+])
+```
+
+Each entry: `{ term, translation, context? }`. The `context` field is appended to the prompt so the model knows when to apply the entry vs. a natural translation.
+
+The bare `translator` export is `translatorWithGlossary([])` — idiomatic translation, no glossary.
 
 ## Related
 
