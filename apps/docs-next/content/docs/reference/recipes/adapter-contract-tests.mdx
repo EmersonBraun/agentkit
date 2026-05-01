@@ -1,0 +1,68 @@
+---
+title: Adapter contract tests
+description: Verify any adapter against the ADR 0001 invariants A1–A10 with the shared test harness.
+---
+
+Every adapter ships in `@agentskit/adapters` runs the same contract test suite before merge — `runAdapterContract` exercises the ADR 0001 invariants (A1–A10) against the adapter's actual streaming code. New adapter authors should run the same suite from day one.
+
+```ts
+// packages/adapters/tests/your-adapter.test.ts
+import {
+  runAdapterContract,
+  openAISuccessBody,
+} from './contract'
+import { yourAdapter } from '../src/your-adapter'
+
+runAdapterContract({
+  name: 'yourAdapter',
+  build: () => yourAdapter({ apiKey: 'k', model: 'm' }),
+  successBody: openAISuccessBody,  // or anthropic / gemini / ollama
+})
+```
+
+That's it — five test cases run automatically:
+
+| Case | Invariant |
+|---|---|
+| `A1: createSource is synchronous and does not fetch eagerly` | Pure factory — no work until `stream()` is called. |
+| `A3 + A4: stream ends with a terminal chunk` | Every stream emits a `done` or `error` chunk last. |
+| `A6: abort is safe before stream() is called` | `abort()` never throws. |
+| `A6: abort is safe after stream() completes` | Same — even after natural completion. |
+| `A7: input messages are not mutated` | Snapshot before / after; bytes match. |
+| `A9: errors surface as an error chunk, not a thrown exception` | `fetch` returns 500 → adapter emits `error`, doesn't throw. |
+
+## Stock response bodies
+
+| Helper | Shape |
+|---|---|
+| `openAISuccessBody()` | OpenAI-compatible SSE — `data: {...}\n\n` chunks with a `[DONE]` sentinel. |
+| `anthropicSuccessBody()` | Anthropic event stream — `content_block_delta` + `message_stop`. |
+| `geminiSuccessBody()` | Gemini SSE — single `candidates[].content.parts[].text` chunk. |
+| `ollamaSuccessBody()` | Ollama NDJSON — `{message:{content}}` lines + `{done:true}`. |
+
+For adapters with a different protocol (Bedrock SDK, Replicate two-step, Vertex OAuth), write a dedicated test file — the contract harness only covers fetch-driven adapters.
+
+## Coverage today
+
+The shared suite runs against 17 adapters: openai, anthropic, gemini, grok, deepseek, kimi, mistral, cohere, together, groq, fireworks, openrouter, huggingface, ollama, lmstudio, vllm, llamacpp.
+
+Adapters with their own dedicated tests (different protocols):
+
+- `bedrock` — uses an injected SDK client, not `globalThis.fetch`.
+- `replicate` — two-step: POST predictions → GET stream URL.
+- `vertex` — OAuth2 access tokens.
+- `azureOpenAI` — deployment + api-version routing.
+- `langchain` / `langgraph` / `vercelAI` — wrap third-party runtimes; their contracts are covered by the runtimes they delegate to.
+
+## What the harness does NOT cover
+
+- A2 (single iteration of `stream()`) — undefined behavior, not tested.
+- A5 (tool-call atomicity) — exercised in adapter-specific tool-call tests.
+- A8 (metadata is opaque) — type-level invariant; vitest can't see it at runtime.
+- A10 (no hidden config) — code-review concern; can't be tested mechanically.
+
+## Related
+
+- [ADR 0001 — Adapter Contract](https://github.com/AgentsKit-io/agentskit/blob/main/docs/architecture/adrs/0001-adapter-contract.md)
+- [Recipe: custom adapter](./custom-adapter)
+- [Choosing an adapter](/docs/data/providers/choosing)
