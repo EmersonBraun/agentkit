@@ -45,7 +45,7 @@ console.log(result.content)
 
 ## Features
 
-- Built-in skills: `researcher`, `coder`, `planner`, `critic`, `summarizer`
+- Built-in skills: `researcher`, `coder`, `planner`, `critic`, `summarizer`, `codeReviewer`, `prReviewer`, `sqlGen`, `dataAnalyst`, `translator`
 - `composeSkills(...skills)` — merge system prompts and behavioral defaults
 - Skill contract v1 (ADR 0005): `{ name, description, systemPrompt }`
 - Works with `@agentskit/runtime`, `useChat`, and the CLI `--skill` flag

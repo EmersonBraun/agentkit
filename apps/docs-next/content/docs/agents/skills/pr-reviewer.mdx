@@ -1,0 +1,55 @@
+---
+title: prReviewer
+description: Reviews a diff against the AgentsKit Manifesto + package CONVENTIONS. Flags violations and suggests concrete rewrites.
+---
+
+```ts
+import { prReviewer } from '@agentskit/skills'
+import { github } from '@agentskit/tools/integrations'
+
+const runtime = createRuntime({
+  adapter,
+  skills: [prReviewer],
+  tools: [...github({ token: process.env.GITHUB_TOKEN! })],
+})
+
+await runtime.run('Review the diff on PR #123 in AgentsKit-io/agentskit')
+```
+
+## When to reach for it
+
+- Self-review of agent-generated code before merge.
+- Enforcing the Manifesto on inbound contributions.
+- Pre-commit quality gate inside the AgentsKit repo itself.
+
+## What it enforces
+
+- No new external deps in `@agentskit/core`.
+- No `any` — use `unknown` and narrow.
+- Named exports only; no `export default`.
+- Headless components — no hardcoded styles, theming via `data-ak-*`.
+- No backwards-compat shims, dead re-exports, or "removed code" comments.
+- No comments that just narrate the code.
+- Vitest only.
+
+## Output shape
+
+Always opens with one of `APPROVE` / `REQUEST CHANGES` / `COMMENT`, then
+findings grouped by severity (`blocker · high · med · nit`), one line
+each:
+
+```
+<file>:<line> — <one-sentence problem statement>. <concrete rewrite>.
+```
+
+## vs. `codeReviewer`
+
+`codeReviewer` is general-purpose (correctness / security / performance
+/ readability). `prReviewer` is the AgentsKit-flavored cousin — same
+output shape, but the system prompt is loaded with this repo's
+Manifesto so it has opinions instead of just observations.
+
+## Related
+
+- [Skills overview](./) · [codeReviewer](./code-reviewer) · [Authoring](./authoring)
+- [Manifesto](https://github.com/AgentsKit-io/agentskit/blob/main/MANIFESTO.md)
