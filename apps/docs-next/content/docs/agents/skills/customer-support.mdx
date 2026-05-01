@@ -1,0 +1,41 @@
+---
+title: customerSupport
+description: First-line customer support — calm, direct, useful. Diagnoses, resolves, or escalates.
+---
+
+```ts
+import { customerSupport } from '@agentskit/skills'
+import { fetchUrl } from '@agentskit/tools'
+
+const runtime = createRuntime({
+  adapter,
+  skills: [customerSupport],
+  tools: [fetchUrl()],   // pull docs / policy pages
+})
+
+await runtime.run('Customer asks: "My export keeps timing out, I\'ve tried 4 times."')
+```
+
+## Style enforced
+
+- Acknowledge once, don't grovel.
+- Lead with the answer, then explain.
+- One question at a time when diagnosing.
+- Frustrated → drop small talk, fix it. Confused → walk through. Power user → terse + links.
+
+## Hard rules
+
+- Never invent policy. Check docs / policy tool. If not found, escalate.
+- Never invent timeframes. Real ETA or "I don't have a timeline yet."
+- Escalate fast on legal / compliance, account compromise, payment disputes.
+- PII stays out of the conversation log.
+
+## Pairs well with
+
+- `fetchUrl` for docs / policy lookup.
+- The `slack()` integration for handing off to a human channel.
+- A `linear` tool for filing follow-up bugs without making the customer repeat themselves.
+
+## Related
+
+- [Skills overview](./) · [Use case: support agent](/docs/use-cases/support-agent)

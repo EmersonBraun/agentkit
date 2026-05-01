@@ -7,6 +7,10 @@ export { codeReviewer } from './code-reviewer'
 export { sqlGen } from './sql-gen'
 export { dataAnalyst } from './data-analyst'
 export { translator } from './translator'
+export { sqlAnalyst } from './sql-analyst'
+export { technicalWriter } from './technical-writer'
+export { securityAuditor } from './security-auditor'
+export { customerSupport } from './customer-support'
 
 export {
   createSkillRegistry,

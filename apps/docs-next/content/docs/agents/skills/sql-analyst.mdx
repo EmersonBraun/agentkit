@@ -1,0 +1,39 @@
+---
+title: sqlAnalyst
+description: Read-only data analyst — schema discovery, safe SELECTs, plain-English explanations.
+---
+
+```ts
+import { sqlAnalyst } from '@agentskit/skills'
+import { sqliteQueryTool } from '@agentskit/tools'
+
+const runtime = createRuntime({
+  adapter,
+  skills: [sqlAnalyst],
+  tools: [sqliteQueryTool({ path: './data/app.db' })],
+})
+
+await runtime.run('How many orders did each customer place last month?')
+```
+
+## When to reach for it
+
+- Plain-English questions over a known database.
+- Internal copilots for product / revenue / ops dashboards.
+- Quick ad-hoc analysis without writing SQL by hand.
+
+## Hard rules in the prompt
+
+- Read-only only — refuses `INSERT` / `UPDATE` / `DELETE` / `DROP` / `ALTER` / `TRUNCATE` / `CREATE` / `MERGE` / `PRAGMA`.
+- One statement at a time (no semicolon-chained queries).
+- `LIMIT` on anything that could realistically return >1k rows.
+- No `SELECT *` in final answers.
+
+## vs. `sqlGen`
+
+`sqlGen` writes SQL. `sqlAnalyst` runs SQL, reads the result, and explains it. Pair `sqlAnalyst` with `sqliteQueryTool` (or any read-only DB tool) so it can actually execute.
+
+## Related
+
+- [Skills overview](./) · [sqlGen](./sql-gen)
+- [Tool: sqliteQueryTool](/docs/agents/tools/builtins#sqlitequerytool)
