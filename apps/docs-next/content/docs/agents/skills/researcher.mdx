@@ -21,11 +21,14 @@ const runtime = createRuntime({
 - You want the agent to flag uncertainty instead of speculating.
 - You're ingesting RAG context and need disciplined citation output.
 
-## Behavior
+## Behavior (v2 — citation-first)
 
-- Breaks the question into sub-queries and searches each independently.
-- Cross-references across sources; flags contradictions.
-- Output leads with a direct answer, then cited claims, then a confidence assessment.
+- Every non-trivial claim ships an inline numbered citation `[1]`. Uncited claims are dropped or flagged.
+- Direct quotes go in double-quotes with a citation; paraphrases also need a citation.
+- Primary sources beat secondary summaries. Vendor blog beats news article. Wikipedia is acknowledged but not preferred.
+- Recency is named when the topic is fast-moving.
+- Contradictions surface with both citations rather than picking silently.
+- Confidence assessment at the end (high / medium / low) with one-line justification.
 
 ## Tools it expects
 
@@ -54,4 +57,3 @@ const thorough = composeSkills(researcher, critic)
 ## Related
 
 - [Skills overview](./) · [Authoring](./authoring) · [Marketplace](./marketplace)
-- Issue #453 — [researcherSkill v2 (citation-first)](https://github.com/AgentsKit-io/agentskit/issues/453)

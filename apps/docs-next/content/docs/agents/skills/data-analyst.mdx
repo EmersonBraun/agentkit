@@ -23,15 +23,26 @@ const runtime = createRuntime({
 - Column-profile + anomaly hunting.
 - Lightweight EDA before handing off to a BI tool.
 
-## Behavior
+## Behavior (v2 — tabular-aware)
 
-- Loads file → reads schema + head/tail.
-- Reports shape, dtypes, null %, basic stats.
-- Highlights outliers + correlations worth investigating.
-- Never fabricates a column that isn't there.
+- **Inspect schema before writing SQL.** Lists relevant tables / columns / types up-front; never guesses column names.
+- **Distributions over means.** Median + p95 by default for revenue / latency / session-length.
+- **Explicit time windows.** "Last 30 days", "Q3 2026" — never "recent".
+- **Group sizes.** Buckets with <30 observations are labeled low-N or folded into "Other".
+- **Survivorship + selection bias.** Filters that exclude rows are called out, not silent.
+- **Units on every number.** No bare integers — `ms`, `$`, `%`, `count`.
+
+## Output shape
+
+| Section | Contents |
+|---|---|
+| Answer | Bottom line, 1–2 sentences |
+| Metric table | Numbers with units + window |
+| Query | The SQL that produced the numbers |
+| Interpretation | Plain English, with one counter-hypothesis |
+| Caveats | Explicit limitations (sample size, missing data, seasonality) |
 
 ## Related
 
-- [Skills overview](./) · [sqlGen](./sql-gen)
-- Issue #451 — [dataAnalystSkill v2 (tabular-aware)](https://github.com/AgentsKit-io/agentskit/issues/451)
+- [Skills overview](./) · [sqlGen](./sql-gen) · [sqlAnalyst](./sql-analyst)
 - [documentParsers](/docs/agents/tools/integrations/document-parsers)
