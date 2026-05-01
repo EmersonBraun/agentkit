@@ -1,0 +1,40 @@
+---
+title: securityAuditor
+description: Security review of code or config — injection, auth, secrets, crypto, SSRF, supply chain, LLM-specific risks.
+---
+
+```ts
+import { securityAuditor } from '@agentskit/skills'
+
+const runtime = createRuntime({
+  adapter,
+  skills: [securityAuditor],
+})
+
+await runtime.run('Audit the diff on PR #123.')
+```
+
+## What it covers
+
+- Authn / authz boundaries.
+- Injection — SQL / NoSQL / command / LDAP / template / **prompt injection in LLM-fed content**.
+- Secrets in code, logs, client bundles, error messages.
+- Crypto — weak hashing, password compare timing leaks, predictable randomness.
+- Network — SSRF on user-supplied URLs, XXE, missing TLS verification.
+- Supply chain — postinstall scripts, typosquats, lockfile drift.
+- LLM-specific — untrusted instructions in tool output / RAG context, sandbox escapes, jailbreak surfaces.
+
+## Output
+
+Severity ladder: `critical · high · medium · low · info`. Every finding cites a real `file:line`, names the exploit, and proposes a concrete fix.
+
+## vs. `prReviewer` and `codeReviewer`
+
+- `prReviewer` enforces project-Manifesto rules.
+- `codeReviewer` is general-purpose code quality.
+- `securityAuditor` is *only* security. Use it alongside the others, not instead of them.
+
+## Related
+
+- [Skills overview](./) · [prReviewer](./pr-reviewer) · [codeReviewer](./code-reviewer)
+- [Production → Security](/docs/production/security/prompt-injection)

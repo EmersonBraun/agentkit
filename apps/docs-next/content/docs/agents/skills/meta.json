@@ -15,6 +15,10 @@
     "summarizer",
     "sql-gen",
     "data-analyst",
-    "translator"
+    "translator",
+    "sql-analyst",
+    "technical-writer",
+    "security-auditor",
+    "customer-support"
   ]
 }

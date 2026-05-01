@@ -1,0 +1,33 @@
+---
+title: technicalWriter
+description: Skim-friendly technical docs — TL;DR-first, no marketing voice, code-example-driven.
+---
+
+```ts
+import { technicalWriter } from '@agentskit/skills'
+
+const runtime = createRuntime({
+  adapter,
+  skills: [technicalWriter],
+})
+
+await runtime.run('Write the README intro for @agentskit/x.')
+```
+
+## When to reach for it
+
+- README intros, package docs, recipe pages.
+- Rewriting marketing-y prose into engineer-readable prose.
+- Drafting docs you'll polish by hand afterward.
+
+## Style enforced in the prompt
+
+- One idea per sentence; active voice.
+- No filler (`simply`, `just`, `actually`, `basically`).
+- No marketing (`powerful`, `robust`, `leverage`).
+- TL;DR before walkthrough before API surface before edge cases.
+- Concrete code examples, not abstract descriptions.
+
+## Related
+
+- [Skills overview](./) · [coder](./coder) · [summarizer](./summarizer)
