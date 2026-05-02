@@ -14,3 +14,6 @@
 
 # Anchored fragments that mdx-lint can't resolve cleanly (per-page, fine in browser)
 #strikes-known
+
+# Transient: tree links to packages added in this PR; resolve on merge to main
+^https://github\.com/AgentsKit-io/agentskit/tree/main/packages/(eval-braintrust|observability-langfuse)$
