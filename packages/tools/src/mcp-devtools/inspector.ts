@@ -93,9 +93,17 @@ export interface EvalResult {
 /**
  * Capability surface a runtime exposes for devtools inspection. Every
  * method is optional — devtools only registers the MCP tools whose
- * inspector method exists. A read-only inspector (no pause/resume/
- * step/replay) is a perfectly valid configuration for production
- * monitoring.
+ * inspector method exists.
+ *
+ * **Mutation methods are write-side.** `stepRuntime`, `replaySession`,
+ * `pauseRuntime`, `resumeRuntime`, and `runEval` all cause the runtime
+ * to execute new work — tool calls, model invocations, side effects.
+ * If you intend a read-only inspector for production monitoring, omit
+ * those methods entirely. Do not implement them as no-ops; the gating
+ * is structural (presence ⇒ tool registered), so an accidental no-op
+ * implementation still exposes the tool over MCP. The mutating tools
+ * each set `requiresConfirmation: true`, but a misconfigured client
+ * that auto-approves can still bypass that gate.
  */
 export interface RuntimeInspector {
   listSessions?: () => Promise<SessionSummary[]>

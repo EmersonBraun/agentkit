@@ -146,12 +146,13 @@ export function devtoolsTools(options: DevtoolsToolsOptions): ToolDefinition[] {
     tools.push(
       defineTool({
         name: 'devtools_step_runtime',
-        description: 'Advance a paused session by exactly one step.',
+        description: 'Advance a paused session by exactly one step. Destructive — runs the next tool call which may write files, call APIs, or send messages.',
         schema: {
           type: 'object',
           properties: { session_id: { type: 'string' } },
           required: ['session_id'],
         } as const,
+        requiresConfirmation: true,
         async execute({ session_id }) {
           return await inspector.stepRuntime!(String(session_id))
         },
@@ -163,7 +164,7 @@ export function devtoolsTools(options: DevtoolsToolsOptions): ToolDefinition[] {
     tools.push(
       defineTool({
         name: 'devtools_replay_session',
-        description: 'Replay a session deterministically from the recorded history, optionally starting at a specific step.',
+        description: 'Replay a session deterministically from the recorded history, optionally starting at a specific step. Destructive — re-executes side-effecting tool calls against live external systems.',
         schema: {
           type: 'object',
           properties: {
@@ -172,6 +173,7 @@ export function devtoolsTools(options: DevtoolsToolsOptions): ToolDefinition[] {
           },
           required: ['session_id'],
         } as const,
+        requiresConfirmation: true,
         async execute({ session_id, from_step }) {
           const step = typeof from_step === 'number' ? from_step : undefined
           return await inspector.replaySession!(String(session_id), step)

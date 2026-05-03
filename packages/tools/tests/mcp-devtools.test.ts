@@ -109,15 +109,34 @@ describe('devtoolsTools — execution', () => {
     expect(inspector.replaySession).toHaveBeenCalledWith('s-1', 5)
   })
 
-  it('destructive tools set requiresConfirmation: true', () => {
+  it('every mutating tool sets requiresConfirmation: true', () => {
     const inspector: RuntimeInspector = {
       listSessions: async () => [],
       pauseRuntime: async () => ({ ok: true }),
       resumeRuntime: async () => ({ ok: true }),
+      stepRuntime: async () => ({ step: 1, status: 'paused' }),
+      replaySession: async () => ({ replayId: 'r', fromStep: 0, status: 'pending' }),
     }
     const tools = devtoolsTools({ inspector })
-    expect(tools.find(t => t.name === 'devtools_pause_runtime')!.requiresConfirmation).toBe(true)
-    expect(tools.find(t => t.name === 'devtools_resume_runtime')!.requiresConfirmation).toBe(true)
+    for (const name of [
+      'devtools_pause_runtime',
+      'devtools_resume_runtime',
+      'devtools_step_runtime',
+      'devtools_replay_session',
+    ]) {
+      expect(tools.find(t => t.name === name)!.requiresConfirmation, name).toBe(true)
+    }
+  })
+
+  it('read-only tools do NOT set requiresConfirmation', () => {
+    const inspector: RuntimeInspector = {
+      listSessions: async () => [],
+      inspectSession: async () => DETAIL,
+      listTools: async () => [],
+    }
+    for (const tool of devtoolsTools({ inspector })) {
+      expect(tool.requiresConfirmation, tool.name).toBeFalsy()
+    }
   })
 })
 
