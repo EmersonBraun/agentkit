@@ -92,14 +92,28 @@ describe('validatePIITaxonomy', () => {
     expect(result.issues.some(i => /unknown field "patter"/.test(i.message))).toBe(true)
   })
 
-  it('rejects regexes that exhibit catastrophic backtracking on the canary', () => {
-    // Classic ReDoS pattern — nested quantifier on a tail-anchored alternation.
+  it('flags nested-quantifier patterns as likely ReDoS (static heuristic)', () => {
+    for (const pattern of ['(a+)+$', '(.*)*', '(a*)+', '([a-z]+)*']) {
+      const result = validatePIITaxonomy({
+        version: '1',
+        rules: [{ name: 'redos', pattern }],
+      })
+      expect(result.ok, `expected ${pattern} to be rejected`).toBe(false)
+      expect(result.issues.some(i => /ReDoS/.test(i.message))).toBe(true)
+    }
+  })
+
+  it('flags quantified alternations as likely ReDoS', () => {
     const result = validatePIITaxonomy({
       version: '1',
-      rules: [{ name: 'redos', pattern: '(a+)+$' }],
+      rules: [{ name: 'redos', pattern: '(a|a)+' }],
     })
     expect(result.ok).toBe(false)
-    expect(result.issues.some(i => /catastrophic backtracking/.test(i.message))).toBe(true)
+    expect(result.issues.some(i => /alternation/.test(i.message))).toBe(true)
+  })
+
+  it('does NOT flag the shipped default taxonomy', () => {
+    expect(validatePIITaxonomy(load()).ok).toBe(true)
   })
 
   it('returns ALL issues, not just the first', () => {

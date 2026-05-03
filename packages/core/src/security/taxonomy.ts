@@ -43,10 +43,28 @@ const NAME_RE = /^[a-z][a-z0-9_-]{0,63}$/
 const KNOWN_RULE_FIELDS = new Set(['name', 'pattern', 'flags', 'replacer', 'description'])
 const KNOWN_TOP_FIELDS = new Set(['version', 'id', 'rules'])
 
-/** Adversarial input used to canary-check user-supplied regexes for catastrophic backtracking. */
-const REDOS_CANARY = `${'a'.repeat(64)}!`
-/** Match-time budget per rule, in milliseconds. Generous — well-formed regex finishes in well under 1 ms. */
-const REDOS_BUDGET_MS = 25
+/**
+ * Static heuristic for catastrophic-backtracking regex patterns. We
+ * deliberately do not run the user-supplied regex against an
+ * adversarial canary — a known-bad pattern blocks the Node event loop
+ * for tens of seconds before timing out, which is itself a DoS during
+ * validation. Instead we flag the most common dangerous shapes:
+ * nested quantifiers (`(a+)+`, `(.*)*`) and quantified alternations
+ * with overlapping branches followed by another quantifier.
+ *
+ * This is best-effort. Customers loading untrusted taxonomies should
+ * additionally sandbox the runtime redactor.
+ */
+const REDOS_PATTERNS: Array<{ regex: RegExp; reason: string }> = [
+  {
+    regex: /\([^)]*[+*][^)]*\)[+*]/,
+    reason: 'nested quantifier (e.g. `(a+)+`, `(.*)*`) — catastrophic backtracking',
+  },
+  {
+    regex: /\([^)]*\|[^)]*\)[+*]/,
+    reason: 'quantified alternation (e.g. `(a|a)+`) — verify branches do not overlap',
+  },
+]
 
 /**
  * Pure-data validation. Does not throw — returns the full list of
@@ -111,19 +129,11 @@ export function validatePIITaxonomy(input: unknown): TaxonomyValidationResult {
         push(`rules[${i}].pattern`, `invalid regex: ${(err as Error).message}`, i)
       }
       if (compiled !== undefined) {
-        const start = performance.now()
-        try {
-          REDOS_CANARY.replace(compiled, '')
-        } catch {
-          // exec errors are unlikely on a successfully constructed regex; ignore.
-        }
-        const elapsed = performance.now() - start
-        if (elapsed > REDOS_BUDGET_MS) {
-          push(
-            `rules[${i}].pattern`,
-            `pattern took ${elapsed.toFixed(1)} ms on a ${REDOS_CANARY.length}-char canary (budget ${REDOS_BUDGET_MS} ms) — likely catastrophic backtracking; rewrite without nested quantifiers`,
-            i,
-          )
+        for (const { regex, reason } of REDOS_PATTERNS) {
+          if (regex.test(rule.pattern)) {
+            push(`rules[${i}].pattern`, `looks like ReDoS: ${reason}`, i)
+            break
+          }
         }
       }
     }
