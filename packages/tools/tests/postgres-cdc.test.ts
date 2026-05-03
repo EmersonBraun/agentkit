@@ -137,6 +137,13 @@ describe('postgresCdcAdvance', () => {
     expect(result.targetLsn).toBe('0/16B6500')
     expect(calls[0].params).toEqual(['agent_slot', '0/16B6500'])
   })
+
+  it('rejects malformed LSN before reaching the database', async () => {
+    const { admin, calls } = makeAdmin()
+    const tool = postgresCdcAdvance({ admin, slotName: 'agent_slot' })
+    await expect(tool.execute!({ lsn: "'; DROP TABLE x" }, stubCtx)).rejects.toThrow(/lsn must look like/)
+    expect(calls).toHaveLength(0)
+  })
 })
 
 describe('postgresCdcPeek', () => {
@@ -172,6 +179,13 @@ describe('postgresCdcPeek', () => {
     const tool = postgresCdcPeek({ admin, slotName: 'agent_slot' })
     await tool.execute!({ upto_lsn: '0/16B6500' }, stubCtx)
     expect(calls[0].params[1]).toBe('0/16B6500')
+  })
+
+  it('rejects malformed upto_lsn before reaching the database', async () => {
+    const { admin, calls } = makeAdmin()
+    const tool = postgresCdcPeek({ admin, slotName: 'agent_slot' })
+    await expect(tool.execute!({ upto_lsn: 'not-an-lsn' }, stubCtx)).rejects.toThrow(/upto_lsn must look like/)
+    expect(calls).toHaveLength(0)
   })
 })
 

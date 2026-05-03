@@ -65,12 +65,22 @@ export interface PostgresCdcConfig {
 }
 
 const VALID_IDENT = /^[A-Za-z_][A-Za-z0-9_]{0,62}$/
+const VALID_LSN = /^[0-9A-Fa-f]{1,8}\/[0-9A-Fa-f]{1,8}$/
 
 function assertIdent(name: string, label: string): void {
   if (!VALID_IDENT.test(name)) {
     throw new ConfigError({
       code: ErrorCodes.AK_CONFIG_INVALID,
       message: `${label} must match /^[A-Za-z_][A-Za-z0-9_]{0,62}$/, got: ${name}`,
+    })
+  }
+}
+
+function assertLsn(value: string, label: string): void {
+  if (!VALID_LSN.test(value)) {
+    throw new ToolError({
+      code: ErrorCodes.AK_TOOL_INVALID_INPUT,
+      message: `${label} must look like '0/16B6360', got: ${value}`,
     })
   }
 }
@@ -194,6 +204,7 @@ export function postgresCdcAdvance(config: PostgresCdcConfig) {
     requiresConfirmation: true,
     async execute({ lsn }) {
       const target = String(lsn)
+      assertLsn(target, 'lsn')
       try {
         const result = await admin.execute(
           'SELECT pg_replication_slot_advance($1, $2::pg_lsn) AS info',
@@ -229,6 +240,7 @@ export function postgresCdcPeek(config: PostgresCdcConfig) {
       const requested = typeof limit === 'number' ? limit : 25
       const n = Math.min(cap, Math.max(1, requested))
       const upto = typeof upto_lsn === 'string' ? upto_lsn : null
+      if (upto !== null) assertLsn(upto, 'upto_lsn')
       try {
         const result = await admin.execute(
           'SELECT lsn::text AS lsn, xid::text AS xid, data FROM pg_logical_slot_peek_changes($1, $2::pg_lsn, $3)',
