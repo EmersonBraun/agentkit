@@ -36,6 +36,7 @@ export {
 export type { TraceReport, FileTraceSink } from './trace-viewer'
 
 export {
+  appendPiiAuditEvents,
   createSignedAuditLog,
   createInMemoryAuditStore,
 } from './audit-log'
@@ -46,6 +47,9 @@ export type {
   SignedAuditLog,
   AppendAuditInput,
   AuditVerifyResult,
+  PiiAuditAction,
+  PiiAuditInput,
+  PiiAuditPayload,
 } from './audit-log'
 
 export { createDevtoolsServer, toSseFrame } from './devtools'
