@@ -1,4 +1,4 @@
-import type { Observer } from '@agentskit/core'
+import { AdapterError, ErrorCodes, type Observer } from '@agentskit/core'
 import { createTraceTracker, type TraceSpan } from '@agentskit/observability'
 
 export interface LangfuseConfig {
@@ -64,9 +64,11 @@ export function langfuse(config: LangfuseConfig = {}): Observer {
           | (new (c: Record<string, unknown>) => LangfuseClient)
           | undefined
         if (typeof Ctor !== 'function') {
-          throw new Error(
-            'langfuse package is missing or invalid: no `Langfuse` export. Add the peer dependency: pnpm add langfuse',
-          )
+          throw new AdapterError({
+            code: ErrorCodes.AK_ADAPTER_MISSING,
+            message: 'langfuse package is missing or invalid: no `Langfuse` export.',
+            hint: 'Add the optional peer dependency: pnpm add langfuse',
+          })
         }
         return new Ctor({
           publicKey,
@@ -82,7 +84,14 @@ export function langfuse(config: LangfuseConfig = {}): Observer {
           '[@agentskit/observability-langfuse] Optional peer `langfuse` failed to load; spans will not be sent.',
           cause,
         )
-        throw cause instanceof Error ? cause : new Error(String(cause))
+        throw cause instanceof AdapterError
+          ? cause
+          : new AdapterError({
+              code: ErrorCodes.AK_ADAPTER_MISSING,
+              message: cause instanceof Error ? cause.message : String(cause),
+              hint: 'Add the optional peer dependency: pnpm add langfuse',
+              cause,
+            })
       }
     })()
     return clientPromise
