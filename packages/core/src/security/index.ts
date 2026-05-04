@@ -11,6 +11,33 @@ export type {
 } from './pii'
 
 export {
+  validatePIITaxonomy,
+  compilePIITaxonomy,
+  PII_TAXONOMY_JSON_SCHEMA,
+} from './taxonomy'
+export type {
+  PIITaxonomy,
+  PIITaxonomyEntry,
+  TaxonomyValidationResult,
+  TaxonomyValidationIssue,
+} from './taxonomy'
+
+export {
+  tokenize,
+  reveal,
+  createInMemoryRedactionVault,
+} from './vault'
+export type {
+  RedactionVault,
+  VaultEntry,
+  RevealActor,
+  TokenizeOptions,
+  RevealOptions,
+  RedactionAuditEvent,
+  RedactionAuditSink,
+} from './vault'
+
+export {
   createInjectionDetector,
   DEFAULT_INJECTION_HEURISTICS,
 } from './injection'

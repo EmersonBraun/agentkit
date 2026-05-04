@@ -1,6 +1,12 @@
 export { consoleLogger } from './console-logger'
 export type { ConsoleLoggerConfig } from './console-logger'
 
+export { wrapObserverWithRedaction } from './redaction'
+export type {
+  ObserverRedactionOptions,
+  RedactionMode as ObserverRedactionMode,
+} from './redaction'
+
 export { langsmith } from './langsmith'
 export type { LangSmithConfig } from './langsmith'
 
@@ -24,6 +30,36 @@ export type { CostGuardOptions, TokenPrice } from './cost-guard'
 
 export { multiTenantCostGuard } from './cost-guard-multi-tenant'
 export type { MultiTenantCostGuardOptions } from './cost-guard-multi-tenant'
+
+export {
+  createAdvancedCostGuard,
+  consoleAlertSink,
+  webhookAlertSink,
+  throttle,
+} from './cost-guard-advanced'
+export type {
+  AdvancedCostGuard,
+  AdvancedCostGuardOptions,
+  CostGuardMode,
+  CostCaps,
+  CostCapWindow,
+  CostAlertSink,
+  CostAlertEvent,
+  CostAlertType,
+  WebhookAlertSinkOptions,
+} from './cost-guard-advanced'
+
+export {
+  chargebackReport,
+  chargebackReportToCsv,
+} from './cost-chargeback'
+export type {
+  CostSample,
+  ChargebackGroupKey,
+  ChargebackReport,
+  ChargebackReportOptions,
+  ChargebackRow,
+} from './cost-chargeback'
 
 export { approximateCounter, countTokens, countTokensDetailed, createProviderCounter } from './token-counter'
 export type { ProviderTokenCounterOptions } from './token-counter'

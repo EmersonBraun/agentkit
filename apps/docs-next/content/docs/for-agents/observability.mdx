@@ -28,8 +28,15 @@ npm install @agentskit/observability
 
 - `costGuard(options)` — dollar ceiling per run.
 - `multiTenantCostGuard(options)` — per-tenant cost cap with shared bookkeeping.
+- `createAdvancedCostGuard({ budgets, caps, mode, disableRuntime, alertSinks })` — production-grade guard with `warn` / `reject` / `kill` modes, rolling window caps (`perMinute` / `perDay` / `perMonth` / custom), 50/80/100 % threshold alerts, linear forecast alerts, and pluggable sinks.
+- `consoleAlertSink()`, `webhookAlertSink({ url, headers })`, `throttle(sink, windowMs)` — built-in alert sinks.
+- `chargebackReport(samples, { groupBy, from, to })` + `chargebackReportToCsv(report)` — pure cost-attribution exporter for finance / per-tenant invoicing.
 - `priceFor`, `computeCost`, `DEFAULT_PRICES`.
 - `approximateCounter`, `countTokens`, `countTokensDetailed`, `createProviderCounter`.
+
+### PII redaction
+
+- `wrapObserverWithRedaction(observer, { rules, mode?, vault?, allowedRoles? })` — redact (or tokenize via `@agentskit/core/security`) string content fields in the AgentEvent stream (`llm:end.content`, `tool:start.args`, `tool:end.result`, `agent:delegate:end.result`, `error.message`) before they hit the underlying sink. Numeric / structural fields pass through unchanged so dashboards stay correct.
 
 ### Local trace viewer
 
