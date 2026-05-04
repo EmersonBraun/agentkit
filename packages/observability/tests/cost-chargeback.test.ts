@@ -115,6 +115,35 @@ describe('chargebackReport — windowing', () => {
   })
 })
 
+describe('chargebackReport — timezone correctness', () => {
+  it('treats from / to / sample.at as instants regardless of UTC offset', () => {
+    const offsetSamples: CostSample[] = [
+      {
+        at: '2026-01-01T03:00:00Z',
+        tenant: 'a',
+        model: 'gpt-4o',
+        promptTokens: 100,
+        completionTokens: 100,
+        costUsd: 0.001,
+      },
+    ]
+    // String compare would exclude this sample (lexicographic).
+    // Instant compare keeps it: 08:00+05:30 = 02:30Z, 08:30+05:30 = 03:00Z
+    const report = chargebackReport(offsetSamples, {
+      from: '2026-01-01T08:00:00+05:30',
+      to: '2026-01-01T08:30:00+05:30',
+    })
+    expect(report.totalCalls).toBe(1)
+  })
+
+  it('drops samples with unparseable timestamps', () => {
+    const bad: CostSample[] = [
+      { at: 'not a date', tenant: 'a', model: 'gpt-4o', promptTokens: 1, completionTokens: 1, costUsd: 0.001 },
+    ]
+    expect(chargebackReport(bad, { from: '2026-01-01T00:00:00Z' }).totalCalls).toBe(0)
+  })
+})
+
 describe('chargebackReportToCsv', () => {
   it('emits a header row, one row per group, plus a TOTAL footer', () => {
     const report = chargebackReport(samples, { groupBy: 'tenant' })

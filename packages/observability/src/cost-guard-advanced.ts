@@ -244,11 +244,24 @@ export function createAdvancedCostGuard(
     return state
   }
 
-  const onSpend = async (tenant: string, state: TenantState, deltaCost: number): Promise<void> => {
+  /**
+   * Synchronously update state + bucket counters and decide which
+   * alerts must fire. Returns the alert events ready for the caller
+   * to dispatch via the (async) sinks. Keeping this synchronous is
+   * what closes the concurrency window: by the time `on()` returns,
+   * `state.totalCost`, every bucket's `costUsd`, the alert bookkeeping
+   * (`alerted`, `forecastAlerted`, `exceededOverall`), and the
+   * `state.disabled` flag are all in their final consistent shape.
+   */
+  const recordSpend = (
+    tenant: string,
+    state: TenantState,
+    deltaCost: number,
+  ): { alerts: CostAlertEvent[]; disable?: { reason: string } } => {
     state.totalCost += deltaCost
     const t = now()
+    const alerts: CostAlertEvent[] = []
 
-    // Window bookkeeping + threshold alerts.
     const caps = pickCaps(options, tenant)
     for (const [windowId, cap] of caps) {
       const bucket = ensureBucket(state, windowId, cap, t)
@@ -257,7 +270,7 @@ export function createAdvancedCostGuard(
       for (const threshold of THRESHOLDS) {
         if (utilization >= threshold && !bucket.alerted.has(threshold)) {
           bucket.alerted.add(threshold)
-          await fireAlert({
+          alerts.push({
             type: threshold === 1.0 ? 'cost:exceeded' : 'cost:threshold',
             tenant,
             window: windowId,
@@ -269,8 +282,6 @@ export function createAdvancedCostGuard(
           })
         }
       }
-      // Forecast: linear extrapolation. If we are past 25 % of the window
-      // and projected to exceed, alert once per window.
       const elapsed = t - bucket.start
       if (
         !bucket.forecastAlerted &&
@@ -285,7 +296,7 @@ export function createAdvancedCostGuard(
           const remaining = bucket.budgetUsd - bucket.costUsd
           const rate = bucket.costUsd / elapsed
           const msUntilExceeded = remaining > 0 && rate > 0 ? remaining / rate : 0
-          await fireAlert({
+          alerts.push({
             type: 'cost:forecast',
             tenant,
             window: windowId,
@@ -299,11 +310,10 @@ export function createAdvancedCostGuard(
       }
     }
 
-    // Overall hard budget.
     const overall = overallBudget(tenant)
     if (overall !== undefined && state.totalCost > overall && !state.exceededOverall) {
       state.exceededOverall = true
-      await fireAlert({
+      alerts.push({
         type: 'cost:exceeded',
         tenant,
         window: 'overall',
@@ -315,17 +325,17 @@ export function createAdvancedCostGuard(
       })
     }
 
-    // Mode enforcement.
     const tripped =
       state.exceededOverall ||
       Array.from(state.buckets.values()).some(b => b.alerted.has(1.0))
+    let disable: { reason: string } | undefined
     if (mode === 'kill' && tripped && !state.disabled) {
       state.disabled = true
       const reason = state.exceededOverall
         ? `overall budget exceeded ($${overall} cap)`
         : 'window cap exceeded'
-      await options.disableRuntime?.(tenant, reason)
-      await fireAlert({
+      disable = { reason }
+      alerts.push({
         type: 'cost:disabled',
         tenant,
         window: 'overall',
@@ -336,6 +346,17 @@ export function createAdvancedCostGuard(
         reason,
       })
     }
+
+    return { alerts, disable }
+  }
+
+  const dispatchAlerts = async (
+    tenant: string,
+    alerts: CostAlertEvent[],
+    disable?: { reason: string },
+  ): Promise<void> => {
+    for (const event of alerts) await fireAlert(event)
+    if (disable) await options.disableRuntime?.(tenant, disable.reason)
   }
 
   return {
@@ -344,7 +365,7 @@ export function createAdvancedCostGuard(
       const tenant = options.tenantOf?.() ?? activeTenant
       if (!tenant) return
       const state = stateOf(tenant)
-      if (state.disabled && mode === 'kill') return // stop counting once killed
+      if (state.disabled && mode === 'kill') return
       if (event.type === 'llm:start' && event.model && !options.modelOverride) {
         state.model = event.model
       }
@@ -358,9 +379,13 @@ export function createAdvancedCostGuard(
         )
         const delta = newTotal - state.totalCost
         if (delta > 0) {
-          // Fire-and-forget — the on() contract is sync-or-async; sinks
-          // are awaited inside onSpend for sequencing.
-          void onSpend(tenant, state, delta)
+          // Mutate state SYNCHRONOUSLY so concurrent on() calls see the
+          // updated totals. Async work (alert sinks, disableRuntime) is
+          // fire-and-forget afterward and does not touch state again.
+          const { alerts, disable } = recordSpend(tenant, state, delta)
+          if (alerts.length > 0 || disable) {
+            void dispatchAlerts(tenant, alerts, disable)
+          }
         }
       }
     },

@@ -98,8 +98,20 @@ function keyOf(sample: CostSample, groupBy: ChargebackGroupKey): string {
 }
 
 function inWindow(sample: CostSample, from?: string, to?: string): boolean {
-  if (from && sample.at < from) return false
-  if (to && sample.at > to) return false
+  // Compare by epoch ms — string compare on ISO 8601 only works when
+  // every value shares the same UTC offset. Real-world callers mix
+  // `+05:30`, `Z`, and naive forms; coercing through Date.getTime
+  // collapses them all to the same instant.
+  const at = Date.parse(sample.at)
+  if (Number.isNaN(at)) return false
+  if (from) {
+    const fromMs = Date.parse(from)
+    if (!Number.isNaN(fromMs) && at < fromMs) return false
+  }
+  if (to) {
+    const toMs = Date.parse(to)
+    if (!Number.isNaN(toMs) && at > toMs) return false
+  }
   return true
 }
 
@@ -178,9 +190,11 @@ function escapeCsv(field: string | number): string {
 
 export function chargebackReportToCsv(report: ChargebackReport): string {
   const lines = [CSV_HEADERS.join(',')]
+  const renderRow = (cells: Array<string | number>): string =>
+    cells.map(v => escapeCsv(v)).join(',')
   for (const row of report.rows) {
-    lines.push([
-      escapeCsv(row.group),
+    lines.push(renderRow([
+      row.group,
       row.callCount,
       row.promptTokens,
       row.completionTokens,
@@ -188,10 +202,9 @@ export function chargebackReportToCsv(report: ChargebackReport): string {
       row.costUsd.toFixed(6),
       row.firstAt,
       row.lastAt,
-    ].map(v => typeof v === 'string' ? v : escapeCsv(v)).join(','))
+    ]))
   }
-  // Footer summary line.
-  lines.push([
+  lines.push(renderRow([
     'TOTAL',
     report.totalCalls,
     report.rows.reduce((s, r) => s + r.promptTokens, 0),
@@ -200,6 +213,6 @@ export function chargebackReportToCsv(report: ChargebackReport): string {
     report.totalCostUsd.toFixed(6),
     report.from ?? '',
     report.to ?? '',
-  ].map(v => typeof v === 'string' ? v : escapeCsv(v)).join(','))
+  ]))
   return `${lines.join('\n')}\n`
 }

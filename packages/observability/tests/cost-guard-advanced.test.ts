@@ -23,6 +23,48 @@ function llmStart(model: string): AgentEvent {
 
 const flush = () => new Promise(r => setImmediate(r))
 
+describe('createAdvancedCostGuard — concurrency', () => {
+  it('does not double-count when llm:end events fire back-to-back synchronously', async () => {
+    const g = createAdvancedCostGuard({
+      budgets: {},
+      modelOverride: 'gpt-4o',
+    })
+    g.setTenant('t1')
+    // Fire two events synchronously — the on() handler must update
+    // state.totalCost before returning so the second call's delta is
+    // computed against the up-to-date cumulative cost. Bug shape:
+    // both calls saw state.totalCost = 0 → each added the cumulative
+    // newTotal, doubling the final figure.
+    g.on(llmEnd(1000, 1000))
+    g.on(llmEnd(1000, 1000))
+    await flush()
+    // gpt-4o pricing: $0.0025 input + $0.01 output per 1k tokens.
+    // Two events of (1000, 1000) → cumulative (2000, 2000) → cost
+    // = 2*0.0025 + 2*0.01 = $0.025. Anything above that is double-count.
+    expect(g.costUsd('t1')).toBeCloseTo(0.025, 6)
+  })
+
+  it('threshold alerts fire exactly once per (window, level) under concurrent events', async () => {
+    const events: CostAlertEvent[] = []
+    const g = createAdvancedCostGuard({
+      budgets: {},
+      caps: { perDay: { windowMs: 86_400_000, budgetUsd: 0.01 } },
+      alertSinks: [e => { events.push(e) }],
+      modelOverride: 'gpt-4o',
+    })
+    g.setTenant('t1')
+    g.on(llmEnd(1000, 1000))
+    g.on(llmEnd(1000, 1000))
+    await flush()
+    const fifty = events.filter(e => e.window === 'perDay' && e.threshold === 0.5)
+    const eighty = events.filter(e => e.window === 'perDay' && e.threshold === 0.8)
+    const hundred = events.filter(e => e.window === 'perDay' && e.threshold === 1)
+    expect(fifty).toHaveLength(1)
+    expect(eighty).toHaveLength(1)
+    expect(hundred).toHaveLength(1)
+  })
+})
+
 describe('createAdvancedCostGuard — modes', () => {
   it('mode=warn: tracks spend but never disables', async () => {
     const events: CostAlertEvent[] = []
